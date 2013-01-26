@@ -1,0 +1,11 @@
+name: LotteryPlus
+main: com.randude14.lotteryplus.Plugin
+author: Randude14
+description: 'Powerful and functional lottery interface that makes lotteries easy to make and fun to play!'
+website: 'http://dev.bukkit.org/server-mods/lotteryplus/'
+version: 0.7.9d
+commands: 
+    lottery: 
+        description: get available commands
+    l:
+        description: get available commands
