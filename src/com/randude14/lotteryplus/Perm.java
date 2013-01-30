@@ -31,7 +31,7 @@ public enum Perm {
 	
 	private Perm(String perm) {
 		this.permission = perm;
-		this.bukkitPerm = new org.bukkit.permissions.Permission(this.permission, PermissionDefault.FALSE);
+		this.bukkitPerm = new org.bukkit.permissions.Permission(this.permission, PermissionDefault.OP);
 	}
 	
 	private Perm(String value, Perm... childrenArray) {
