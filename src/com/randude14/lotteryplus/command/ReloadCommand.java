@@ -15,7 +15,9 @@ public class ReloadCommand implements Command {
 		if(!Plugin.checkPermission(sender, Perm.RELOAD)) {
 			return false;
 		}
-		LotteryManager.reloadLottery(sender, args[0], true);
+		for(String lottery : args) {
+			LotteryManager.reloadLottery(sender, lottery, true);
+		}
 		return true;
 	}
 

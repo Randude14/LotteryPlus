@@ -30,10 +30,16 @@ import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.register.economy.Economy;
 import com.randude14.lotteryplus.register.economy.MaterialEconomy;
 import com.randude14.lotteryplus.register.economy.VaultEconomy;
-import com.randude14.lotteryplus.util.FormatOptions;
 import com.randude14.lotteryplus.util.TimeConstants;
 
-public class Lottery implements FormatOptions, TimeConstants, Runnable {
+public class Lottery implements TimeConstants, Runnable {
+	private static final String FORMAT_REWARD = "<reward>";
+	private static final String FORMAT_TIME = "<time>";
+	private static final String FORMAT_NAME = "<name>";
+	private static final String FORMAT_WINNER = "<winner>";
+	private static final String FORMAT_TICKET_COST = "<ticketcost>";
+	private static final String FORMAT_TICKET_TAX = "<ticket_tax>";
+	private static final String FORMAT_POT_TAX = "<pot_tax>";
 	private final LotteryTimer timer;
 	private final Map<String, Long> cooldowns;
 	private final List<Reward> rewards;
@@ -85,11 +91,13 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 	}
 
 	//called every second
-	public void onTick() {
-		timer.onTick();
-		if (timer.isOver()) {
-			this.draw();
-			return;
+	public synchronized void onTick() {
+		if(options.getBoolean(Config.DEFAULT_USE_TIMER)) {
+			timer.onTick();
+			if (timer.isOver()) {
+				this.draw();
+				return;
+			}
 		}
 		printWarningTimes();
 		updateSigns();
@@ -111,23 +119,23 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 					switch(c) {
 					case 'w':
 						time = WEEK * time;
-						timeMess += "week(s)";
+						timeMess += ChatUtils.getRawName("lottery.time.weeks");
 					    break;
 					case 'd':
 						time = DAY * time;
-						timeMess += "day(s)";
+						timeMess += ChatUtils.getRawName("lottery.time.days");
 					    break;
 					case 'h':
 						time = HOUR * time;
-						timeMess += "hour(s)";
+						timeMess += ChatUtils.getRawName("lottery.time.hours");
 					    break;
 					case 'm':
 						time = MINUTE * time;
-						timeMess += "minute(s)";
+						timeMess += ChatUtils.getRawName("lottery.time.minutes");
 					    break;
 					default:
 						//no need to do anything with time, already in seconds
-						timeMess += "second(s)";
+						timeMess += ChatUtils.getRawName("lottery.time.seconds");
 						break;
 					}
 					if(timer.getTime() == time) {
@@ -193,24 +201,15 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 
 	public String format(String mess) {
 		String winner = options.getString("winner", "");
+		if(options.getBoolean(Config.DEFAULT_USE_TIMER))
+			mess = mess.replace(FORMAT_TIME, timer.format());
 		return mess
 				.replace(FORMAT_REWARD, formatReward())
-				.replace(FORMAT_TIME, timer.format())
 				.replace(FORMAT_NAME, lotteryName)
-				.replace(FORMAT_WINNER,
-						(!winner.isEmpty()) ? winner : "no winner yet")
-				.replace(
-						FORMAT_TICKET_COST,
-						econ.format(options
-								.getDouble(Config.DEFAULT_TICKET_COST)))
-				.replace(
-						FORMAT_TICKET_TAX,
-						String.format("%,.2f",
-								options.getDouble(Config.DEFAULT_TICKET_TAX)))
-				.replace(
-						FORMAT_POT_TAX,
-						String.format("%,.2f",
-								options.getDouble(Config.DEFAULT_POT_TAX)));
+				.replace(FORMAT_WINNER, (!winner.isEmpty()) ? winner : ChatUtils.getRawName("lottery.error.nowinner"))
+				.replace(FORMAT_TICKET_COST, econ.format(options.getDouble(Config.DEFAULT_TICKET_COST)))
+				.replace(FORMAT_TICKET_TAX, String.format("%,.2f", options.getDouble(Config.DEFAULT_TICKET_TAX)))
+				.replace(FORMAT_POT_TAX, String.format("%,.2f", options.getDouble(Config.DEFAULT_POT_TAX)));
 	}
 
 	private String formatReward() {
@@ -221,7 +220,7 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 			if (rewards instanceof ItemReward)
 				num++;
 		}
-		return num + " item(s)";
+		return ChatUtils.getRawName("lottery.reward.items", "<number>", num);
 	}
 
 	public synchronized boolean addToPot(CommandSender sender, double add) {
@@ -257,9 +256,9 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 			double time = options.getDouble(Config.DEFAULT_TIME);
 			double pot = options.getDouble(Config.DEFAULT_POT);
 			double ticketCost = options.getDouble(Config.DEFAULT_TICKET_COST);
-			Validate.isTrue(time >= 0, ChatUtils.getNameFor("lottery.error.negative.time", "<time>", time));
-			Validate.isTrue(pot >= 0.0, ChatUtils.getNameFor("lottery.error.negative.pot", "<pot>", pot));
-			Validate.isTrue(ticketCost >= 0.0, ChatUtils.getNameFor("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
+			Validate.isTrue(time >= 0, ChatUtils.getRawName("lottery.error.negative.time", "<time>", time));
+			Validate.isTrue(pot >= 0.0, ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
+			Validate.isTrue(ticketCost >= 0.0, ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
 
 			if (force) {
 				rewards.clear();
@@ -296,8 +295,8 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 					econ = new VaultEconomy();
 				}
 			} else {
-				int materialID = Config.getInt(Config.DEFAULT_MATERIAL_ID);
-				String name = Config.getString(Config.DEFAULT_MATERIAL_NAME);
+				int materialID = options.getInt(Config.DEFAULT_MATERIAL_ID);
+				String name = options.getString(Config.DEFAULT_MATERIAL_NAME);
 				econ = new MaterialEconomy(materialID, name);
 			}
 			
@@ -334,22 +333,22 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 	}
 
 	private void transfer(LotteryOptions oldOptions, LotteryOptions newOptions) {
-		if (oldOptions == null || success) {
-			rewards.clear();
-			return;
-		}
-		if (!oldOptions.getBoolean(Config.DEFAULT_CLEAR_POT)) {
-			double pot = newOptions.getDouble(Config.DEFAULT_POT);
-			newOptions.set(Config.DEFAULT_POT,
-					pot + oldOptions.getDouble(Config.DEFAULT_POT));
-		}
-		if (oldOptions.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
-			rewards.clear();
-		}
-		if(oldOptions.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
-			for(String player : getPlayers()) {
-				newOptions.set("players." + player, oldOptions.getInt("players." + player, 0));
+		if (oldOptions != null && !success) {
+			if (!oldOptions.getBoolean(Config.DEFAULT_CLEAR_POT)) {
+				double pot = newOptions.getDouble(Config.DEFAULT_POT);
+				newOptions.set(Config.DEFAULT_POT,
+						pot + oldOptions.getDouble(Config.DEFAULT_POT));
 			}
+			if (oldOptions.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
+				rewards.clear();
+			}
+			if(oldOptions.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
+				for(String player : getPlayers()) {
+					newOptions.set("players." + player, oldOptions.getInt("players." + player, 0));
+				}
+			}
+		} else{
+			rewards.clear();
 		}
 	}
 
@@ -510,7 +509,7 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 		options.set("players." + player, num + tickets);
 		Player p = Bukkit.getPlayer(player);
 		if (p != null) {
-			ChatUtils.send(p, "plugin.command.reward.mess", "<tickets>", tickets, "<lottery>", lotteryName);
+			ChatUtils.send(p, "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		}
 		updateSigns();
 		return true;
@@ -532,7 +531,8 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 	}
 
 	public void sendInfo(CommandSender sender) {
-		ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
+		if(options.getBoolean(Config.DEFAULT_USE_TIMER)) 
+			ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
 		ChatUtils.sendRaw(sender, "lottery.info.drawing", "<is_drawing>", isDrawing());
 		if (!isItemOnly()) {
 			ChatUtils.sendRaw(sender, "lottery.info.pot", "<pot>", econ.format(options.getDouble(Config.DEFAULT_POT)));
@@ -589,10 +589,6 @@ public class Lottery implements FormatOptions, TimeConstants, Runnable {
 
 	public int getTicketsBought(String name) {
 		return options.getInt("players." + name, 0);
-	}
-
-	public long getTime() {
-		return timer.getTime();
 	}
 
 	public void draw() {

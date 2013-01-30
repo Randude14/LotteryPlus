@@ -11,7 +11,7 @@ public class VaultEconomy extends Economy {
 	public VaultEconomy() {
 		econ = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class).getProvider();
 		if(econ == null) {
-			throw new NullPointerException(ChatUtils.getNameFor("plugin.exception.vault.economy"));
+			throw new NullPointerException(ChatUtils.getRawName("plugin.exception.vault.economy"));
 		}
 	}
 

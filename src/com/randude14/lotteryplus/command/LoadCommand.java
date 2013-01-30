@@ -15,7 +15,14 @@ public class LoadCommand implements Command {
 		if(!Plugin.checkPermission(sender, Perm.LOAD)) {
 			return false;
 		}
-		LotteryManager.loadLottery(sender, args[0]);
+		if(args.length == 0) {
+			int numLotteries = LotteryManager.loadLotteries(sender, false);
+			ChatUtils.send(sender, "logger.lottery.num", "<number>", numLotteries);
+		}
+		else
+			for(String lottery : args) {
+				LotteryManager.loadLottery(sender, lottery);
+			}
 		return true;
 	}
 
@@ -36,6 +43,6 @@ public class LoadCommand implements Command {
 	}
 	
 	public int minValues() {
-		return 1;
+		return 0;
 	}
 }

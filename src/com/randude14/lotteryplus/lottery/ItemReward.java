@@ -31,12 +31,8 @@ public class ItemReward implements Reward {
 		ChatUtils.send(player, "lottery.reward.item", "<amount>", reward.getAmount(), "<item>", reward.getType().name());
 	}
 	
-	public ItemStack getItem() {
-		return reward;
-	}
-	
 	public String getInfo() {
-		return ChatUtils.getNameFor("lottery.reward.item.info", "<amount>", reward.getAmount(), "<item>", reward.getType().name());
+		return ChatUtils.getRawName("lottery.reward.item.info", "<amount>", reward.getAmount(), "<item>", reward.getType().name());
 	}
 	
 	public static ItemReward deserialize(Map<String, Object> map) {

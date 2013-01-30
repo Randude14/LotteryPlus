@@ -15,9 +15,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
-//import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -204,12 +205,11 @@ public class Plugin extends JavaPlugin implements TimeConstants {
 
 	public static boolean hasPermission(CommandSender sender,
 			Perm permission) {
-		/*
+		
 		if (sender instanceof ConsoleCommandSender)
 			return true;
 		Player player = (Player) sender;
-		return perm.hasPermission(player, permission);*/
-		return true;
+		return perm.hasPermission(player, permission);
 	}
 	
 	public static boolean isThereNewUpdate(String currentVersion) {

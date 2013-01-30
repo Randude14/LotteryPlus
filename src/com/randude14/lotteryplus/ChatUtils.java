@@ -98,7 +98,15 @@ public class ChatUtils {
 	public static String getNameFor(String code, Object... args) {
 		String mess = properties.getProperty(code);
 		if(mess == null) mess = code;
+		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
+			mess = mess.replace(args[cntr].toString(), args[cntr+1].toString());
+		}
 		mess = replaceColorCodes(mess);
+		return mess;
+	}
+	
+	public static String getRawName(String code, Object... args) {
+		String mess = properties.getProperty(code);
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
 			mess = mess.replace(args[cntr].toString(), args[cntr+1].toString());
 		}

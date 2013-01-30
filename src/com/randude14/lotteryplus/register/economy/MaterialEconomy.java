@@ -63,6 +63,7 @@ public class MaterialEconomy extends Economy {
 						}
 					}
 				}
+				inv.setContents(contents);
 				p.updateInventory();
 			}
 			while(amount > 0) {
@@ -100,6 +101,7 @@ public class MaterialEconomy extends Economy {
 					contents[cntr] = null;
 				}
 			}
+			inv.setContents(contents);
 			p.updateInventory();
 		}
 	}

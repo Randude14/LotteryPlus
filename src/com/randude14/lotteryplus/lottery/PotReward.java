@@ -35,7 +35,7 @@ public class PotReward implements Reward {
 	}
 	
 	public String getInfo() {
-		return ChatUtils.getNameFor("lottery.reward.pot.info", "<pot>", econ.format(pot));
+		return ChatUtils.getRawName("lottery.reward.pot.info", "<pot>", econ.format(pot));
 	}
 	
 	public static PotReward deserialize(Map<String, Object> map) {

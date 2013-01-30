@@ -15,7 +15,10 @@ public class CreateCommand implements Command {
 		if(!Plugin.checkPermission(sender, Perm.CREATE)) {
 			return false;
 		}
-		return LotteryManager.createLotterySection(sender, args[0]);
+		for(String lottery : args) {
+			LotteryManager.createLotterySection(sender, lottery);
+		}
+		return true;
 	}
 
 	public CommandAccess getAccess() {

@@ -43,6 +43,9 @@ properties:
     
     # prefix used in chat, can have color codes
     chat-prefix: '&e[LotteryPlus] - '
+    
+    # the lottery that will be used when a user doesn't specify one in the buy command
+    main-lottery: 'MAIN'
 
     # the lotteries that the user will be notified about when a player joins the server
     # ex: 'MAIN1 MAIN2 MAIN3', ect...
@@ -106,6 +109,12 @@ defaults:
     
     # this account will receive all taxes from 'pot-tax' and "ticket-tax"
     tax-account: ''
+    
+    # whether to use timers on lotteries or not
+    use-timer: true
+    
+    # whether to keep the tickets if the lottery failed to draw a winner
+    keep-tickets: true
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool

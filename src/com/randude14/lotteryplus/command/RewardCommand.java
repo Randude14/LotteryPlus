@@ -31,7 +31,7 @@ public class RewardCommand implements Command {
 		try {
 			int tickets = Integer.parseInt(args[2]);
 			if(lottery.rewardPlayer(sender, name, tickets)) {
-				ChatUtils.send(sender, "plugin.command.reward.mess", "<player>", name, "<lottery>", lottery.getName());
+				ChatUtils.send(sender, "plugin.command.reward.mess", "<player>", name, "<lottery>", lottery.getName(), "<tickets>", tickets);
 			}		
 			return true;
 		} catch (Exception ex) {
