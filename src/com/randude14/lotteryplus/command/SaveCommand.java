@@ -7,12 +7,12 @@ import org.bukkit.command.CommandSender;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class SaveCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.FORCE_SAVE)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.FORCE_SAVE)) {
 			return false;
 		}
 		LotteryManager.saveLotteries();
@@ -29,7 +29,7 @@ public class SaveCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.FORCE_SAVE))
+		if(LotteryPlus.hasPermission(sender, Perm.FORCE_SAVE))
 			list.add("plugin.command.save");
 	}
 	

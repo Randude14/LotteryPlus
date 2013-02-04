@@ -2,7 +2,7 @@ package com.randude14.lotteryplus.tasks;
 
 import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 
 public class SaveTask implements Task {
@@ -19,11 +19,11 @@ public class SaveTask implements Task {
 
 	public void scheduleTask() {
 		long delay = Config.getLong(Config.SAVE_DELAY);
-		Plugin.cancelTask(updateId);
+		LotteryPlus.cancelTask(updateId);
 		if (delay <= 0) {
 			return;
 		}
 		delay *= SERVER_SECOND * MINUTE;
-		updateId = Plugin.scheduleSyncRepeatingTask(this, delay, delay);
+		updateId = LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
 	}
 }

@@ -6,13 +6,13 @@ import org.bukkit.command.CommandSender;
 
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.WinnersManager;
 
 public class WinnersCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.WINNERS)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.WINNERS)) {
 			return false;
 		}
 		WinnersManager.listWinners(sender);
@@ -28,7 +28,7 @@ public class WinnersCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.WINNERS))
+		if(LotteryPlus.hasPermission(sender, Perm.WINNERS))
 			list.add("plugin.command.winners");
 	}
 	

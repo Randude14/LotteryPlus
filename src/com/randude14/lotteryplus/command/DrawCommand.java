@@ -7,13 +7,13 @@ import org.bukkit.command.CommandSender;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.lottery.Lottery;
 
 public class DrawCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.DRAW)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.DRAW)) {
 			return false;
 		}
 		Lottery lottery = LotteryManager.getLottery(args[0]);
@@ -34,7 +34,7 @@ public class DrawCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.DRAW))
+		if(LotteryPlus.hasPermission(sender, Perm.DRAW))
 			list.add("plugin.command.draw");
 	}
 	

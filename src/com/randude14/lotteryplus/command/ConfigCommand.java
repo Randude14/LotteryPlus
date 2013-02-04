@@ -6,20 +6,20 @@ import org.bukkit.command.CommandSender;
 
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class ConfigCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.CONFIG_RELOAD)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.CONFIG_RELOAD)) {
 			return false;
 		}
 		if(!args[0].equals("reload")) {
 			getCommands(sender, cmd);
 			return true;
 		}
-		Plugin.reload();
-		ChatUtils.send(sender, "plugin.command.config.version", "<version>", Plugin.getVersion());
+		LotteryPlus.reload();
+		ChatUtils.send(sender, "plugin.command.config.version", "<version>", LotteryPlus.getVersion());
 		return true;
 	}
 
@@ -32,7 +32,7 @@ public class ConfigCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.CONFIG_RELOAD))
+		if(LotteryPlus.hasPermission(sender, Perm.CONFIG_RELOAD))
 			list.add("plugin.command.config");
 	}
 	

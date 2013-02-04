@@ -7,12 +7,12 @@ import org.bukkit.command.CommandSender;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class UnloadCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.UNLOAD)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.UNLOAD)) {
 			return false;
 		}
 		boolean delete = false;
@@ -30,7 +30,7 @@ public class UnloadCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.UNLOAD))
+		if(LotteryPlus.hasPermission(sender, Perm.UNLOAD))
 			list.add("plugin.command.unload");
 	}
 	

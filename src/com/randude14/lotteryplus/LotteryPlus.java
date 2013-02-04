@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.w3c.dom.Document;
@@ -25,6 +26,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.palmergames.bukkit.towny.Towny;
 import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.listeners.*;
@@ -34,8 +36,8 @@ import com.randude14.lotteryplus.register.permission.VaultPermission;
 import com.randude14.lotteryplus.tasks.*;
 import com.randude14.lotteryplus.util.TimeConstants;
 
-public class Plugin extends JavaPlugin implements TimeConstants {
-	private static Plugin instance = null;
+public class LotteryPlus extends JavaPlugin implements TimeConstants {
+	private static LotteryPlus instance = null;
 	private static final List<Task> tasks = new ArrayList<Task>();
 	private static Permission perm;
 	private File configFile;
@@ -183,7 +185,17 @@ public class Plugin extends JavaPlugin implements TimeConstants {
 		// create the object instead of returning null
 		return instance.getServer().getOfflinePlayer(name);
 	}
-
+	
+	public static boolean isTownyInstalled() {
+		try {
+			Class.forName("com.palmergames.bukkit.towny.Towny");
+		} catch (Exception ex) {
+			return false;
+		}
+		Plugin plugin = instance.getServer().getPluginManager().getPlugin("Towny");
+		return plugin != null && plugin instanceof Towny;
+	}
+	
 	public static boolean checkPermission(CommandSender sender,
 			Perm permission) {
 		if (!hasPermission(sender, permission)) {
@@ -301,7 +313,7 @@ public class Plugin extends JavaPlugin implements TimeConstants {
 		return perm;
 	}
 	
-	public static final Plugin getInstance() {
+	public static final LotteryPlus getInstance() {
 		return instance;
 	}
 }

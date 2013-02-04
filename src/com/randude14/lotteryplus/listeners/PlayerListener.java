@@ -23,7 +23,7 @@ import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
 
@@ -50,7 +50,7 @@ public class PlayerListener implements Listener {
 	public void onSignChange(SignChangeEvent event) {
 		Player player = event.getPlayer();
 		String[] lines = event.getLines();
-		if (isLotterySign(lines) && Plugin.isSign(event.getBlock())) {
+		if (isLotterySign(lines) && LotteryPlus.isSign(event.getBlock())) {
 			Sign sign = (Sign) event.getBlock().getState();
 			for (int cntr = 0; cntr < 4; cntr++)
 				sign.setLine(cntr, lines[cntr]);
@@ -64,7 +64,7 @@ public class PlayerListener implements Listener {
 		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
 			return;
 		}
-		if (!Plugin.isSign(block)) {
+		if (!LotteryPlus.isSign(block)) {
 			return;
 		}
 		Player player = event.getPlayer();
@@ -75,7 +75,7 @@ public class PlayerListener implements Listener {
 					.getString(Config.SIGN_TAG));
 			event.setCancelled(true);
 			if (player.isSneaking()) {
-				if (Plugin.checkPermission(player, Perm.SIGN_REMOVE)) {
+				if (LotteryPlus.checkPermission(player, Perm.SIGN_REMOVE)) {
 					Lottery lottery = LotteryManager.getLottery(lines[1]);
 					if (lottery != null && lottery.unregisterSign(sign)) {
 						ChatUtils.send(player, "lottery.sign.removed",
@@ -86,7 +86,7 @@ public class PlayerListener implements Listener {
 			} else {
 				for (Lottery lottery : LotteryManager.getLotteries()) {
 					if (lottery.hasRegisteredSign(block)) {
-						if (!Plugin.checkPermission(player, Perm.SIGN_USE)) {
+						if (!LotteryPlus.checkPermission(player, Perm.SIGN_USE)) {
 							return;
 						}
 						lines[1] = lottery.getName();
@@ -107,7 +107,7 @@ public class PlayerListener implements Listener {
 						return;
 					}
 				}
-				if (Plugin.checkPermission(player, Perm.SIGN_CREATE)) {
+				if (LotteryPlus.checkPermission(player, Perm.SIGN_CREATE)) {
 					createSign(player, sign, event);
 				}
 			}
@@ -181,7 +181,7 @@ public class PlayerListener implements Listener {
 	}
 
 	private void createSign(Player player, Sign sign, Cancellable cancel) {
-		if (!Plugin.checkPermission(player, Perm.SIGN_CREATE)) {
+		if (!LotteryPlus.checkPermission(player, Perm.SIGN_CREATE)) {
 			return;
 		}
 		String[] lines = sign.getLines();

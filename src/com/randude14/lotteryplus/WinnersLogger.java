@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class WinnersLogger extends java.util.logging.Logger {
-	private static final Plugin plugin = Plugin.getInstance();
+	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private static final String winnersLogString = plugin.getDataFolder() + "/winners.log";
 	private static final File winnersLogFile = new File(winnersLogString);
 	

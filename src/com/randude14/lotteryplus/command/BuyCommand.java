@@ -8,14 +8,14 @@ import org.bukkit.entity.Player;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
 
 public class BuyCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.BUY)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.BUY)) {
 			return false;
 		}
 		if(args.length == 1) return buyTickets((Player) sender, args[0], Config.getString(Config.MAIN_LOTTERY));
@@ -27,7 +27,7 @@ public class BuyCommand implements Command {
 	}
 	
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.BUY)){
+		if(LotteryPlus.hasPermission(sender, Perm.BUY)){
 			list.add("plugin.command.buy");
 			list.add("plugin.command.buy.main");
 		}

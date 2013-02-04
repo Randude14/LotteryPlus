@@ -257,7 +257,7 @@ public class LotteryManager {
 	}
 
 	public static boolean isSignRegistered(Sign sign) {
-		if (Plugin.isSign(sign.getLocation()))
+		if (LotteryPlus.isSign(sign.getLocation()))
 			return false;
 		synchronized (lotteries) {
 			for (Lottery lottery : lotteries.values()) {

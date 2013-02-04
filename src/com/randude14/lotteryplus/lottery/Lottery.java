@@ -24,7 +24,7 @@ import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.Utils;
 import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
@@ -45,6 +45,7 @@ public class Lottery implements TimeConstants, Runnable {
 	private final List<Reward> rewards;
 	private final List<Sign> signs;
 	private List<String> worlds;
+	private List<String> towny;
 	private final String lotteryName;
 	private final Random rand;
 	private LotteryOptions options;
@@ -171,7 +172,7 @@ public class Lottery implements TimeConstants, Runnable {
 				line4 = ChatUtils.replaceColorCodes(format(Config.getString(Config.UPDATE_SIGN_LINE_FOUR)));
 			}
 		}
-		Plugin.scheduleSyncDelayedTask(new Runnable() {
+		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
 				for(Sign sign : signs) {
 					if(!sign.getChunk().isLoaded()) 
@@ -272,7 +273,7 @@ public class Lottery implements TimeConstants, Runnable {
 					Location loc = Utils.parseToLocation(str);
 					if(loc != null) {
 						Block block = loc.getBlock();
-						if(Plugin.isSign(block)) {
+						if(LotteryPlus.isSign(block)) {
 							Sign sign = (Sign) block.getState();
 							signs.add(sign);
 						} else {
@@ -327,6 +328,9 @@ public class Lottery implements TimeConstants, Runnable {
 			
 			// WORLDS
 			worlds = options.getStringList(Config.DEFAULT_WORLDS);
+			
+			// TOWNY
+			towny = options.getStringList(Config.DEFAULT_TOWNY);
 		} catch (Exception ex) {
 			throw new InvalidLotteryException("Failed to load options.", ex);
 		}
@@ -355,34 +359,62 @@ public class Lottery implements TimeConstants, Runnable {
 	public List<Player> getPlayersToBroadcast() {
 		List<Player> players = new ArrayList<Player>();
 		for(Player p : Bukkit.getOnlinePlayers()) {
-			if(hasAccess(p.getWorld().getName())) {
+			if(hasWorldAccess(p.getWorld().getName()) || hasTownyAccess(p)) {
 				players.add(p);
 			}
 		}
 		return players;
 	}
 	
-	public boolean checkAccess(CommandSender sender, World worldToCheck) {
-		if(!hasAccess(worldToCheck.getName())) {
+	public boolean checkAccess(CommandSender sender) {
+		if(sender instanceof Player) {
+			if(!checkWorldAccess(sender)) {
+				
+			}
+		}
+	}
+	
+	public boolean checkTownyAccess(CommandSender sender) {
+		if(!hasTownyAccess(sender)) {
+			ChatUtils.send(sender, "lottery.error.towny.error");
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean hasTownyAccess(CommandSender sender) {
+		if(towny.isEmpty()) return true;
+		if(!(sender instanceof Player)) return true;
+		if(!LotteryPlus.isTownyInstalled()) return true;
+        try {
+        	com.palmergames.bukkit.towny.object.Resident resident = com.palmergames.bukkit.towny.object.TownyUniverse.getDataSource().getResident(sender.getName());
+        	return towny.contains(resident.getTown().getName());
+        } catch (Exception ex) {
+        }
+        return false;
+	}
+	
+	public boolean checkWorldAccess(CommandSender sender, World worldToCheck) {
+		if(!hasWorldAccess(worldToCheck.getName())) {
 			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
 			return false;
 		}
 		return true;
 	}
 	
-	public boolean checkAccess(CommandSender sender, String worldToCheck) {
-		if(!hasAccess(worldToCheck)) {
+	public boolean checkWorldAccess(CommandSender sender, String worldToCheck) {
+		if(!hasWorldAccess(worldToCheck)) {
 			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
 			return false;
 		}
 		return true;
 	}
 	
-	public boolean hasAccess(World worldToCheck) {
-		return hasAccess(worldToCheck.getName());
+	public boolean hasWorldAccess(World worldToCheck) {
+		return hasWorldAccess(worldToCheck.getName());
 	}
 	
-	public boolean hasAccess(String worldToCheck) {
+	public boolean hasWorldAccess(String worldToCheck) {
 		if(worlds.isEmpty()) return true;
 		for(String world : worlds) {
 			if(worldToCheck.equalsIgnoreCase(world)) return true;
@@ -400,7 +432,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	public boolean registerSign(CommandSender sender, Sign sign) {
-		if(!checkAccess(sender, sign.getWorld())) {
+		if(!checkWorldAccess(sender, sign.getWorld())) {
 			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
 			return false;
 		}
@@ -412,7 +444,7 @@ public class Lottery implements TimeConstants, Runnable {
 	
 	public boolean hasRegisteredSign(Block block) {
 		for(Sign s : signs) {
-			if(Plugin.locsInBounds(block.getLocation(), s.getLocation())) {
+			if(LotteryPlus.locsInBounds(block.getLocation(), s.getLocation())) {
 				return true;
 			}
 		}
@@ -421,7 +453,7 @@ public class Lottery implements TimeConstants, Runnable {
 	
 	public boolean hasRegisteredSign(Sign sign) {
 		for(Sign s : signs) {
-			if(Plugin.locsInBounds(sign.getLocation(), s.getLocation())) {
+			if(LotteryPlus.locsInBounds(sign.getLocation(), s.getLocation())) {
 				return true;
 			}
 		}
@@ -431,7 +463,7 @@ public class Lottery implements TimeConstants, Runnable {
 	public boolean unregisterSign(Sign sign) {
 		for(int cntr = 0;cntr < signs.size();cntr++) {
 			Sign s = signs.get(cntr);
-			if(Plugin.locsInBounds(sign.getLocation(), s.getLocation())) {
+			if(LotteryPlus.locsInBounds(sign.getLocation(), s.getLocation())) {
 				signs.remove(cntr);
 				return true;
 			}
@@ -444,7 +476,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
-		if(!checkAccess(player, player.getWorld())) {
+		if(!checkWorldAccess(player, player.getWorld())) {
 			return false;
 		}
 		if (isDrawing() && !Config.getBoolean(Config.BUY_DURING_DRAW)) {
@@ -576,7 +608,7 @@ public class Lottery implements TimeConstants, Runnable {
 	public void sendInfo(CommandSender sender) {
 		if(sender instanceof Player) {
 			Player player = (Player) sender;
-			if(!checkAccess(player, player.getWorld())) {
+			if(!checkWorldAccess(player, player.getWorld())) {
 				return;
 			}
 		}
@@ -659,14 +691,14 @@ public class Lottery implements TimeConstants, Runnable {
 			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		long delay = Config.getLong(Config.DRAW_DELAY);
-		drawId = Plugin.scheduleAsyncDelayedTask(this, delay * SERVER_SECOND);
+		drawId = LotteryPlus.scheduleAsyncDelayedTask(this, delay * SERVER_SECOND);
 		timer.setRunning(false);
 		options.set("drawing", true);
 		updateSigns();
 	}
 
 	public synchronized void cancelDrawing() {
-		Plugin.cancelTask(drawId);
+		LotteryPlus.cancelTask(drawId);
 	}
 
 	private void clearPlayers() {

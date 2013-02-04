@@ -7,12 +7,12 @@ import org.bukkit.command.CommandSender;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class ListCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.LIST)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.LIST)) {
 			return false;
 		}
 		int page = 1;
@@ -37,7 +37,7 @@ public class ListCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.LIST))
+		if(LotteryPlus.hasPermission(sender, Perm.LIST))
 			list.add("plugin.command.list");
 	}
 	

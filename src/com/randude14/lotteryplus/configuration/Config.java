@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.bukkit.Material;
 
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class Config {
-	private static final Plugin plugin = Plugin.getInstance();
+	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	
 	//PROPERTIES
 	public static final Property<Long> SAVE_DELAY = new Property<Long>("properties.save-delay", 15L);
@@ -46,6 +46,7 @@ public class Config {
 	public static final Property<String> DEFAULT_RESET_ADD_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "");
 	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "");
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "");
+	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "");
 	public static final Property<Boolean> DEFAULT_ITEM_ONLY = new Property<Boolean>("defaults.item-only", false);
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true);
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false);

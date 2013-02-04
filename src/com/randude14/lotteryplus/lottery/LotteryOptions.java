@@ -1,7 +1,6 @@
 package com.randude14.lotteryplus.lottery;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +147,7 @@ public class LotteryOptions {
 	
 	public List<String> getStringList(Property<String> property) {
 		String value = getString(property);
-		if(value.equals("")) return Collections.emptyList();
+		if(value.equals("")) return Config.getStringList(property);
 		return Arrays.asList(value.split("\\s+"));
 	}
 	

@@ -7,10 +7,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.randude14.lotteryplus.Logger;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class CustomYaml {
-	private static final Plugin plugin = Plugin.getInstance();
+	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private final FileConfiguration config;
 	private final File configFile;
 	

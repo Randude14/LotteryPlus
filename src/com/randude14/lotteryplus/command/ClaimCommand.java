@@ -8,13 +8,13 @@ import org.bukkit.entity.Player;
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class ClaimCommand implements Command {
 	
 	public boolean execute(CommandSender sender,
 			org.bukkit.command.Command cmd, String[] args) {
-		if (!Plugin.checkPermission(sender, Perm.CLAIM)) {
+		if (!LotteryPlus.checkPermission(sender, Perm.CLAIM)) {
 			return false;
 		}
 		ClaimManager.rewardClaims((Player) sender);
@@ -30,7 +30,7 @@ public class ClaimCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (Plugin.hasPermission(sender, Perm.CLAIM))
+		if (LotteryPlus.hasPermission(sender, Perm.CLAIM))
 			list.add("plugin.command.claim");
 	}
 	

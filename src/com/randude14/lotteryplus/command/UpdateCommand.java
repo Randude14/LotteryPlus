@@ -6,16 +6,16 @@ import org.bukkit.command.CommandSender;
 
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.Plugin;
+import com.randude14.lotteryplus.LotteryPlus;
 
 public class UpdateCommand implements Command {
-	private static final String currentVersion = Plugin.getVersion();
+	private static final String currentVersion = LotteryPlus.getVersion();
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!Plugin.checkPermission(sender, Perm.UPDATE)) {
+		if(!LotteryPlus.checkPermission(sender, Perm.UPDATE)) {
 			return false;
 		}
-		Plugin.updateCheck(sender, currentVersion);
+		LotteryPlus.updateCheck(sender, currentVersion);
 		return true;
 	}
 
@@ -28,7 +28,7 @@ public class UpdateCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(Plugin.hasPermission(sender, Perm.UPDATE))
+		if(LotteryPlus.hasPermission(sender, Perm.UPDATE))
 			list.add("plugin.command.update");
 	}
 	

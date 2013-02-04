@@ -77,7 +77,7 @@ public class ChatUtils {
 	}
 
 	public static boolean sendCommandHelp(CommandSender sender, Perm permission, String code, org.bukkit.command.Command cmd) {
-		if (!Plugin.hasPermission(sender, permission))
+		if (!LotteryPlus.hasPermission(sender, permission))
 			return false;
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 		return true;
@@ -130,8 +130,8 @@ public class ChatUtils {
 		return mess;
 	}
 	
-	private static final Plugin plugin = Plugin.getInstance();
-	private static final File langFile = new File(Plugin.getInstance().getDataFolder(), "lang.properties");
+	private static final LotteryPlus plugin = LotteryPlus.getInstance();
+	private static final File langFile = new File(LotteryPlus.getInstance().getDataFolder(), "lang.properties");
 	private static final Properties properties = new Properties();
 	private static final Properties defaults = new Properties();
 	private static boolean defaultsLoaded = false;
