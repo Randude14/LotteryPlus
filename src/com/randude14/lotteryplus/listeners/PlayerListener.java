@@ -28,7 +28,7 @@ import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
 
 public class PlayerListener implements Listener {
-	private final Map<String, String> buyers = new HashMap<String, String>();
+	private final Map<Player, String> buyers = new HashMap<Player, String>();
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
@@ -86,13 +86,12 @@ public class PlayerListener implements Listener {
 			} else {
 				for (Lottery lottery : LotteryManager.getLotteries()) {
 					if (lottery.hasRegisteredSign(block)) {
-						String name = player.getName();
 						if (!Plugin.checkPermission(player, Perm.SIGN_USE)) {
 							return;
 						}
 						lines[1] = lottery.getName();
-						if (buyers.containsKey(name)) {
-							String lotteryName = buyers.remove(name);
+						if (buyers.containsKey(player)) {
+							String lotteryName = buyers.remove(player);
 							if (lotteryName.equalsIgnoreCase(lottery.getName())) {
 								ChatUtils.sendRaw(player,
 										"lottery.error.trans-cancelled");
@@ -104,7 +103,7 @@ public class PlayerListener implements Listener {
 						String[] messages = getSignMessage(lottery);
 						player.sendMessage(messages);
 						ChatUtils.sendRaw(player, "lottery.tickets.howmany");
-						buyers.put(name, lottery.getName());
+						buyers.put(player, lottery.getName());
 						return;
 					}
 				}
@@ -129,14 +128,13 @@ public class PlayerListener implements Listener {
 		buyers.remove(name);
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		Player player = event.getPlayer();
-		String name = player.getName();
 		String chat = event.getMessage();
 
-		if (buyers.containsKey(name)) {
-			String lotteryName = buyers.remove(name);
+		if (buyers.containsKey(player)) {
+			String lotteryName = buyers.remove(player);
 			Lottery lottery = LotteryManager.getLottery(lotteryName);
 			event.setCancelled(true);
 
@@ -202,9 +200,10 @@ public class PlayerListener implements Listener {
 		lines[0] = ChatUtils.replaceColorCodes(Config
 				.getString(Config.SIGN_TAG));
 		lines[1] = lottery.getName();
-		lottery.registerSign(sign);
-		ChatUtils.send(player, "lottery.sign.created", "<lottery>",
-				lottery.getName());
+		boolean success = lottery.registerSign(player, sign);
+		if(success) {
+			ChatUtils.send(player, "lottery.sign.created", "<lottery>", lottery.getName());
+		}
 	}
 
 	private String[] getSignMessage(Lottery lottery) {

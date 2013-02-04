@@ -1,7 +1,6 @@
 package com.randude14.lotteryplus;
 
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.permissions.Permission;
 
 public enum Perm {
 	
@@ -29,9 +28,8 @@ public enum Perm {
 	PARENT_SIGN("lottery.sign.*", SIGN_CREATE, SIGN_REMOVE, SIGN_USE),
 	SUPER_PERM("lottery.*", PARENT_BASIC, PARENT_ADMIN, PARENT_SIGN);
 	
-	private Perm(String perm) {
-		this.permission = perm;
-		this.bukkitPerm = new org.bukkit.permissions.Permission(this.permission, PermissionDefault.OP);
+	private Perm(String value) {
+		this.permission = new Permission(value);
 	}
 	
 	private Perm(String value, Perm... childrenArray) {
@@ -41,30 +39,20 @@ public enum Perm {
 		}
 	}
 	
-	public void loadPermission(PluginManager pm) {
-		pm.addPermission(bukkitPerm);
-	}
-	
 	private void setParent(Perm parentValue) {
 		if(this.parent != null)
 			return;
 		this.parent = parentValue;
-		//this.bukkitPerm.addParent(this.parent.getBukkitPerm(), false);
 	}
 	
 	public Perm getParent() {
 		return parent;
 	}
 	
-	public org.bukkit.permissions.Permission getBukkitPerm() {
-		return bukkitPerm;
-	}
-	
-	public String getPermission() {
+	public Permission getPermission() {
 		return permission;
 	}
 	
-	private final org.bukkit.permissions.Permission bukkitPerm;
+	private final org.bukkit.permissions.Permission permission;
 	private Perm parent;
-	private final String permission;
 }

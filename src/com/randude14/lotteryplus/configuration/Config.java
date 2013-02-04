@@ -1,5 +1,9 @@
 package com.randude14.lotteryplus.configuration;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Material;
 
 import com.randude14.lotteryplus.Plugin;
@@ -41,6 +45,7 @@ public class Config {
 	public static final Property<String> DEFAULT_MATERIAL_NAME = new Property<String>("defaults.material-name", "Gold Ingot");
 	public static final Property<String> DEFAULT_RESET_ADD_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "");
 	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "");
+	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "");
 	public static final Property<Boolean> DEFAULT_ITEM_ONLY = new Property<Boolean>("defaults.item-only", false);
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true);
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false);
@@ -89,5 +94,11 @@ public class Config {
 	
 	public static String getString(Property<String> property) {
 		return plugin.getConfig().getString(property.getPath(), property.getDefaultValue());
+	}
+	
+	public static List<String> getStringList(Property<String> property) {
+		String value = getString(property);
+		if(value.equals("")) return Collections.emptyList();
+		return Arrays.asList(value.split("\\s+"));
 	}
 }

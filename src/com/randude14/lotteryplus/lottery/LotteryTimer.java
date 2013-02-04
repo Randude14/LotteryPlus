@@ -1,19 +1,36 @@
 package com.randude14.lotteryplus.lottery;
 
+import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.util.TimeConstants;
 
-public class LotteryTimer implements TimeConstants {
-	private final Lottery lottery;
+public class LotteryTimer implements TimeConstants, Timer {
 	private boolean running;
 	private long time;
 	private long reset;
 
-	protected LotteryTimer(Lottery lottery) {
-		this.lottery = lottery;
+	protected LotteryTimer() {
+	}
+	
+	public void load(LotteryOptions options) {
+		if (options.contains("save-time") && options.contains("reset-time")) {
+			this.time = options.getLong("save-time", 0L);
+			this.reset = options.getLong("reset-time", 0L);
+		} else {
+			long t = (long) Math.floor(options.getDouble(Config.DEFAULT_TIME) * (double)HOUR);
+			this.time = this.reset = t;
+		}
+	}
+	
+	public void save(LotteryOptions options) {
+		options.set("save-time", time);
+		options.set("reset-time", reset);
 	}
 
-	public Lottery getLottery() {
-		return lottery;
+	public void reset(LotteryOptions options) {
+		double time = options.getDouble(Config.DEFAULT_RESET_ADD_TIME);
+		long t = (long) Math.floor(time * (double)HOUR);
+		reset = t + reset;
+		time = reset;
 	}
 
 	public void setTime(long time) {
@@ -26,10 +43,6 @@ public class LotteryTimer implements TimeConstants {
 
 	public long getTime() {
 		return time;
-	}
-
-	public void reset() {
-		time = reset;
 	}
 
 	public void start() {

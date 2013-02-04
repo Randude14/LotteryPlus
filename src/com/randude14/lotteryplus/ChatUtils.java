@@ -1,6 +1,7 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,6 +36,14 @@ public class ChatUtils {
 		}
 	}
 	
+	public static void broadcast(List<Player> players, String code, Object... args) {
+		String[] messages = getMessages(code, args);
+		for (Player player : players) {
+			player.sendMessage(messages);
+		}
+		Bukkit.getConsoleSender().sendMessage(messages);
+	}
+	
 	public static void broadcast(String code, Object... args) {
 		String[] messages = getMessages(code, args);
 		for (Player player : Bukkit.getOnlinePlayers()) {
@@ -43,6 +52,14 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 
+	public static void broadcastRaw(List<Player> players, String code, Object... args) {
+		String[] messages = getMessages(code, null, args);
+		for (Player player : players) {
+			player.sendMessage(messages);
+		}
+		Bukkit.getConsoleSender().sendMessage(messages);
+	}
+	
 	public static void broadcastRaw(String code, Object... args) {
 		String[] messages = getMessages(code, null, args);
 		for (Player player : Bukkit.getOnlinePlayers()) {

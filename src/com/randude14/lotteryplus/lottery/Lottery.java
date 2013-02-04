@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -40,13 +41,14 @@ public class Lottery implements TimeConstants, Runnable {
 	private static final String FORMAT_TICKET_COST = "<ticketcost>";
 	private static final String FORMAT_TICKET_TAX = "<ticket_tax>";
 	private static final String FORMAT_POT_TAX = "<pot_tax>";
-	private final LotteryTimer timer;
 	private final Map<String, Long> cooldowns;
 	private final List<Reward> rewards;
 	private final List<Sign> signs;
+	private List<String> worlds;
 	private final String lotteryName;
 	private final Random rand;
 	private LotteryOptions options;
+	private Timer timer;
 	private Economy econ;
 	private boolean success;
 	private int drawId;
@@ -56,7 +58,6 @@ public class Lottery implements TimeConstants, Runnable {
 		this.rewards = new ArrayList<Reward>();
 		this.signs = new ArrayList<Sign>();
 		this.lotteryName = name;
-		this.timer = new LotteryTimer(this);
 		this.rand = new Random();
 		success = false;
 	}
@@ -92,16 +93,16 @@ public class Lottery implements TimeConstants, Runnable {
 
 	//called every second
 	public synchronized void onTick() {
-		if(options.getBoolean(Config.DEFAULT_USE_TIMER)) {
-			timer.onTick();
-			if (timer.isOver()) {
-				this.draw();
+		timer.onTick();
+		if (timer.isOver()) {
+			this.draw();
 				return;
-			}
 		}
-		printWarningTimes();
+		if(options.getBoolean(Config.DEFAULT_USE_TIMER)) {
+			printWarningTimes();
+			updateCooldowns();
+		}
 		updateSigns();
-		updateCooldowns();
 	}
 	
 	private void printWarningTimes() {
@@ -139,7 +140,7 @@ public class Lottery implements TimeConstants, Runnable {
 						break;
 					}
 					if(timer.getTime() == time) {
-						ChatUtils.broadcastRaw("lottery.mess.warning", "<name>", lotteryName, "<time>", timeMess);
+						ChatUtils.broadcastRaw(getPlayersToBroadcast(), "lottery.mess.warning", "<name>", lotteryName, "<time>", timeMess);
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -246,11 +247,11 @@ public class Lottery implements TimeConstants, Runnable {
 		return true;
 	}
 
-	public void setOptions(LotteryOptions options) throws InvalidLotteryException {
-		setOptions(options, false);
+	public void setOptions(CommandSender sender, LotteryOptions options) throws InvalidLotteryException {
+		setOptions(sender, options, false);
 	}
 
-	public void setOptions(LotteryOptions options, boolean force) throws InvalidLotteryException {
+	public void setOptions(CommandSender sender, LotteryOptions options, boolean force) throws InvalidLotteryException {
 		try {
 			// CHECK FOR NEGATIVE OPTIONS
 			double time = options.getDouble(Config.DEFAULT_TIME);
@@ -316,17 +317,16 @@ public class Lottery implements TimeConstants, Runnable {
 			}
 
 			// LOAD TIME
-			timer.setRunning(true);
-			if (options.contains("save-time") && options.contains("reset-time")) {
-				long saveTime = options.getLong("save-time", 0L);
-				timer.setTime(saveTime);
-				long resetTime = options.getLong("reset-time", 0L);
-				timer.setResetTime(resetTime);
+			if(options.getBoolean(Config.DEFAULT_USE_TIMER)) {
+				this.timer = new LotteryTimer();
 			} else {
-				long t = (long) Math.floor(time * (double)HOUR);
-				timer.setTime(t);
-				timer.setResetTime(t);
+				this.timer = new BlankTimer();
 			}
+			timer.setRunning(true);
+			timer.load(options);
+			
+			// WORLDS
+			worlds = options.getStringList(Config.DEFAULT_WORLDS);
 		} catch (Exception ex) {
 			throw new InvalidLotteryException("Failed to load options.", ex);
 		}
@@ -351,10 +351,47 @@ public class Lottery implements TimeConstants, Runnable {
 			rewards.clear();
 		}
 	}
+	
+	public List<Player> getPlayersToBroadcast() {
+		List<Player> players = new ArrayList<Player>();
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			if(hasAccess(p.getWorld().getName())) {
+				players.add(p);
+			}
+		}
+		return players;
+	}
+	
+	public boolean checkAccess(CommandSender sender, World worldToCheck) {
+		if(!hasAccess(worldToCheck.getName())) {
+			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean checkAccess(CommandSender sender, String worldToCheck) {
+		if(!hasAccess(worldToCheck)) {
+			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean hasAccess(World worldToCheck) {
+		return hasAccess(worldToCheck.getName());
+	}
+	
+	public boolean hasAccess(String worldToCheck) {
+		if(worlds.isEmpty()) return true;
+		for(String world : worlds) {
+			if(worldToCheck.equalsIgnoreCase(world)) return true;
+		}
+		return false;
+	}
 
 	public void save() {
-		options.set("save-time", timer.getTime());
-		options.set("reset-time", timer.getResetTime());
+		timer.save(options);
 		options.remove("drawing");
 		int cntr = 1;
 		for(Sign sign : signs) {
@@ -362,7 +399,11 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 	
-	public boolean registerSign(Sign sign) {
+	public boolean registerSign(CommandSender sender, Sign sign) {
+		if(!checkAccess(sender, sign.getWorld())) {
+			ChatUtils.send(sender, "lottery.error.world.access", "<lottery>", lotteryName);
+			return false;
+		}
 		if(hasRegisteredSign(sign)) return false;
 		signs.add(sign);
 		updateSigns();
@@ -399,10 +440,13 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	public void broadcast(String player, int tickets) {
-		ChatUtils.broadcast("lottery.mess.buy", "<player>", player, "<tickets>", tickets, "<lottery>", lotteryName);
+		ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.mess.buy", "<player>", player, "<tickets>", tickets, "<lottery>", lotteryName);
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
+		if(!checkAccess(player, player.getWorld())) {
+			return false;
+		}
 		if (isDrawing() && !Config.getBoolean(Config.BUY_DURING_DRAW)) {
 			ChatUtils.sendRaw(player, "lottery.error.drawing");
 			return false;
@@ -491,8 +535,7 @@ public class Lottery implements TimeConstants, Runnable {
 		return true;
 	}
 
-	public synchronized boolean rewardPlayer(CommandSender rewarder, String player,
-			int tickets) {
+	public synchronized boolean rewardPlayer(CommandSender rewarder, String player, int tickets) {
 		int ticketLimit = options.getInt(Config.DEFAULT_TICKET_LIMIT);
 		int num = options.getInt("players." + player, 0);
 		if (ticketLimit > 0) {
@@ -531,8 +574,14 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 
 	public void sendInfo(CommandSender sender) {
-		if(options.getBoolean(Config.DEFAULT_USE_TIMER)) 
-			ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
+		if(sender instanceof Player) {
+			Player player = (Player) sender;
+			if(!checkAccess(player, player.getWorld())) {
+				return;
+			}
+		}
+		if(options.getBoolean(Config.DEFAULT_USE_TIMER))
+		    ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
 		ChatUtils.sendRaw(sender, "lottery.info.drawing", "<is_drawing>", isDrawing());
 		if (!isItemOnly()) {
 			ChatUtils.sendRaw(sender, "lottery.info.pot", "<pot>", econ.format(options.getDouble(Config.DEFAULT_POT)));
@@ -605,9 +654,9 @@ public class Lottery implements TimeConstants, Runnable {
 			return;
 		}
 		if (sender == null) {
-			ChatUtils.broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
+			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.mess", "<lottery>", lotteryName);
 		} else {
-			ChatUtils.broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
+			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		long delay = Config.getLong(Config.DRAW_DELAY);
 		drawId = Plugin.scheduleAsyncDelayedTask(this, delay * SERVER_SECOND);
@@ -639,7 +688,7 @@ public class Lottery implements TimeConstants, Runnable {
 			List<String> players = this.getPlayers();
 			int len = players.size();
 			if (len < options.getInt(Config.DEFAULT_MIN_PLAYERS) || len < 1) {
-				ChatUtils.broadcast("lottery.error.drawing.notenough");
+				ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.error.drawing.notenough");
 				resetData();
 				options.set("drawing", false);
 				return;
@@ -647,14 +696,14 @@ public class Lottery implements TimeConstants, Runnable {
 			String winner = pickRandomPlayer(rand, players,
 					options.getInt(Config.DEFAULT_TICKET_LIMIT));
 			if (winner == null) {
-				ChatUtils.broadcast("lottery.error.drawing.nowinner");
+				ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.error.drawing.nowinner");
 				options.set("drawing", false);
 				success = false;
 				LotteryManager.reloadLottery(lotteryName);
 				return;
 			}
 			options.set("winner", winner);
-			ChatUtils.broadcast("lottery.drawing.winner.mess", "<winner>", winner);
+			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.winner.mess", "<winner>", winner);
 			if (!this.isItemOnly()) {
 				double pot = options.getDouble(Config.DEFAULT_POT);
 				double potTax = options.getDouble(Config.DEFAULT_POT_TAX);
@@ -719,9 +768,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 
 	private void resetData() {
-		double time = options.getDouble(Config.DEFAULT_RESET_ADD_TIME);
-		long t = (long) Math.floor(time * (double)HOUR);
-		this.timer.setResetTime(timer.getResetTime() + t);
+		timer.reset(options);
 		options.set(
 				Config.DEFAULT_TICKET_COST,
 				options.getDouble(Config.DEFAULT_TICKET_COST)
@@ -764,7 +811,6 @@ public class Lottery implements TimeConstants, Runnable {
 				rewards.add(new ItemReward(item));
 			}
 		}
-		this.timer.reset();
 	}
 
 	public int hashCode() {

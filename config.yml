@@ -115,6 +115,9 @@ defaults:
     
     # whether to keep the tickets if the lottery failed to draw a winner
     keep-tickets: true
+    
+    # the worlds to which this lottery will belong to, leave blank for global
+    worlds: ''
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool

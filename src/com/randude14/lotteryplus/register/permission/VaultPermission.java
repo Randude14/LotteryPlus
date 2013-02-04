@@ -1,6 +1,7 @@
 package com.randude14.lotteryplus.register.permission;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class VaultPermission extends Permission {
@@ -13,8 +14,12 @@ public class VaultPermission extends Permission {
 		}
 	}
 
-	protected boolean playerHas(Player player, String permission) {
-		return perm.playerHas(player.getWorld().getName(), player.getName(), permission);
+	protected boolean playerHas(CommandSender sender, String permission) {
+		if(sender instanceof Player) {
+			Player player = (Player) sender;
+			return perm.has(player.getWorld(), player.getName(), permission);
+		}
+		return perm.has(sender, permission);
 	}
 	
 	public static boolean isVaultInstalled() {

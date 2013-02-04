@@ -62,7 +62,7 @@ public class LotteryManager {
 				Lottery lottery = new Lottery(sectionName);
 				Map<String, Object> values = lotteriesSection.getValues(true);
 				try {
-					lottery.setOptions(new LotteryOptions(values));
+					lottery.setOptions(sender, new LotteryOptions(values));
 				} catch (Exception ex) {
 					Logger.info("lottery.exception.lottery.load", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -159,7 +159,7 @@ public class LotteryManager {
 				ConfigurationSection lotteriesSection = section.getConfigurationSection(sectionName);
 				Map<String, Object> values = lotteriesSection.getValues(true);
 				try {
-					lottery.setOptions(new LotteryOptions(values), force);
+					lottery.setOptions(sender, new LotteryOptions(values), force);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -213,7 +213,7 @@ public class LotteryManager {
 			Lottery lottery = new Lottery(lotteryName);
 			Map<String, Object> values = lotteriesSection.getValues(true);
 			try {
-				lottery.setOptions(new LotteryOptions(values));
+				lottery.setOptions(sender, new LotteryOptions(values));
 			} catch (InvalidLotteryException ex) {
 				Logger.info("lottery.exception.lottery.load", "<lottery>", lotteryName);
 				ex.printStackTrace();
