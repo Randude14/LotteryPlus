@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus.lottery;
+package com.randude14.lotteryplus.lottery.reward;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;

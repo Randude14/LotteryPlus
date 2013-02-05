@@ -26,15 +26,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.palmergames.bukkit.towny.Towny;
 import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.listeners.*;
-import com.randude14.lotteryplus.register.permission.BukkitPermission;
-import com.randude14.lotteryplus.register.permission.Permission;
-import com.randude14.lotteryplus.register.permission.VaultPermission;
 import com.randude14.lotteryplus.tasks.*;
 import com.randude14.lotteryplus.util.TimeConstants;
+import com.randude14.register.permission.BukkitPermission;
+import com.randude14.register.permission.Permission;
+import com.randude14.register.permission.VaultPermission;
 
 public class LotteryPlus extends JavaPlugin implements TimeConstants {
 	private static LotteryPlus instance = null;
@@ -187,13 +186,14 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 	}
 	
 	public static boolean isTownyInstalled() {
+		Class<?> townyClass = null;
 		try {
-			Class.forName("com.palmergames.bukkit.towny.Towny");
+			townyClass = Class.forName("com.palmergames.bukkit.towny.Towny");
 		} catch (Exception ex) {
 			return false;
 		}
 		Plugin plugin = instance.getServer().getPluginManager().getPlugin("Towny");
-		return plugin != null && plugin instanceof Towny;
+		return plugin != null && plugin.getClass() == townyClass;
 	}
 	
 	public static boolean checkPermission(CommandSender sender,

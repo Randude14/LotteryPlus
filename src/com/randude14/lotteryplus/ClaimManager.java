@@ -11,11 +11,11 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.configuration.CustomYaml;
-import com.randude14.lotteryplus.lottery.ItemReward;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
-import com.randude14.lotteryplus.lottery.PotReward;
-import com.randude14.lotteryplus.lottery.Reward;
+import com.randude14.lotteryplus.lottery.reward.ItemReward;
+import com.randude14.lotteryplus.lottery.reward.PotReward;
+import com.randude14.lotteryplus.lottery.reward.Reward;
 
 public class ClaimManager {
 	private static void saveClaims() {

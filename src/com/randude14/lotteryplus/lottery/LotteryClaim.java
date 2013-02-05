@@ -9,6 +9,8 @@ import java.util.Map;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
+import com.randude14.lotteryplus.lottery.reward.Reward;
+
 @SerializableAs("LotteryClaim")
 public class LotteryClaim implements ConfigurationSerializable, Iterable<Reward> {
 	private List<Reward> rewards;

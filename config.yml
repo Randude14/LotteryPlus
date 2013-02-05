@@ -118,6 +118,9 @@ defaults:
     
     # the worlds to which this lottery will belong to, leave blank for global
     worlds: ''
+    
+    # the towns in Towny to which this lottery will belong to, leave blank for global
+    towny: ''
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool

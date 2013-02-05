@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus.register.economy;
+package com.randude14.register.economy;
 
 import org.bukkit.Bukkit;
 

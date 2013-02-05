@@ -89,12 +89,12 @@ public class ChatUtils {
 
 	// replace color codes with the colors
 	public static final String replaceColorCodes(String mess) {
-		return mess.replaceAll("(&([" + colorCodes + "]))", "\u00A7$2");
+		return mess.replaceAll(colorCodes, "\u00A7$2");
 	}
 	
 	// get rid of color codes
 	public static final String cleanColorCodes(String mess) {
-		return mess.replaceAll("(&([" + colorCodes + "]))", "");
+		return mess.replaceAll(colorCodes, "");
 	}
 	
 	public static String[] getMessages(String code, Object... args) {
@@ -116,7 +116,9 @@ public class ChatUtils {
 		String mess = properties.getProperty(code);
 		if(mess == null) mess = code;
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
-			mess = mess.replace(args[cntr].toString(), args[cntr+1].toString());
+			String string = args[cntr+1].toString();
+			if(string == null || string.equals("")) string = "\"\"";
+			mess = mess.replace(args[cntr].toString(), string);
 		}
 		mess = replaceColorCodes(mess);
 		return mess;
@@ -125,7 +127,9 @@ public class ChatUtils {
 	public static String getRawName(String code, Object... args) {
 		String mess = properties.getProperty(code);
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
-			mess = mess.replace(args[cntr].toString(), args[cntr+1].toString());
+			String string = args[cntr+1].toString();
+			if(string == null || string.equals("")) string = "\"\"";
+			mess = mess.replace(args[cntr].toString(), string);
 		}
 		return mess;
 	}
@@ -148,6 +152,6 @@ public class ChatUtils {
 				string += Character.toLowerCase(c);
 			}
 		}
-		colorCodes = string;
+		colorCodes = "(&([" + string + "]))";
 	}
 }

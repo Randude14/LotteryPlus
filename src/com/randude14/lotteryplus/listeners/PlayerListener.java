@@ -34,15 +34,14 @@ public class PlayerListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		ClaimManager.notifyOfClaims(player);
-		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split(
-				"\\s+");
+		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split("\\s+");
 		for (String lotteryName : mainLotteries) {
 			Lottery lottery = LotteryManager.getLottery(lotteryName);
 			if (lottery == null)
 				return;
 			String mess = ChatUtils.getNameFor("lottery.mess.main");
 			mess = lottery.format(mess);
-			player.sendMessage(mess);
+			player.sendMessage(mess.split(Config.getString(Config.LINE_SEPARATOR)));
 		}
 	}
 
@@ -78,8 +77,7 @@ public class PlayerListener implements Listener {
 				if (LotteryPlus.checkPermission(player, Perm.SIGN_REMOVE)) {
 					Lottery lottery = LotteryManager.getLottery(lines[1]);
 					if (lottery != null && lottery.unregisterSign(sign)) {
-						ChatUtils.send(player, "lottery.sign.removed",
-								"<lottery>", lottery.getName());
+						ChatUtils.send(player, "lottery.sign.removed", "<lottery>", lottery.getName());
 						block.breakNaturally();
 					}
 				}
@@ -172,8 +170,7 @@ public class PlayerListener implements Listener {
 			}
 
 			else {
-				ChatUtils.sendRaw(player, "lottery.error.unknown-removed",
-						"<lottery>", lotteryName);
+				ChatUtils.sendRaw(player, "lottery.error.unknown-removed", "<lottery>", lotteryName);
 				ChatUtils.sendRaw(player, "lottery.error.trans-cancelled");
 				ChatUtils.sendRaw(player, "plugin.headliner");
 			}
@@ -192,17 +189,17 @@ public class PlayerListener implements Listener {
 		}
 		Lottery lottery = LotteryManager.getLottery(lines[1]);
 		if (lottery == null) {
-			ChatUtils.send(player, "lottery.error.notfound", "<lottery>",
-					lines[1]);
+			ChatUtils.send(player, "lottery.error.notfound", "<lottery>", lines[1]);
 			cancel.setCancelled(true);
 			return;
 		}
-		lines[0] = ChatUtils.replaceColorCodes(Config
-				.getString(Config.SIGN_TAG));
+		lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 		lines[1] = lottery.getName();
 		boolean success = lottery.registerSign(player, sign);
 		if(success) {
 			ChatUtils.send(player, "lottery.sign.created", "<lottery>", lottery.getName());
+		} else {
+			cancel.setCancelled(true);
 		}
 	}
 
@@ -213,8 +210,7 @@ public class PlayerListener implements Listener {
 	}
 
 	private boolean isLotterySign(String[] lines) {
-		String signTag = ChatUtils.cleanColorCodes(Config
-				.getString(Config.SIGN_TAG));
+		String signTag = ChatUtils.cleanColorCodes(Config.getString(Config.SIGN_TAG));
 		String line1 = ChatColor.stripColor(lines[0]);
 		return signTag.equalsIgnoreCase(line1);
 	}

@@ -12,13 +12,18 @@ public class LotteryTimer implements TimeConstants, Timer {
 	}
 	
 	public void load(LotteryOptions options) {
+		long defaultTime = toTime(options.getDouble(Config.DEFAULT_TIME));
 		if (options.contains("save-time") && options.contains("reset-time")) {
-			this.time = options.getLong("save-time", 0L);
-			this.reset = options.getLong("reset-time", 0L);
+			this.time = options.getLong("save-time", defaultTime);
+			this.reset = options.getLong("reset-time", defaultTime);
 		} else {
-			long t = (long) Math.floor(options.getDouble(Config.DEFAULT_TIME) * (double)HOUR);
+			long t = defaultTime;
 			this.time = this.reset = t;
 		}
+	}
+	
+	private long toTime(double time) {
+		return (long) Math.floor(time * (double)HOUR);
 	}
 	
 	public void save(LotteryOptions options) {
@@ -28,7 +33,7 @@ public class LotteryTimer implements TimeConstants, Timer {
 
 	public void reset(LotteryOptions options) {
 		double time = options.getDouble(Config.DEFAULT_RESET_ADD_TIME);
-		long t = (long) Math.floor(time * (double)HOUR);
+		long t = toTime(time);
 		reset = t + reset;
 		time = reset;
 	}
@@ -37,28 +42,12 @@ public class LotteryTimer implements TimeConstants, Timer {
 		this.time = time;
 	}
 
-	public void setResetTime(long reset) {
-		this.reset = reset;
-	}
-
 	public long getTime() {
 		return time;
 	}
 
-	public void start() {
-		setRunning(true);
-	}
-
-	public void stop() {
-		setRunning(false);
-	}
-
 	public void setRunning(boolean flag) {
 		this.running = flag;
-	}
-
-	public long getResetTime() {
-		return reset;
 	}
 
 	public boolean isRunning() {

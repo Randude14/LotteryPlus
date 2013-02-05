@@ -1,9 +1,11 @@
 package com.randude14.lotteryplus.lottery;
 
+import com.randude14.lotteryplus.ChatUtils;
+
 public class BlankTimer implements Timer {
 	private boolean running = false;
 	
-	public BlankTimer() {
+	protected BlankTimer() {
 	}
 
 	public void load(LotteryOptions options) {
@@ -22,11 +24,11 @@ public class BlankTimer implements Timer {
 	}
 
 	public long getTime() {
-		return 0;
+		return -1;
 	}
 
 	public String format() {
-		return null;
+		return ChatUtils.getRawName("lottery.timer.infinite");
 	}
 
 	public void setRunning(boolean running) {

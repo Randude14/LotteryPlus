@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus.register.permission;
+package com.randude14.register.permission;
 
 import org.bukkit.command.CommandSender;
 

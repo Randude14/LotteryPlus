@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus.lottery;
+package com.randude14.lotteryplus.lottery.reward;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.ChatUtils;
-import com.randude14.lotteryplus.register.economy.Economy;
+import com.randude14.register.economy.Economy;
 
 @SerializableAs("PotReward")
 public class PotReward implements Reward {
