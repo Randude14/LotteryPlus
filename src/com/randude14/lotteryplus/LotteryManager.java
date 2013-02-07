@@ -127,10 +127,40 @@ public class LotteryManager {
 			return new ArrayList<Lottery>(lotteries.values());
 		}
 	}
-
-	public static Lottery getLottery(String lotteryName) {
+	
+	public static List<Lottery> getLotteries(CommandSender sender) {
 		synchronized (lotteries) {
-			return lotteries.get(lotteryName.toLowerCase());
+			List<Lottery> list = new ArrayList<Lottery>(lotteries.values());
+			for(int cntr = 0;cntr < list.size();cntr++) {
+				if(!list.get(cntr).hasAccess(sender)) {
+					list.remove(cntr);
+				}
+			}
+			return list;
+		}
+	}
+
+	public static Lottery getLottery(String string) {
+		synchronized (lotteries) {
+			Lottery lottery = lotteries.get(string.toLowerCase());
+			if(lottery != null) return lottery;
+			for(Lottery l : lotteries.values()) {
+				for(String alias : l.getAliases()) {
+					if(alias.equalsIgnoreCase(string)) {
+						return l;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static Lottery getLottery(CommandSender sender, String string) {
+		Lottery lottery = getLottery(string);
+		if(lottery != null && !lottery.hasAccess(sender)) {
+			return null;
+		} else {
+			return lottery;
 		}
 	}
 
@@ -169,6 +199,7 @@ public class LotteryManager {
 					return false;
 				}
 				ChatUtils.send(sender, "lottery.reload", "<lottery>", lottery.getName());
+				return true;
 			}
 		}
 		return true;
@@ -240,7 +271,7 @@ public class LotteryManager {
 	}
 
 	public static void listLotteries(CommandSender sender, int page) {
-		List<Lottery> list = getLotteries();
+		List<Lottery> list = getLotteries(sender);
 		int len = list.size();
 		int max = (len / 10) + 1;
 		if (len % 10 == 0)

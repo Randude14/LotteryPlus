@@ -43,7 +43,7 @@ public class BuyCommand implements Command {
 	}
 	
 	private static boolean buyTickets(Player player, String ticketString, String lotteryName) {
-		Lottery lottery = LotteryManager.getLottery(lotteryName);
+		Lottery lottery = LotteryManager.getLottery(player, lotteryName);
 		if(lottery == null) {
 			ChatUtils.send(player, "lottery.error.notfound", "<lottery>", lotteryName);
 			return false;

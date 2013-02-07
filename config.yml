@@ -23,8 +23,13 @@ properties:
     # look for 'lottery.mess.reminder' in 'lang.properties' to edit the message
     reminder-message-delay: 10
 
-    # whether item rewards should drop on the ground near players or should it go in their inventory
+    # whether item rewards should drop on the ground near players or
+    # should it go in their inventory, applies to economies
     should-drop: true
+    
+    # whether rewards should be allowed drop if there is no room for them
+    # if false and there is no room for them it will create a lottery claim for the player
+    drop-reward: false
     
     # whether to log lottery savings or not
     should-log: false
@@ -117,10 +122,16 @@ defaults:
     keep-tickets: true
     
     # the worlds to which this lottery will belong to, leave blank for global
+    # NOTE: This is not for use as a default, must specify under lottery
     worlds: ''
     
     # the towns in Towny to which this lottery will belong to, leave blank for global
+    # NOTE: This is not for use as a default, must specify under lottery
     towny: ''
+    
+    # the aliases for a lottery, can work with 'main-lottery'
+    # NOTE: This is not for use as a default, must specify under lottery
+    aliases: ''
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool

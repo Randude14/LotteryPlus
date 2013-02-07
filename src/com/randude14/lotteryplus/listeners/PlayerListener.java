@@ -36,7 +36,7 @@ public class PlayerListener implements Listener {
 		ClaimManager.notifyOfClaims(player);
 		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split("\\s+");
 		for (String lotteryName : mainLotteries) {
-			Lottery lottery = LotteryManager.getLottery(lotteryName);
+			Lottery lottery = LotteryManager.getLottery(player, lotteryName);
 			if (lottery == null)
 				return;
 			String mess = ChatUtils.getNameFor("lottery.mess.main");
@@ -75,7 +75,7 @@ public class PlayerListener implements Listener {
 			event.setCancelled(true);
 			if (player.isSneaking()) {
 				if (LotteryPlus.checkPermission(player, Perm.SIGN_REMOVE)) {
-					Lottery lottery = LotteryManager.getLottery(lines[1]);
+					Lottery lottery = LotteryManager.getLottery(player, lines[1]);
 					if (lottery != null && lottery.unregisterSign(sign)) {
 						ChatUtils.send(player, "lottery.sign.removed", "<lottery>", lottery.getName());
 						block.breakNaturally();
@@ -133,7 +133,7 @@ public class PlayerListener implements Listener {
 
 		if (buyers.containsKey(player)) {
 			String lotteryName = buyers.remove(player);
-			Lottery lottery = LotteryManager.getLottery(lotteryName);
+			Lottery lottery = LotteryManager.getLottery(player, lotteryName);
 			event.setCancelled(true);
 
 			if (lottery != null) {

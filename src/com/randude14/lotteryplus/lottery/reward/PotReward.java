@@ -12,7 +12,7 @@ import com.randude14.register.economy.Economy;
 @SerializableAs("PotReward")
 public class PotReward implements Reward {
 	private final Economy econ;
-	private final double pot;
+	private double pot;
 	
 	public PotReward(Economy econ, final double pot) {
 		this.econ = econ;
@@ -24,14 +24,16 @@ public class PotReward implements Reward {
 		this.pot = pot;
 	}
 	
-	public void rewardPlayer(Player player) {
+	public boolean rewardPlayer(Player player) {
 		try {
 			econ.deposit(player.getName(), pot);
 			ChatUtils.send(player, "lottery.reward.pot", "<pot>", econ.format(pot));
+			return true;
 		} catch (Exception ex) {
 			ChatUtils.send(player, "lottery.exception.reward");
 			ex.printStackTrace();
 		}
+		return false;
 	}
 	
 	public String getInfo() {

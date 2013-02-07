@@ -15,6 +15,10 @@ import com.randude14.lotteryplus.lottery.reward.Reward;
 public class LotteryClaim implements ConfigurationSerializable, Iterable<Reward> {
 	private List<Reward> rewards;
 	private String lotteryName;
+	
+	public LotteryClaim(Lottery lottery, List<Reward> rewards) {
+		this(lottery.getName(), rewards);
+	}
 
 	public LotteryClaim(String lottery, List<Reward> rewards) {
 		this.rewards = new ArrayList<Reward>(rewards);

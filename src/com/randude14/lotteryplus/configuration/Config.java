@@ -17,6 +17,7 @@ public class Config {
 	public static final Property<Long> REMINDER_MESSAGE_TIME = new Property<Long>("properties.reminder-message-delay", 10L);
 	public static final Property<Long> DRAW_DELAY = new Property<Long>("properties.draw-delay", 3L);
 	public static final Property<Long> BUY_DELAY = new Property<Long>("properties.buy-delay", 30L);
+	public static final Property<Boolean> DROP_REWARD = new Property<Boolean>("properties.drop-reward", true);
 	public static final Property<Boolean> SHOULD_DROP = new Property<Boolean>("properties.should-drop", true);
 	public static final Property<Boolean> BUY_ENABLE = new Property<Boolean>("properties.buy-enable", true);
 	public static final Property<Boolean> OPEN_INVENTORY = new Property<Boolean>("properties.open-inv", false);
@@ -28,6 +29,8 @@ public class Config {
 	public static final Property<String> CHAT_PREFIX = new Property<String>("properties.chat-prefix", "&e[LotteryPlus] - ");
 	public static final Property<String> SIGN_TAG = new Property<String>("properties.sign-tag", "&a[Lottery+]");
 	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
+	
+	//SIGN FORMATS
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
 	public static final Property<String> UPDATE_SIGN_LINE_THREE = new Property<String>("sign-format.Update.line-3", "<time>");
 	public static final Property<String> UPDATE_SIGN_LINE_FOUR = new Property<String>("sign-format.Update.line-4", "<reward>");
@@ -47,6 +50,7 @@ public class Config {
 	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "");
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "");
+	public static final Property<String> DEFAULT_ALIASES = new Property<String>("defaults.aliases", "");
 	public static final Property<Boolean> DEFAULT_ITEM_ONLY = new Property<Boolean>("defaults.item-only", false);
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true);
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false);

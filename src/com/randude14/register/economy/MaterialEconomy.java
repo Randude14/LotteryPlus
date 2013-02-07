@@ -1,11 +1,13 @@
 package com.randude14.register.economy;
 
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
+import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.configuration.Config;
 
 @SuppressWarnings("deprecation") // for Player.updateInventory()
@@ -37,33 +39,11 @@ public class MaterialEconomy extends Economy {
 		if(p != null) {
 			int max = material.getMaxStackSize();
 			if(!Config.getBoolean(Config.SHOULD_DROP)) {
-				PlayerInventory inv = p.getInventory();
-				ItemStack[] contents = inv.getContents();
-				for(int cntr = 0;cntr < contents.length;cntr++) {
-					if(amount <= 0) {
-						break;
-					}
-					if(contents[cntr] == null) {
-						if(max >= amount) {
-							contents[cntr] = new ItemStack(material, amount);
-							amount = 0;
-						} else {
-							contents[cntr] = new ItemStack(material, max);
-							amount -= max;
-						}
-					} else if(contents[cntr].getType() == material) {
-						ItemStack item = contents[cntr];
-						int stackSize = item.getAmount();
-						if(max >= amount + stackSize) {
-							item.setAmount(amount + stackSize);
-							amount = 0;
-						} else {
-							item.setAmount(max);
-							amount -= max;
-						}
-					}
+				Collection<ItemStack> stacks = p.getInventory().addItem(new ItemStack(material, amount)).values();
+				amount = 0;
+				for(ItemStack stack : stacks) {
+					amount += stack.getAmount();
 				}
-				inv.setContents(contents);
 				p.updateInventory();
 			}
 			while(amount > 0) {
@@ -82,32 +62,13 @@ public class MaterialEconomy extends Economy {
 		int amount = (int)Math.floor(d);
 		Player p = Bukkit.getPlayer(player);
 		if(p != null) {
-			PlayerInventory inv = p.getInventory();
-			ItemStack[] contents = inv.getContents();
-			for(int cntr = 0;cntr < contents.length;cntr++) {
-				if(amount <= 0) {
-					break;
-				}
-				if(contents[cntr] == null || contents[cntr].getType() != material) {
-					continue;
-				}
-				ItemStack item = contents[cntr];
-				int stackSize = item.getAmount();
-				int take = Math.max(amount, stackSize);
-				if(stackSize == take) {
-					item.setAmount(stackSize - amount);
-				} else {
-					amount -= stackSize;
-					contents[cntr] = null;
-				}
-			}
-			inv.setContents(contents);
+			p.getInventory().removeItem(new ItemStack(material, amount));
 			p.updateInventory();
 		}
 	}
 
 	public String format(double amount) {
-		return String.format("%d %s(s)", (int)Math.floor(amount), name);
+		return ChatUtils.getRawName("lottery.economy.item", "<material>", name, "<amount>", (int)Math.floor(amount));
 	}
 
 	public boolean hasAccount(String player) {

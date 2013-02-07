@@ -86,7 +86,11 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		    .registerCommand("update", new UpdateCommand());
 		this.getCommand("lottery").setExecutor(cm);
 		this.getCommand("l").setExecutor(cm);
-		scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
+		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
+			public void run() {
+				scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
+			}
+		}, 0L);
 		Logger.info("logger.enabled");
 	}
 	

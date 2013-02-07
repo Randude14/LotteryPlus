@@ -22,20 +22,19 @@ public class LotteryTimer implements TimeConstants, Timer {
 		}
 	}
 	
-	private long toTime(double time) {
-		return (long) Math.floor(time * (double)HOUR);
-	}
-	
 	public void save(LotteryOptions options) {
 		options.set("save-time", time);
 		options.set("reset-time", reset);
 	}
 
 	public void reset(LotteryOptions options) {
-		double time = options.getDouble(Config.DEFAULT_RESET_ADD_TIME);
-		long t = toTime(time);
-		reset = t + reset;
-		time = reset;
+		long t = toTime(Config.getDouble(Config.DEFAULT_TIME));
+		this.reset = t + reset;
+		this.time = reset;
+	}
+	
+	private long toTime(double time) {
+		return (long) Math.floor(time * (double)HOUR);
 	}
 
 	public void setTime(long time) {

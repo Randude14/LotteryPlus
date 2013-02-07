@@ -16,7 +16,7 @@ public class InfoCommand implements Command {
 		if(!LotteryPlus.checkPermission(sender, Perm.INFO)) {
 			return false;
 		}
-		Lottery lottery = LotteryManager.getLottery(args[0]);
+		Lottery lottery = LotteryManager.getLottery(sender, args[0]);
 		if(lottery == null) {
 			ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", args[0]);
 			return false;

@@ -1,5 +1,6 @@
 package com.randude14.register.economy;
 
+
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.configuration.Config;
@@ -37,5 +38,4 @@ public abstract class Economy {
 	public static Economy valueOf(int materialID) {
 		return (materialID < 0) ? new VaultEconomy() : new MaterialEconomy(materialID, Config.getString(Config.DEFAULT_MATERIAL_NAME));
 	}
-
 }

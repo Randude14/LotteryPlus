@@ -44,6 +44,7 @@ public class Lottery implements TimeConstants, Runnable {
 	private final List<Permission> perms;
 	private final List<Reward> rewards;
 	private final List<Sign> signs;
+	private List<String> aliases;
 	private List<String> worlds;
 	private List<String> towny;
 	private final String lotteryName;
@@ -104,6 +105,10 @@ public class Lottery implements TimeConstants, Runnable {
 	public List<String> getTowny() {
 		return towny;
 	}
+	
+	public List<String> getAliases() {
+		return aliases;
+	}
 
 	//called every second
 	public synchronized void onTick() {
@@ -114,7 +119,6 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 		printWarningTimes();
 		updateCooldowns();
-		updateSigns();
 	}
 	
 	private void printWarningTimes() {
@@ -152,7 +156,7 @@ public class Lottery implements TimeConstants, Runnable {
 						break;
 					}
 					if(timer.getTime() == time) {
-						ChatUtils.broadcastRaw(getPlayersToBroadcast(), "lottery.mess.warning", "<name>", lotteryName, "<time>", timeMess);
+						broadcastRaw("lottery.mess.warning", "<name>", lotteryName, "<time>", timeMess);
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -161,7 +165,7 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 	
-	private void updateSigns() {
+	public void updateSigns() {
 		updateSigns(false);
 	}
 	
@@ -341,6 +345,9 @@ public class Lottery implements TimeConstants, Runnable {
 			
 			// TOWNY
 			towny = options.getStringList(Config.DEFAULT_TOWNY);
+			
+			// ALIASES
+			aliases = options.getStringList(Config.DEFAULT_ALIASES);
 			cooldowns.clear();
 		} catch (Exception ex) {
 			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.options.load", "<lottery>", lotteryName), ex);
@@ -367,7 +374,15 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 	
-	public List<Player> getPlayersToBroadcast() {
+	public void broadcast(String code, Object... args) {
+		ChatUtils.broadcast(getPlayersToBroadcast(), code, args);
+	}
+	
+	public void broadcastRaw(String code, Object... args) {
+		ChatUtils.broadcastRaw(getPlayersToBroadcast(), code, args);
+	}
+	
+	private List<Player> getPlayersToBroadcast() {
 		List<Player> players = new ArrayList<Player>();
 		for(Player p : Bukkit.getOnlinePlayers()) {
 			if(hasAccess(p)) {
@@ -378,15 +393,17 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	public boolean checkAccess(CommandSender sender) {
-		if(!hasAccess(sender)) {
-			return false;
+		for(Permission perm : perms) {
+			if(!perm.checkAccess(sender)) {
+				return false;
+			}
 		}
 		return true;
 	}
 	
 	public boolean hasAccess(CommandSender sender) {
 		for(Permission perm : perms) {
-			if(!perm.checkAccess(sender)) {
+			if(!perm.hasAccess(sender)) {
 				return false;
 			}
 		}
@@ -442,7 +459,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	public void broadcast(String player, int tickets) {
-		ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.mess.buy", "<player>", player, "<tickets>", tickets, "<lottery>", lotteryName);
+		broadcast("lottery.mess.buy", "<player>", player, "<tickets>", tickets, "<lottery>", lotteryName);
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
@@ -597,6 +614,7 @@ public class Lottery implements TimeConstants, Runnable {
 		ChatUtils.sendRaw(sender, "lottery.info.tickets.left", "<number>", formatTicketsLeft());
 		if (sender instanceof Player)
 			ChatUtils.sendRaw(sender, "lottery.info.tickets.bought", "<number>", getTicketsBought(sender.getName()));
+		ChatUtils.sendRaw(sender, "lottery.info.aliases", "<aliases>", aliases);
 	}
 
 	private String formatTicketsLeft() {
@@ -655,9 +673,9 @@ public class Lottery implements TimeConstants, Runnable {
 			return;
 		}
 		if (sender == null) {
-			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.mess", "<lottery>", lotteryName);
+			broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
 		} else {
-			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
+			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		long delay = Config.getLong(Config.DRAW_DELAY);
 		drawId = LotteryPlus.scheduleAsyncDelayedTask(this, delay * SERVER_SECOND);
@@ -689,22 +707,21 @@ public class Lottery implements TimeConstants, Runnable {
 			List<String> players = this.getPlayers();
 			int len = players.size();
 			if (len < options.getInt(Config.DEFAULT_MIN_PLAYERS) || len < 1) {
-				ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.error.drawing.notenough");
+				broadcast("lottery.error.drawing.notenough");
 				resetData();
 				options.set("drawing", false);
 				return;
 			}
-			String winner = pickRandomPlayer(rand, players,
-					options.getInt(Config.DEFAULT_TICKET_LIMIT));
+			String winner = Lottery.pickRandomPlayer(rand, players, options.getInt(Config.DEFAULT_TICKET_LIMIT));
 			if (winner == null) {
-				ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.error.drawing.nowinner");
+				broadcast("lottery.error.drawing.nowinner");
 				options.set("drawing", false);
 				success = false;
 				LotteryManager.reloadLottery(lotteryName);
 				return;
 			}
 			options.set("winner", winner);
-			ChatUtils.broadcast(getPlayersToBroadcast(), "lottery.drawing.winner.mess", "<winner>", winner);
+			broadcast("lottery.drawing.winner.mess", "<winner>", winner);
 			if (!this.isItemOnly()) {
 				double pot = options.getDouble(Config.DEFAULT_POT);
 				double potTax = options.getDouble(Config.DEFAULT_POT_TAX);
@@ -719,10 +736,11 @@ public class Lottery implements TimeConstants, Runnable {
 			clearPlayers();
 			WinnersManager.logWinner(logWinner.toString());
 			Player pWinner = Bukkit.getPlayer(winner);
-
+			boolean rewarded = false;
 			if (pWinner != null) {
-				handleRewards(rewards, pWinner);
-			} else {
+				rewarded = Lottery.handleRewards(lotteryName, rewards, pWinner);
+			}
+			if(!rewarded) {
 				ClaimManager.addClaim(winner, lotteryName, rewards);
 			}
 			drawId = -1;
@@ -762,10 +780,19 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 
-	public static void handleRewards(List<Reward> rewards, Player player) {
-		for (Reward reward : rewards) {
-			reward.rewardPlayer(player);
+	public static boolean handleRewards(String lottery, List<Reward> list, Player player) {
+		Iterator<Reward> rewards = list.iterator();
+		while(rewards.hasNext()) {
+			Reward reward = rewards.next();
+			if(reward.rewardPlayer(player)) {
+				rewards.remove();
+			}
 		}
+		if(!list.isEmpty()) {
+			ChatUtils.send(player, "lottery.reward.leftover");
+			return false;
+		}
+		return true;
 	}
 
 	private void resetData() {

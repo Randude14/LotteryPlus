@@ -62,9 +62,12 @@ public class ClaimManager {
 	public static void rewardClaims(Player player) {
 		List<LotteryClaim> playerClaims = claims.get(player.getName());
 		if(playerClaims != null && !playerClaims.isEmpty()) {
-			while(!playerClaims.isEmpty()) {
-				LotteryClaim claim = playerClaims.remove(0);
-				Lottery.handleRewards(claim.getRewards(), player);
+			for(int cntr = 0;cntr < playerClaims.size();cntr++) {
+				LotteryClaim claim = playerClaims.get(cntr);
+				if(Lottery.handleRewards(claim.getLotteryName(), claim.getRewards(), player)) {
+					playerClaims.remove(cntr);
+					cntr--;
+				}
 			}
 			saveClaims();
 		} else {

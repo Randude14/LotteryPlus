@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 public interface Reward extends ConfigurationSerializable {
 	
-	void rewardPlayer(Player player);
+	boolean rewardPlayer(Player player);
 	
 	String getInfo();
 

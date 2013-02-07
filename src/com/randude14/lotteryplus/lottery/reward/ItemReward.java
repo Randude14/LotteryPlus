@@ -2,7 +2,6 @@ package com.randude14.lotteryplus.lottery.reward;
 
 import java.util.Map;
 
-import org.bukkit.World;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,17 +17,21 @@ public class ItemReward implements Reward {
 		this.reward = item;
 	}
 
-	public void rewardPlayer(Player player) {
-		if(Config.getBoolean(Config.SHOULD_DROP)) {
-			World world = player.getWorld();
-			world.dropItem(player.getLocation(), reward);
-		} else {
-			for(ItemStack item : player.getInventory().addItem(reward).values()) {
-				World world = player.getWorld();
-				world.dropItem(player.getLocation(), item);
+	public boolean rewardPlayer(Player player) {
+		boolean drop = player.getInventory().addItem(reward).isEmpty();
+		if(!drop) {
+			if(Config.getBoolean(Config.DROP_REWARD)) {
+				dropReward(player);
+			} else {
+				return false;
 			}
 		}
 		ChatUtils.send(player, "lottery.reward.item", "<amount>", reward.getAmount(), "<item>", reward.getType().name());
+		return true;
+	}
+	
+	private void dropReward(Player player) {
+		player.getWorld().dropItem(player.getLocation(), reward);
 	}
 	
 	public String getInfo() {
