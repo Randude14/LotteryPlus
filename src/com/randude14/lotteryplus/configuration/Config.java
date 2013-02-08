@@ -13,10 +13,13 @@ public class Config {
 	
 	//PROPERTIES
 	public static final Property<Long> SAVE_DELAY = new Property<Long>("properties.save-delay", 15L);
-	public static final Property<Long> UPDATE_DELAY = new Property<Long>("properties.update-delay", 0L);
+	public static final Property<Long> UPDATE_DELAY = new Property<Long>("properties.update-delay", 60L);
 	public static final Property<Long> REMINDER_MESSAGE_TIME = new Property<Long>("properties.reminder-message-delay", 10L);
 	public static final Property<Long> DRAW_DELAY = new Property<Long>("properties.draw-delay", 3L);
 	public static final Property<Long> BUY_DELAY = new Property<Long>("properties.buy-delay", 30L);
+	public static final Property<Boolean> FORCE_SAVE_ENABLE = new Property<Boolean>("properties.save-enable", true);
+	public static final Property<Boolean> UPDATE_CHECK_ENABLE = new Property<Boolean>("properties.update-enable", false);
+	public static final Property<Boolean> REMINDER_MESSAGE_ENABLE = new Property<Boolean>("properties.reminder-message-enable", true);
 	public static final Property<Boolean> DROP_REWARD = new Property<Boolean>("properties.drop-reward", true);
 	public static final Property<Boolean> SHOULD_DROP = new Property<Boolean>("properties.should-drop", true);
 	public static final Property<Boolean> BUY_ENABLE = new Property<Boolean>("properties.buy-enable", true);

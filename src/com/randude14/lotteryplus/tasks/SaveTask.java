@@ -18,12 +18,10 @@ public class SaveTask implements Task {
 	}
 
 	public void scheduleTask() {
-		long delay = Config.getLong(Config.SAVE_DELAY);
 		LotteryPlus.cancelTask(updateId);
-		if (delay <= 0) {
-			return;
-		}
-		delay *= SERVER_SECOND * MINUTE;
+		updateId = -1;
+		if(!Config.getBoolean(Config.FORCE_SAVE_ENABLE)) return;
+		long delay = Config.getLong(Config.SAVE_DELAY) * SERVER_SECOND * MINUTE;
 		updateId = LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
 	}
 }

@@ -15,11 +15,9 @@ public class UpdateCheckTask implements Task {
 	
 	public void scheduleTask() {
 		LotteryPlus.cancelTask(updateId);
-		long delay = Config.getLong(Config.UPDATE_DELAY);
-		if(delay <= 0) {
-			return;
-		}
-		delay *=  SERVER_SECOND * MINUTE;
+		updateId = -1;
+		if(!Config.getBoolean(Config.UPDATE_CHECK_ENABLE)) return;
+		long delay = Config.getLong(Config.UPDATE_DELAY) * SERVER_SECOND * MINUTE;
 		updateId = LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
 	}
 }

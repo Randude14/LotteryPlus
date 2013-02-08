@@ -119,6 +119,7 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 		printWarningTimes();
 		updateCooldowns();
+		updateSigns();
 	}
 	
 	private void printWarningTimes() {
@@ -700,18 +701,23 @@ public class Lottery implements TimeConstants, Runnable {
 
 	public void run() {
 		try {
+			// clear cooldowns
 			synchronized(cooldowns) {
 				cooldowns.clear();
 			}
 			drawId = -1;
 			List<String> players = this.getPlayers();
 			int len = players.size();
+			
+			// check if there were enough players entered in drawing
 			if (len < options.getInt(Config.DEFAULT_MIN_PLAYERS) || len < 1) {
 				broadcast("lottery.error.drawing.notenough");
 				resetData();
 				options.set("drawing", false);
 				return;
 			}
+			
+			// pick winner
 			String winner = Lottery.pickRandomPlayer(rand, players, options.getInt(Config.DEFAULT_TICKET_LIMIT));
 			if (winner == null) {
 				broadcast("lottery.error.drawing.nowinner");
@@ -720,21 +726,27 @@ public class Lottery implements TimeConstants, Runnable {
 				LotteryManager.reloadLottery(lotteryName);
 				return;
 			}
-			options.set("winner", winner);
+			
+			// broadcast winner		
 			broadcast("lottery.drawing.winner.mess", "<winner>", winner);
+			
+			// add pot reward
 			if (!this.isItemOnly()) {
 				double pot = options.getDouble(Config.DEFAULT_POT);
 				double potTax = options.getDouble(Config.DEFAULT_POT_TAX);
 				double winnings = pot - (pot * (potTax / 100));
 				rewards.add(0, new PotReward(econ, winnings));
 			}
+			
+			// log winner
 			StringBuilder logWinner = new StringBuilder(lotteryName + ": " + winner);
 			for (Reward reward : rewards) {
 				logWinner.append(", ");
 				logWinner.append("[" + reward.getInfo() + "]");
-			}
-			clearPlayers();
+			}			
 			WinnersManager.logWinner(logWinner.toString());
+			
+			// reward winner if online
 			Player pWinner = Bukkit.getPlayer(winner);
 			boolean rewarded = false;
 			if (pWinner != null) {
@@ -743,8 +755,11 @@ public class Lottery implements TimeConstants, Runnable {
 			if(!rewarded) {
 				ClaimManager.addClaim(winner, lotteryName, rewards);
 			}
-			drawId = -1;
+			
+			// set up for next drawing
+			options.set("winner", winner);
 			options.set("drawing", false);
+			clearPlayers();
 			success = true;
 			if (options.getBoolean(Config.DEFAULT_REPEAT)) {
 				LotteryManager.reloadLottery(lotteryName);

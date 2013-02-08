@@ -6,11 +6,17 @@ properties:
     # look for 'lottery.mess.buy' in 'lang.properties' to edit the message
     buy-enable: true 
 
-    # delay between lottery savings, x minutes: set to 0 or less to disable, can also use '/lottery save' to force save lotteries
+    # delay between lottery savings, x minutes: can also use '/lottery save' to force save lotteries
     save-delay: 15
+    
+    # enable lottery savings
+    save-enable: true 
 
-    # delay between update checks, x minutes: set to 0 or less to disable, can also use '/lottery update' to check on updates
-    update-delay: 0
+    # delay between update checks, x minutes: can also use '/lottery update' to check on updates
+    update-delay: 60
+    
+    # enable the update checks
+    update-enable: false
     
     # the delay that takes place between a lottery drawing and when it announces the winner, x seconds
     draw-delay: 3
@@ -19,9 +25,11 @@ properties:
     # NOTE: this is the delay between a lottery NOT all lotteries
     buy-delay: 30
 
-    # delay between reminder messages, x minutes: set to 0 or less to disable
-    # look for 'lottery.mess.reminder' in 'lang.properties' to edit the message
+    # delay between reminder messages, look for 'lottery.mess.reminder' in 'lang.properties' to edit the message
     reminder-message-delay: 10
+    
+    # enable the reminder message
+    reminder-message-enable: true
 
     # whether item rewards should drop on the ground near players or
     # should it go in their inventory, applies to economies
