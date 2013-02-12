@@ -17,8 +17,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.w3c.dom.Document;
@@ -63,7 +61,7 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		loadRegistry();
 		callTasks();
 		saveExtras();
-		registerListeners(new PlayerListener(), new SignProtectorListener());
+		registerListeners();
 		Command atpCommand = new AddToPotCommand();
 		CommandManager cm = new CommandManager()
 		    .registerCommand("buy", new BuyCommand())
@@ -104,7 +102,7 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 	}
 	
 	private static void loadRegistry() {
-		if(!VaultPermission.isVaultInstalled()) {
+		if(!PluginSupport.VAULT.isInstalled()) {
 			Logger.info("logger.vault.notfound");
 			perm = new BukkitPermission();
 		} else {
@@ -154,11 +152,12 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		instance.getServer().getPluginManager().disablePlugin(instance);
 	}
 
-	private void registerListeners(Listener... listeners) {
-		PluginManager manager = getServer().getPluginManager();
-
-		for (Listener listener : listeners) {
-			manager.registerEvents(listener, this);
+	private void registerListeners() {
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(new SignProtectorListener(), this);
+		pm.registerEvents(new PlayerListener(), this);
+		if(PluginSupport.VOTIFIER.isInstalled()) {
+			pm.registerEvents(new VotifierListener(), this);
 		}
 	}
 	
@@ -188,18 +187,7 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		// create the object instead of returning null
 		return instance.getServer().getOfflinePlayer(name);
 	}
-	
-	public static boolean isTownyInstalled() {
-		Class<?> townyClass = null;
-		try {
-			townyClass = Class.forName("com.palmergames.bukkit.towny.Towny");
-		} catch (Exception ex) {
-			return false;
-		}
-		Plugin plugin = instance.getServer().getPluginManager().getPlugin("Towny");
-		return plugin != null && plugin.getClass() == townyClass;
-	}
-	
+
 	public static boolean checkPermission(CommandSender sender,
 			Perm permission) {
 		if (!hasPermission(sender, permission)) {

@@ -18,13 +18,17 @@ public class ListCommand implements Command {
 		int page = 1;
 		if(args.length > 0) {
 			try {
-				page = Integer.parseInt(args[0]);
+				if(args.length == 1) page = Integer.parseInt(args[0]);
+				else page = Integer.parseInt(args[1]);
 			} catch (Exception ex) {
 				ChatUtils.send(sender, "lottery.error.invalid-number");
 				return false;
 			}
 		}
-		LotteryManager.listLotteries(sender, page);
+		if(args.length <= 1)
+			LotteryManager.listLotteries(sender, page);
+		else
+			LotteryManager.listLotteries(sender, page, args[0]);
 		return true;
 	}
 
@@ -34,11 +38,14 @@ public class ListCommand implements Command {
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
 		ChatUtils.sendCommandHelp(sender, Perm.LIST, "plugin.command.list", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.LIST, "plugin.command.list.filter", cmd);
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(LotteryPlus.hasPermission(sender, Perm.LIST))
+		if(LotteryPlus.hasPermission(sender, Perm.LIST)) {
 			list.add("plugin.command.list");
+			list.add("plugin.command.list.filter");
+		}
 	}
 	
 	public int minValues() {

@@ -17,17 +17,8 @@ public class VaultPermission extends Permission {
 	protected boolean playerHas(CommandSender sender, String permission) {
 		if(sender instanceof Player) {
 			Player player = (Player) sender;
-			return perm.has(player.getWorld(), player.getName(), permission);
+			return perm.has(player.getWorld(), player.getName(), permission) || player.hasPermission(permission);
 		}
 		return perm.has(sender, permission);
-	}
-	
-	public static boolean isVaultInstalled() {
-		try {
-			Class.forName("net.milkbowl.vault.permission.Permission");
-			return Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class).getProvider() != null;
-		} catch (Exception ex) {
-		}
-		return false;
 	}
 }

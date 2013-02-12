@@ -64,7 +64,7 @@ public class ClaimManager {
 		if(playerClaims != null && !playerClaims.isEmpty()) {
 			for(int cntr = 0;cntr < playerClaims.size();cntr++) {
 				LotteryClaim claim = playerClaims.get(cntr);
-				if(Lottery.handleRewards(claim.getLotteryName(), claim.getRewards(), player)) {
+				if(Lottery.handleRewards(player, claim.getRewards())) {
 					playerClaims.remove(cntr);
 					cntr--;
 				}

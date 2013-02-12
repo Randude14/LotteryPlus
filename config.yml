@@ -65,6 +65,9 @@ properties:
     # look for 'lottery.mess.main' in the 'lang.properties' to edit the message
     main-lotteries: ''
     
+    # the default filter used in '/lottery list <page>'
+    default-filter: ''
+    
 
 # various sign formats used in different states of a lottery
 #
@@ -152,9 +155,6 @@ defaults:
     #
     item-rewards: ''
 
-    # whether this lottery has item rewards only or not
-    item-only: false
-
     # whether this lottery should repeat after the next drawing
     repeat: true
     
@@ -169,6 +169,9 @@ defaults:
 
     # the starting pot
     pot: 1000.00
+    
+    # whether to use a pot or not
+    use-pot: true
 
     # cost of lottery tickets
     ticket-cost: 10.00

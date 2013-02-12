@@ -32,6 +32,7 @@ public class Config {
 	public static final Property<String> CHAT_PREFIX = new Property<String>("properties.chat-prefix", "&e[LotteryPlus] - ");
 	public static final Property<String> SIGN_TAG = new Property<String>("properties.sign-tag", "&a[Lottery+]");
 	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
+	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
 	
 	//SIGN FORMATS
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
@@ -54,13 +55,14 @@ public class Config {
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "");
 	public static final Property<String> DEFAULT_ALIASES = new Property<String>("defaults.aliases", "");
-	public static final Property<Boolean> DEFAULT_ITEM_ONLY = new Property<Boolean>("defaults.item-only", false);
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true);
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false);
 	public static final Property<Boolean> DEFAULT_CLEAR_REWARDS = new Property<Boolean>("defaults.clear-rewards", false);
 	public static final Property<Boolean> DEFAULT_USE_VAULT = new Property<Boolean>("defaults.use-vault", true);
 	public static final Property<Boolean> DEFAULT_KEEP_TICKETS = new Property<Boolean>("defaults.keep-tickets", true);
 	public static final Property<Boolean> DEFAULT_USE_TIMER = new Property<Boolean>("defaults.use-timer", true);
+	public static final Property<Boolean> DEFAULT_USE_POT = new Property<Boolean>("defaults.use-pot", true);
+	public static final Property<Boolean> DEFAULT_BUY_TICKETS = new Property<Boolean>("defaults.buy-tickets", true);
 	public static final Property<Double> DEFAULT_POT = new Property<Double>("defaults.pot", 1000.0);
 	public static final Property<Double> DEFAULT_TICKET_COST = new Property<Double>("defaults.ticket-cost", 10.0);
 	public static final Property<Double> DEFAULT_TICKET_TAX = new Property<Double>("defaults.ticket-tax", 0.0);
@@ -79,6 +81,7 @@ public class Config {
 	public static final Property<Integer> DEFAULT_RESET_ADD_MAX_TICKETS = new Property<Integer>("defaults.reset-add-max-tickets", 0);
 	public static final Property<Integer> DEFAULT_RESET_ADD_MIN_PLAYERS = new Property<Integer>("defaults.reset-add-min-players", 0);
 	public static final Property<Integer> DEFAULT_RESET_ADD_MAX_PLAYERS = new Property<Integer>("defaults.reset-add-max-players", 0);
+	public static final Property<Integer> DEFAULT_VOTIFIER_REWARD = new Property<Integer>("defaults.votifier-reward", 0);
 	public static final Property<Long> DEFAULT_COOLDOWN = new Property<Long>("defaults.cooldown", 0L);
 	public static final Property<Long> DEFAULT_RESET_ADD_COOLDOWN = new Property<Long>("defaults.reset-add-cooldown", 0L);
 	public static final Property<Long> DEFAULT_WARMUP = new Property<Long>("defaults.warmup", 0L);

@@ -35,15 +35,6 @@ public class VaultEconomy extends Economy {
 		return econ.hasAccount(player);
 	}
 	
-	public static boolean isVaultInstalled() {
-		try {
-			Class.forName("net.milkbowl.vault.economy.Economy");
-			return Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class).getProvider() != null;
-		} catch (Exception ex) {
-			return false;
-		}
-	}
-	
 	public int getMaterialID() {
 		return -1;
 	}
