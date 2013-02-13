@@ -143,6 +143,12 @@ defaults:
     # the aliases for a lottery, can work with 'main-lottery'
     # NOTE: This is not for use as a default, must specify under lottery
     aliases: ''
+    
+    # number of tickets to reward for voting
+    votifier-reward: 0
+    
+    # whether players should allowed to buy tickets
+    buy-tickets: true
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool

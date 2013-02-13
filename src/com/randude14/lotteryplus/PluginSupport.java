@@ -1,28 +1,24 @@
 package com.randude14.lotteryplus;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
 public enum PluginSupport {
-	VAULT("net.milkbowl.vault.economy.Economy", "Vault"),
-	TOWNY("com.palmergames.bukkit.towny.Towny", "Towny"),
-	VOTIFIER("com.vexsoftware.votifier.Votifier", "Votifier");
+	VAULT("Vault", "net.milkbowl.vault.Vault"),
+	TOWNY("Towny", "com.palmergames.bukkit.towny.Towny"),
+	VOTIFIER("Votifier", "com.vexsoftware.votifier.Votifier");
 	
-	private PluginSupport(String main, String name) {
-		this.main = main;
+	private PluginSupport(String name, String main) {
 		this.name = name;
+		this.main = main;
 	}
 	
 	public boolean isInstalled() {
-		Class<?> pluginClass = null;
 		try {
-			pluginClass = Class.forName(main);
+			Class.forName(main);
+			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		if(pluginClass == null) return false;
-		Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
-		return (plugin != null ? plugin.getClass().equals(pluginClass) : false);
+		return false;
 	}
-	
+	@SuppressWarnings("unused")
 	private final String main, name;
 }

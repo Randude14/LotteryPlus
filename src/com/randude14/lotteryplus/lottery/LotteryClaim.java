@@ -2,7 +2,6 @@ package com.randude14.lotteryplus.lottery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import com.randude14.lotteryplus.lottery.reward.Reward;
 
 @SerializableAs("LotteryClaim")
-public class LotteryClaim implements ConfigurationSerializable, Iterable<Reward> {
+public class LotteryClaim implements ConfigurationSerializable {
 	private List<Reward> rewards;
 	private String lotteryName;
 	
@@ -27,10 +26,6 @@ public class LotteryClaim implements ConfigurationSerializable, Iterable<Reward>
 
 	public String getLotteryName() {
 		return lotteryName;
-	}
-
-	public Iterator<Reward> iterator() {
-		return rewards.iterator();
 	}
 	
 	public List<Reward> getRewards() {

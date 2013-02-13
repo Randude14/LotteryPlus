@@ -239,8 +239,7 @@ public class LotteryManager {
 		lotteriesConfig.reloadConfig(); // doesn't erase current options in place for future reloads
 		ConfigurationSection savesSection = lotteriesConfig.getConfig().createSection("saves");
 		for (Lottery lottery : lotteries.values()) {
-			lottery.save();
-			savesSection.createSection(lottery.getName(), lottery.getOptions().getValues());
+			savesSection.createSection(lottery.getName(), lottery.save());
 		}
 		lotteriesConfig.saveConfig();
 	}
@@ -248,11 +247,10 @@ public class LotteryManager {
 	public static void saveLottery(String lotteryName) {
 		Lottery lottery = getLottery(lotteryName);
 		if(lottery != null) {
-			lottery.save();
 			ConfigurationSection section = lotteriesConfig.getConfig();
 			ConfigurationSection savesSection = section.getConfigurationSection("saves");
 			if(savesSection == null) savesSection = lotteriesConfig.getConfig().createSection("saves");
-			savesSection.createSection(lottery.getName(), lottery.getOptions().getValues());
+			savesSection.createSection(lottery.getName(), lottery.save());
 			lotteriesConfig.saveConfig();
 		}
 	}

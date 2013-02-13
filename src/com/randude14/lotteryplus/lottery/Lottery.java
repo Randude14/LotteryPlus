@@ -70,10 +70,6 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 
-	public LotteryOptions getOptions() {
-		return options;
-	}
-
 	public final String getName() {
 		return lotteryName;
 	}
@@ -193,8 +189,6 @@ public class Lottery implements TimeConstants, Runnable {
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
 				for(Sign sign : signs) {
-					if(!sign.getChunk().isLoaded()) 
-						continue;
 					sign.setLine(0, line1);
 					sign.setLine(1, line2);
 					sign.setLine(2, line3);
@@ -417,13 +411,16 @@ public class Lottery implements TimeConstants, Runnable {
 		return true;
 	}
 
-	public void save() {
+	public Map<String, Object> save() {
 		timer.save(options);
 		options.remove("drawing");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.putAll(options.getValues());
 		int cntr = 1;
 		for(Sign sign : signs) {
-			options.set("sign" + cntr++, Utils.parseLocation(sign.getLocation()));
+			map.put("sign" + cntr++, Utils.parseLocation(sign.getLocation()));
 		}
+		return map;
 	}
 	
 	public boolean registerSign(CommandSender sender, Sign sign) {
@@ -485,6 +482,10 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
+		if(!Config.getBoolean(Config.DEFAULT_BUY_TICKETS)) {
+			ChatUtils.sendRaw(player, "lottery.error.tickets.disabled", "<lottery>", lotteryName);
+			return false;
+		}
 		if(!checkAccess(player)) {
 			return false;
 		}
@@ -738,11 +739,11 @@ public class Lottery implements TimeConstants, Runnable {
 				cooldowns.clear();
 			}
 			drawId = -1;
-			List<String> players = this.getPlayers();
-			int len = players.size();
+			List<String> players = getPlayers();
+			int entered = getPlayersEntered();
 			
 			// check if there were enough players entered in drawing
-			if (len < options.getInt(Config.DEFAULT_MIN_PLAYERS) || len < 1) {
+			if (entered < options.getInt(Config.DEFAULT_MIN_PLAYERS) || entered < 1) {
 				broadcast("lottery.error.drawing.notenough");
 				resetData();
 				options.set("drawing", false);
@@ -782,7 +783,7 @@ public class Lottery implements TimeConstants, Runnable {
 			Player pWinner = Bukkit.getPlayer(winner);
 			boolean rewarded = false;
 			if (pWinner != null) {
-				rewarded = Lottery.handleRewards(pWinner, rewards);
+				rewarded = Lottery.handleRewards(pWinner, lotteryName, rewards);
 			}
 			if(!rewarded) {
 				ClaimManager.addClaim(winner, lotteryName, rewards);
@@ -827,11 +828,11 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 
-	public static boolean handleRewards(Player player, List<Reward> list) {
+	public static boolean handleRewards(Player player, String lottery, List<Reward> list) {
 		Iterator<Reward> rewards = list.iterator();
 		while(rewards.hasNext()) {
 			Reward reward = rewards.next();
-			if(reward.rewardPlayer(player)) {
+			if(reward.rewardPlayer(player, lottery)) {
 				rewards.remove();
 			}
 		}

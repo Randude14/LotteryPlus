@@ -17,7 +17,7 @@ public class ItemReward implements Reward {
 		this.reward = item;
 	}
 
-	public boolean rewardPlayer(Player player) {
+	public boolean rewardPlayer(Player player, String lottery) {
 		boolean drop = player.getInventory().addItem(reward).isEmpty();
 		if(!drop) {
 			if(Config.getBoolean(Config.DROP_REWARD)) {
@@ -26,7 +26,7 @@ public class ItemReward implements Reward {
 				return false;
 			}
 		}
-		ChatUtils.send(player, "lottery.reward.item", "<amount>", reward.getAmount(), "<item>", reward.getType().name());
+		ChatUtils.send(player, "lottery.reward.item", "<amount>", reward.getAmount(), "<item>", reward.getType().name(), "<lottery>", lottery);
 		return true;
 	}
 	

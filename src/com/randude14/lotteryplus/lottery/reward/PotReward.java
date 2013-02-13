@@ -24,10 +24,10 @@ public class PotReward implements Reward {
 		this.pot = pot;
 	}
 	
-	public boolean rewardPlayer(Player player) {
+	public boolean rewardPlayer(Player player, String lottery) {
 		try {
 			econ.deposit(player.getName(), pot);
-			ChatUtils.send(player, "lottery.reward.pot", "<pot>", econ.format(pot));
+			ChatUtils.send(player, "lottery.reward.pot", "<pot>", econ.format(pot), "<lottery>", lottery);
 			return true;
 		} catch (Exception ex) {
 			ChatUtils.send(player, "lottery.exception.reward");
