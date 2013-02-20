@@ -70,8 +70,7 @@ public class PlayerListener implements Listener {
 		Sign sign = (Sign) block.getState();
 		String[] lines = sign.getLines();
 		if (isLotterySign(lines)) {
-			lines[0] = ChatUtils.replaceColorCodes(Config
-					.getString(Config.SIGN_TAG));
+			lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 			event.setCancelled(true);
 			if (player.isSneaking()) {
 				if (LotteryPlus.checkPermission(player, Perm.SIGN_REMOVE)) {

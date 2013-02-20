@@ -77,10 +77,13 @@ public class ChatUtils {
 	}
 
 	public static boolean sendCommandHelp(CommandSender sender, Perm permission, String code, org.bukkit.command.Command cmd) {
-		if (!LotteryPlus.hasPermission(sender, permission))
+		if (!LotteryPlus.checkPermission(sender, permission))
 			return false;
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 		return true;
+	}
+	public static void sendCommandHelp(CommandSender sender, String code, org.bukkit.command.Command cmd) {
+		sendRaw(sender, code, "<command>", cmd.getLabel());
 	}
 
 	public static final String getChatPrefix() {
@@ -131,7 +134,7 @@ public class ChatUtils {
 			if(string == null || string.equals("")) string = "\"\"";
 			mess = mess.replace(args[cntr].toString(), string);
 		}
-		return mess;
+		return cleanColorCodes(mess);
 	}
 	
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();

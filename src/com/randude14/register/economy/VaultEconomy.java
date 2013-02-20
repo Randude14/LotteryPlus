@@ -6,7 +6,7 @@ import com.randude14.lotteryplus.ChatUtils;
 
 
 public class VaultEconomy extends Economy {
-	net.milkbowl.vault.economy.Economy econ;
+	private final net.milkbowl.vault.economy.Economy econ;
 	
 	public VaultEconomy() {
 		econ = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class).getProvider();

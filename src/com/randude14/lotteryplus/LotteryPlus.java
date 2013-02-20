@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bukkit.Bukkit;
@@ -26,17 +27,15 @@ import org.w3c.dom.NodeList;
 
 import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
+import com.randude14.lotteryplus.gui.MainFrame;
 import com.randude14.lotteryplus.listeners.*;
+import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
-import com.randude14.lotteryplus.util.TimeConstants;
-import com.randude14.register.permission.BukkitPermission;
-import com.randude14.register.permission.Permission;
-import com.randude14.register.permission.VaultPermission;
 
-public class LotteryPlus extends JavaPlugin implements TimeConstants {
+public class LotteryPlus extends JavaPlugin {
 	private static LotteryPlus instance = null;
 	private static final List<Task> tasks = new ArrayList<Task>();
-	private static Permission perm;
+	private static MainFrame mainFrame;
 	private File configFile;
 
 	public void onEnable() {
@@ -51,14 +50,20 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 			saveDefaultConfig();
 		}
 		
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		mainFrame = new MainFrame();
 		tasks.add(new ReminderMessageTask());
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
 		ClaimManager.loadClaims();
 		WinnersManager.loadWinners();
+		Perm.loadPermissions();
 		int numLotteries = LotteryManager.loadLotteries();
 		Logger.info("logger.lottery.num", "<number>", numLotteries);
-		loadRegistry();
 		callTasks();
 		saveExtras();
 		registerListeners();
@@ -81,12 +86,13 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		    .registerCommand("save", new SaveCommand())
 		    .registerCommand("config", new ConfigCommand())
 		    .registerCommand("version", new VersionCommand())
-		    .registerCommand("update", new UpdateCommand());
+		    .registerCommand("update", new UpdateCommand())
+		    .registerCommand("guic", new GuiCreatorCommand());
 		this.getCommand("lottery").setExecutor(cm);
 		this.getCommand("l").setExecutor(cm);
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
-				scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
+				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
 			}
 		}, 0L);
 		Logger.info("logger.enabled");
@@ -94,20 +100,12 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 	
 	public void onDisable() {
 		Logger.info("logger.disabled");
+		mainFrame.setVisible(false);
+		mainFrame.dispose();
 		getServer().getScheduler().cancelTasks(this);
 		LotteryManager.saveLotteries();
 		WinnersLogger.close();
 		instance = null;
-		perm = null;
-	}
-	
-	private static void loadRegistry() {
-		if(!PluginSupport.VAULT.isInstalled()) {
-			Logger.info("logger.vault.notfound");
-			perm = new BukkitPermission();
-		} else {
-			perm = new VaultPermission();
-		}
 	}
 
 	private void saveExtras() {
@@ -145,7 +143,6 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		instance.reloadConfig();
 		ChatUtils.reload();
 		callTasks();
-		loadRegistry();
 	}
 	
 	public static void disable() {
@@ -197,9 +194,24 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 		return true;
 	}
 
-	public static boolean hasPermission(CommandSender sender,
-			Perm permission) {
-		return perm.hasPermission(sender, permission);
+	public static boolean hasPermission(CommandSender sender, Perm perm) {
+		if(perm.hasPermission(sender)) {
+			return true;
+		} else {
+			Perm parent = perm.getParent();
+			return parent != null ? hasPermission(sender, parent) : false;
+		}
+	}
+	
+	public static void openGui() {
+		mainFrame.setVisible(true);
+		mainFrame.requestFocus();
+	}
+	
+	public static void openGui(String lotteryName) {
+		mainFrame.openCreator(lotteryName);
+		mainFrame.setVisible(true);
+		mainFrame.requestFocus();
 	}
 	
 	public static boolean isThereNewUpdate(String currentVersion) {
@@ -299,10 +311,6 @@ public class LotteryPlus extends JavaPlugin implements TimeConstants {
 
 	public static boolean isSign(Location loc) {
 		return isSign(loc.getBlock());
-	}
-	
-	public static Permission getPermission() {
-		return perm;
 	}
 	
 	public static final LotteryPlus getInstance() {

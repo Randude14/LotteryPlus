@@ -1,9 +1,9 @@
 package com.randude14.lotteryplus.lottery;
 
 import com.randude14.lotteryplus.configuration.Config;
-import com.randude14.lotteryplus.util.TimeConstants;
+import com.randude14.lotteryplus.util.Time;
 
-public class LotteryTimer implements TimeConstants, Timer {
+public class LotteryTimer implements Timer {
 	private boolean running;
 	private long time;
 	private long reset;
@@ -34,7 +34,7 @@ public class LotteryTimer implements TimeConstants, Timer {
 	}
 	
 	private long toTime(double time) {
-		return (long) Math.floor(time * (double)HOUR);
+		return (long) Math.floor(time * (double)Time.HOUR.getTime());
 	}
 
 	public void setTime(long time) {
@@ -69,10 +69,10 @@ public class LotteryTimer implements TimeConstants, Timer {
 
 	public String format() {
 		long sec = (time) % 60;
-		long min = (time / MINUTE) % 60;
-		long hours = (time / HOUR) % 24;
-		long days = (time / DAY) % 7;
-		long weeks = (time / WEEK) % 52;
+		long min = (time / Time.MINUTE.getTime()) % 60;
+		long hours = (time / Time.HOUR.getTime()) % 24;
+		long days = (time / Time.DAY.getTime()) % 7;
+		long weeks = (time / Time.WEEK.getTime()) % 52;
 		String display = String.format("%02d:%02d:%02d:%02d:%02d", weeks, days,
 				hours, min, sec);
 		return display;

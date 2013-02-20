@@ -1,5 +1,8 @@
 package com.randude14.lotteryplus;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
 public enum PluginSupport {
 	VAULT("Vault", "net.milkbowl.vault.Vault"),
 	TOWNY("Towny", "com.palmergames.bukkit.towny.Towny"),
@@ -13,12 +16,17 @@ public enum PluginSupport {
 	public boolean isInstalled() {
 		try {
 			Class.forName(main);
-			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			return false;
 		}
-		return false;
+		Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
+		return plugin != null;
 	}
-	@SuppressWarnings("unused")
+	
+	public Plugin getPlugin() {
+		if(!isInstalled()) return null;
+		return Bukkit.getPluginManager().getPlugin(name);
+	}
+	
 	private final String main, name;
 }

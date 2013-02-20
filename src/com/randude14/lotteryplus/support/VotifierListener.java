@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus.listeners;
+package com.randude14.lotteryplus.support;
 
 import org.bukkit.event.Listener;
 

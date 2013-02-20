@@ -11,9 +11,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
 import com.randude14.lotteryplus.configuration.Config;
-import com.randude14.lotteryplus.util.TimeConstants;
 
-public class Utils implements TimeConstants {
+public class Utils {
 	
 	public static long loadSeed(String line) {
 		if(line == null)

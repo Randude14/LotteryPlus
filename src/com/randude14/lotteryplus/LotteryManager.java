@@ -3,6 +3,7 @@ package com.randude14.lotteryplus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,16 +17,28 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.CustomYaml;
+import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryOptions;
 
+@SuppressWarnings("rawtypes")
 public class LotteryManager {
 	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml");
 	private static final Map<String, Lottery> lotteries = new LinkedHashMap<String, Lottery>();
+	
+	public static void createLotterySection(CommandSender sender, String lotteryName, Map<String, Object> values) {
+		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection();
+		for (String key : lotteriesSection.getKeys(false)) {
+			if (key.equalsIgnoreCase(lotteryName)) {
+				lotteryName = key;
+			}
+		}
+		lotteriesSection.createSection(lotteryName, values);
+		lotteriesConfig.saveConfig();
+	}
 
-	public static boolean createLotterySection(CommandSender sender,
-			String lotteryName) {
+	public static boolean createLotterySection(CommandSender sender, String lotteryName) {
 		if (lotteries.containsKey(lotteryName.toLowerCase())) {
 			ChatUtils.send(sender, "lottery.error.exists", "<lottery>", lotteryName);
 			return false;
@@ -44,10 +57,35 @@ public class LotteryManager {
 		ChatUtils.send(sender, "lottery.section.created", "<lottery>", lotteryName);
 		return true;
 	}
+	
+	public static String putAll(String lotteryName, Map<Property, Object> values) {
+		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection();
+		for (String key : lotteriesSection.getKeys(false)) {
+			if (key.equalsIgnoreCase(lotteryName)) {
+				ConfigurationSection section = lotteriesSection.getConfigurationSection(key);
+				Map<String, Object> map = section.getValues(false);
+				for(String key1 : map.keySet()) {
+					int index = -1;
+					Property[] lotteryDefaults = Config.lotteryDefaults;
+					for(int cntr = 0;cntr < lotteryDefaults.length;cntr++) {
+						Property prop = lotteryDefaults[cntr];
+						if(prop.getName().equalsIgnoreCase(key1)) {
+							index = cntr;
+							break;
+						}
+					}
+					if(index >= 0) {
+						values.put(lotteryDefaults[index], map.get(key1));
+					}
+				}
+				return key;
+			}
+		}
+		return lotteryName;
+	}
 
 	public static boolean loadLottery(CommandSender sender, String find) {
-		Lottery l;
-		l = lotteries.get(find.toLowerCase());
+		Lottery l = LotteryManager.getLottery(find);
 		if (l != null) {
 			ChatUtils.send(sender, "lottery.error.exists", "<lottery>", l.getName());
 			return false;
@@ -84,21 +122,25 @@ public class LotteryManager {
 		return unloadLottery(sender, find, false);
 	}
 
-	public static boolean unloadLottery(CommandSender sender, String find,
-			boolean delete) {
-		if (!lotteries.containsKey(find.toLowerCase())) {
+	public static boolean unloadLottery(CommandSender sender, String find, boolean delete) {
+		Lottery lottery = LotteryManager.getLottery(find);
+		if (lottery == null) {
 			ChatUtils.send(sender, "lottery.notfound", "<lottery>", find);
 			return false;
 		}
-		Lottery lottery;
-		lottery = lotteries.remove(find.toLowerCase());
 		ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
 		if (savesSection != null) {
-			deleteSection(savesSection, find);
+			deleteSection(savesSection, lottery.getName());
+		}
+		Iterator<Lottery> it = lotteries.values().iterator();
+		while(it.hasNext()) {
+			if(it.next().equals(lottery)) {
+				it.remove();
+			}
 		}
 		if (delete) {
 			ConfigurationSection section = getOrCreateLotteriesSection();
-			deleteSection(section, find);
+			deleteSection(section, lottery.getName());
 			ChatUtils.send(sender, "lottery.unloaded-removed", "<lottery>", lottery.getName());
 		} else {
 			ChatUtils.send(sender, "lottery.unloaded", "<lottery>", lottery.getName());
@@ -156,10 +198,8 @@ public class LotteryManager {
 		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, true);
 	}
 
-	public static boolean reloadLottery(CommandSender sender,
-			String lotteryName, boolean force) {
-		Lottery lottery;
-		lottery = lotteries.get(lotteryName.toLowerCase());
+	public static boolean reloadLottery(CommandSender sender, String lotteryName, boolean force) {
+		Lottery lottery = LotteryManager.getLottery(lotteryName);
 		if (lottery == null) {
 			ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", lotteryName);
 			return false;
@@ -171,7 +211,7 @@ public class LotteryManager {
 		lotteriesConfig.reloadConfig();
 		ConfigurationSection section = getOrCreateLotteriesSection();
 		for (String sectionName : section.getKeys(false)) {
-			if (sectionName.equalsIgnoreCase(lotteryName)) {
+			if (sectionName.equalsIgnoreCase(lottery.getName())) {
 				ConfigurationSection lotteriesSection = section
 						.getConfigurationSection(sectionName);
 				Map<String, Object> values = lotteriesSection.getValues(true);

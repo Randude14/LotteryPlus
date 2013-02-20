@@ -30,10 +30,10 @@ import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.permission.*;
 import com.randude14.lotteryplus.lottery.reward.*;
-import com.randude14.lotteryplus.util.TimeConstants;
+import com.randude14.lotteryplus.util.Time;
 import com.randude14.register.economy.*;
 
-public class Lottery implements TimeConstants, Runnable {
+public class Lottery implements Runnable {
 	private static final String FORMAT_REWARD = "<reward>";
 	private static final String FORMAT_TIME = "<time>";
 	private static final String FORMAT_NAME = "<name>";
@@ -87,7 +87,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	public double getPot() {
-		if(!Config.getBoolean(Config.DEFAULT_USE_POT))
+		if(!options.getBoolean(Config.DEFAULT_USE_POT))
 			return 0;
 		return options.getDouble(Config.DEFAULT_POT);
 	}
@@ -134,19 +134,19 @@ public class Lottery implements TimeConstants, Runnable {
 					char c = Character.toLowerCase(timeStr.charAt(len-1));
 					switch(c) {
 					case 'w':
-						time = WEEK * time;
+						time = Time.WEEK.multi(time);
 						timeMess += ChatUtils.getRawName("lottery.time.weeks");
 					    break;
 					case 'd':
-						time = DAY * time;
+						time = Time.DAY.multi(time);
 						timeMess += ChatUtils.getRawName("lottery.time.days");
 					    break;
 					case 'h':
-						time = HOUR * time;
+						time = Time.HOUR.multi(time);
 						timeMess += ChatUtils.getRawName("lottery.time.hours");
 					    break;
 					case 'm':
-						time = MINUTE * time;
+						time = Time.MINUTE.multi(time);
 						timeMess += ChatUtils.getRawName("lottery.time.minutes");
 					    break;
 					default:
@@ -226,7 +226,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 
 	private String formatReward() {
-		if (Config.getBoolean(Config.DEFAULT_USE_POT))
+		if (options.getBoolean(Config.DEFAULT_USE_POT))
 			return econ.format(options.getDouble(Config.DEFAULT_POT));
 		int num = 0;
 		for (int cntr = 0; cntr < rewards.size(); cntr++) {
@@ -237,7 +237,7 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 
 	public synchronized boolean addToPot(CommandSender sender, double add) {
-		if (!Config.getBoolean(Config.DEFAULT_USE_POT)) {
+		if (!options.getBoolean(Config.DEFAULT_USE_POT)) {
 			ChatUtils.send(sender, "lottery.error.nopot", "<lottery>", lotteryName);
 			return false;
 		}
@@ -281,7 +281,7 @@ public class Lottery implements TimeConstants, Runnable {
 				signs.clear();
 				int cntr = 1;
 				while(options.contains("sign" + cntr)) {
-					String str = options.getString("sign" + cntr);
+					String str = options.remove("sign" + cntr).toString();
 					Location loc = Utils.parseToLocation(str);
 					if(loc != null) {
 						Block block = loc.getBlock();
@@ -300,6 +300,9 @@ public class Lottery implements TimeConstants, Runnable {
 				}
 			}
 
+			if(this.options != null) {
+				options.set("winner", this.options.getString("winner", ""));
+			}
 			this.options = options;
 			
 			// ECONOMY
@@ -346,6 +349,7 @@ public class Lottery implements TimeConstants, Runnable {
 			
 			// ALIASES
 			aliases = options.getStringList(Config.DEFAULT_ALIASES);
+			
 			cooldowns.clear();
 			if(options.contains("item-only")) {
 				options.set(Config.DEFAULT_USE_POT, !options.getBoolean("item-only"));
@@ -356,18 +360,19 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 
 	private void transfer(LotteryOptions oldOptions, LotteryOptions newOptions) {
-		if (oldOptions != null && !success) {
-			if (!oldOptions.getBoolean(Config.DEFAULT_CLEAR_POT)) {
-				double pot = newOptions.getDouble(Config.DEFAULT_POT);
-				newOptions.set(Config.DEFAULT_POT,
-						pot + oldOptions.getDouble(Config.DEFAULT_POT));
-			}
-			if (oldOptions.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
-				rewards.clear();
-			}
-			if(oldOptions.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
-				for(String player : getPlayers()) {
-					newOptions.set("players." + player, oldOptions.getInt("players." + player, 0));
+		if (oldOptions != null) {
+			if(!success) {
+				if (!oldOptions.getBoolean(Config.DEFAULT_CLEAR_POT)) {
+					double pot = newOptions.getDouble(Config.DEFAULT_POT);
+					newOptions.set(Config.DEFAULT_POT, pot + oldOptions.getDouble(Config.DEFAULT_POT));
+				}
+				if (oldOptions.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
+					rewards.clear();
+				}
+				if(oldOptions.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
+					for(String player : getPlayers()) {
+						newOptions.set("players." + player, oldOptions.getInt("players." + player, 0));
+					}
 				}
 			}
 		} else{
@@ -465,6 +470,10 @@ public class Lottery implements TimeConstants, Runnable {
 	public void onVote(String player) {
 		int reward = options.getInt(Config.DEFAULT_VOTIFIER_REWARD);
 		if(reward > 0) {
+			String prevWinner = options.getString("winner", "");
+			if(prevWinner.equalsIgnoreCase(player) && !options.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+				return;
+			}
 			int ticketLimit = options.getInt(Config.DEFAULT_TICKET_LIMIT);
 			int num = getTicketsBought(player);
 			if (ticketLimit > 0) {
@@ -482,8 +491,13 @@ public class Lottery implements TimeConstants, Runnable {
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
-		if(!Config.getBoolean(Config.DEFAULT_BUY_TICKETS)) {
+		if(!options.getBoolean(Config.DEFAULT_BUY_TICKETS)) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.disabled", "<lottery>", lotteryName);
+			return false;
+		}
+		String prevWinner = options.getString("winner", "");
+		if(prevWinner.equalsIgnoreCase(player.getName()) && !options.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+			ChatUtils.send(player, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
 		}
 		if(!checkAccess(player)) {
@@ -557,7 +571,7 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 		addTickets(name, tickets);
 		ChatUtils.sendRaw(player, "lottery.tickets.mess", "<tickets>", tickets, "<lottery>", lotteryName);
-		if (Config.getBoolean(Config.DEFAULT_USE_POT)) {
+		if (options.getBoolean(Config.DEFAULT_USE_POT)) {
 			ChatUtils.sendRaw(player, "lottery.pot.mess", "<money>", econ.format(d), "<lottery>", lotteryName);
 			options.set(Config.DEFAULT_POT,
 					options.getDouble(Config.DEFAULT_POT) + d);
@@ -579,6 +593,11 @@ public class Lottery implements TimeConstants, Runnable {
 
 	public synchronized boolean rewardPlayer(CommandSender rewarder, String player, int tickets) {
 		int ticketLimit = options.getInt(Config.DEFAULT_TICKET_LIMIT);
+		String prevWinner = options.getString("winner", "");
+		if(prevWinner.equalsIgnoreCase(player) && !options.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+			ChatUtils.send(rewarder, "lottery.error.already-won.reward", "<lottery>", lotteryName, "<player>", player);
+			return false;
+		}
 		int num = getTicketsBought(player);
 		if (ticketLimit > 0) {
 			int players = getPlayers().size();
@@ -625,7 +644,7 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 		ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
 		ChatUtils.sendRaw(sender, "lottery.info.drawing", "<is_drawing>", isDrawing());
-		if (Config.getBoolean(Config.DEFAULT_USE_POT)) {
+		if (options.getBoolean(Config.DEFAULT_USE_POT)) {
 			ChatUtils.sendRaw(sender, "lottery.info.pot", "<pot>", econ.format(options.getDouble(Config.DEFAULT_POT)));
 		}
 		for (Reward reward : rewards) {
@@ -712,7 +731,7 @@ public class Lottery implements TimeConstants, Runnable {
 			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		long delay = Config.getLong(Config.DRAW_DELAY);
-		drawId = LotteryPlus.scheduleAsyncDelayedTask(this, delay * SERVER_SECOND);
+		drawId = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
 		timer.setRunning(false);
 		options.set("drawing", true);
 		updateSigns();
@@ -764,7 +783,7 @@ public class Lottery implements TimeConstants, Runnable {
 			broadcast("lottery.drawing.winner.mess", "<winner>", winner);
 			
 			// add pot reward
-			if (Config.getBoolean(Config.DEFAULT_USE_POT)) {
+			if (options.getBoolean(Config.DEFAULT_USE_POT)) {
 				double pot = options.getDouble(Config.DEFAULT_POT);
 				double potTax = options.getDouble(Config.DEFAULT_POT_TAX);
 				double winnings = pot - (pot * (potTax / 100));
@@ -808,8 +827,7 @@ public class Lottery implements TimeConstants, Runnable {
 		}
 	}
 
-	private static String pickRandomPlayer(Random rand, List<String> players,
-			int ticketLimit) {
+	private static String pickRandomPlayer(Random rand, List<String> players, int ticketLimit) {
 		Collections.shuffle(players, rand);
 		if (ticketLimit <= 0) {
 			return players.get(rand.nextInt(players.size()));
@@ -845,48 +863,25 @@ public class Lottery implements TimeConstants, Runnable {
 
 	private void resetData() {
 		timer.reset(options);
-		options.set(
-				Config.DEFAULT_TICKET_COST,
-				options.getDouble(Config.DEFAULT_TICKET_COST)
-						+ options
-								.getDouble(Config.DEFAULT_RESET_ADD_TICKET_COST));
-		options.set(Config.DEFAULT_POT, options.getDouble(Config.DEFAULT_POT)
-				+ options.getDouble(Config.DEFAULT_RESET_ADD_POT));
-		options.set(
-				Config.DEFAULT_COOLDOWN,
-				options.getLong(Config.DEFAULT_COOLDOWN)
-						+ options.getLong(Config.DEFAULT_RESET_ADD_COOLDOWN));
-		options.set(
-				Config.DEFAULT_WARMUP,
-				options.getLong(Config.DEFAULT_WARMUP)
-						+ options.getLong(Config.DEFAULT_RESET_ADD_WARMUP));
-		options.set(
-				Config.DEFAULT_MAX_TICKETS,
-				options.getInt(Config.DEFAULT_MAX_TICKETS)
-						+ options.getInt(Config.DEFAULT_RESET_ADD_MAX_TICKETS));
-		options.set(
-				Config.DEFAULT_MAX_PLAYERS,
-				options.getInt(Config.DEFAULT_MAX_PLAYERS)
-						+ options.getInt(Config.DEFAULT_RESET_ADD_MAX_PLAYERS));
-		options.set(
-				Config.DEFAULT_MIN_PLAYERS,
-				options.getInt(Config.DEFAULT_MIN_PLAYERS)
-						+ options.getInt(Config.DEFAULT_RESET_ADD_MIN_PLAYERS));
-		options.set(
-				Config.DEFAULT_TICKET_TAX,
-				options.getDouble(Config.DEFAULT_TICKET_TAX)
-						+ options
-								.getDouble(Config.DEFAULT_RESET_ADD_TICKET_TAX));
-		options.set(
-				Config.DEFAULT_POT_TAX,
-				options.getDouble(Config.DEFAULT_POT_TAX)
-						+ options.getDouble(Config.DEFAULT_RESET_ADD_POT_TAX));
+		options.set(Config.DEFAULT_TICKET_COST, options.getDouble(Config.DEFAULT_TICKET_COST) + options.getDouble(Config.DEFAULT_RESET_ADD_TICKET_COST));
+		options.set(Config.DEFAULT_POT, options.getDouble(Config.DEFAULT_POT) + options.getDouble(Config.DEFAULT_RESET_ADD_POT));
+		options.set(Config.DEFAULT_COOLDOWN, options.getLong(Config.DEFAULT_COOLDOWN) + options.getLong(Config.DEFAULT_RESET_ADD_COOLDOWN));
+		options.set(Config.DEFAULT_WARMUP, options.getLong(Config.DEFAULT_WARMUP) + options.getLong(Config.DEFAULT_RESET_ADD_WARMUP));
+		options.set(Config.DEFAULT_MAX_TICKETS, options.getInt(Config.DEFAULT_MAX_TICKETS) + options.getInt(Config.DEFAULT_RESET_ADD_MAX_TICKETS));
+		options.set(Config.DEFAULT_MAX_PLAYERS, options.getInt(Config.DEFAULT_MAX_PLAYERS) + options.getInt(Config.DEFAULT_RESET_ADD_MAX_PLAYERS));
+		options.set(Config.DEFAULT_MIN_PLAYERS, options.getInt(Config.DEFAULT_MIN_PLAYERS) + options.getInt(Config.DEFAULT_RESET_ADD_MIN_PLAYERS));
+		options.set(Config.DEFAULT_TICKET_TAX, options.getDouble(Config.DEFAULT_TICKET_TAX) + options.getDouble(Config.DEFAULT_RESET_ADD_TICKET_TAX));
+		options.set(Config.DEFAULT_POT_TAX, options.getDouble(Config.DEFAULT_POT_TAX) + options.getDouble(Config.DEFAULT_RESET_ADD_POT_TAX));
 		String read = options.getString(Config.DEFAULT_RESET_ADD_ITEM_REWARDS);
 		if(read != null && !read.isEmpty()) {
 			for(ItemStack item : Utils.getItemStacks(read)) {
 				rewards.add(new ItemReward(item));
 			}
 		}
+	}
+	
+	public boolean equals(Lottery other) {
+		return other.getName().equalsIgnoreCase(lotteryName);
 	}
 
 	public int hashCode() {

@@ -105,13 +105,13 @@ defaults:
     # time between drawings, x hours
     time: 48
 
-    # max tickets a player can buy, set to negative for infinite limit
+    # max tickets a player can buy, set to negative for 0 limit
     max-tickets: -1
 
     # min players needed in order to draw the lottery
     min-players: 2
 
-    # max players that is allows in the lottery, set to negative for infinite limit
+    # max players that is allows in the lottery, set to negative for 0 limit
     max-players: 10
 
     # time taken from the lottery when a player buys a ticket, x seconds
@@ -149,6 +149,9 @@ defaults:
     
     # whether players should allowed to buy tickets
     buy-tickets: true
+    
+    # whether a player can win a lottery twice in a row
+    win-again: true
 
     # item rewards that are added to the lottery
     # defined examples: '35:3*64' - stack of light blue wool
