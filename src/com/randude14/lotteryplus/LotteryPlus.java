@@ -100,8 +100,6 @@ public class LotteryPlus extends JavaPlugin {
 	
 	public void onDisable() {
 		Logger.info("logger.disabled");
-		mainFrame.setVisible(false);
-		mainFrame.dispose();
 		getServer().getScheduler().cancelTasks(this);
 		LotteryManager.saveLotteries();
 		WinnersLogger.close();
@@ -203,17 +201,6 @@ public class LotteryPlus extends JavaPlugin {
 		}
 	}
 	
-	public static void openGui() {
-		mainFrame.setVisible(true);
-		mainFrame.requestFocus();
-	}
-	
-	public static void openGui(String lotteryName) {
-		mainFrame.openCreator(lotteryName);
-		mainFrame.setVisible(true);
-		mainFrame.requestFocus();
-	}
-	
 	public static boolean isThereNewUpdate(String currentVersion) {
 		String latestVersion = currentVersion;
 		try {
@@ -270,6 +257,17 @@ public class LotteryPlus extends JavaPlugin {
 		} else {
 			ChatUtils.send(sender, "plugin.error.no-update");
 		}
+	}
+	
+	public static void openGui() {
+		mainFrame.setVisible(true);
+		mainFrame.requestFocus();
+	}
+	
+	public static void openGui(String lotteryName) {
+		mainFrame.openCreator(lotteryName);
+		mainFrame.setVisible(true);
+		mainFrame.requestFocus();
 	}
 	
 	public static int scheduleAsyncRepeatingTask(Runnable runnable,

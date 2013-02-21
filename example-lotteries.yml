@@ -34,6 +34,34 @@ lotteries:
     ticket-cost: 10
     pot: 1000
     aliases: tl
+  # creates a lottery that only allows players
+  # that are in the world 'MainWorld'
+  WorldLottery:
+    worlds: MainWorld
+    pot-tax: 10
+    time: 1
+    min-players: 2
+    max-tickets: -1
+    max-players: 10
+    ticket-tax: 0
+    ticket-cost: 10
+    pot: 1000
+    aliases: wl
+  # creates a lottery that continues to run,
+  # until all tickets are sold
+  TicketLottery:
+    worlds: MainWorld
+    pot-tax: 10
+    time: 2
+    min-players: 2
+    max-tickets: -1
+    max-players: 15
+    ticket-tax: 0
+    ticket-cost: 10
+    ticket-limit: 100
+    use-timer: false
+    pot: 1000
+    aliases: wl
   # creates a lottery that instead of having a pot, it has items
   # as rewards instead
   ItemLottery:
@@ -41,7 +69,7 @@ lotteries:
     time: 1
     min-players: 1
     item-rewards: 392*64 145
-    max-tickets: '-1'
+    max-tickets: -1
     reset-add-item-rewards: 264*64
     max-players: 10
     ticket-tax: 0
