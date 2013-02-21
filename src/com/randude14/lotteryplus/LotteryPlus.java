@@ -55,7 +55,6 @@ public class LotteryPlus extends JavaPlugin {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		mainFrame = new MainFrame();
 		tasks.add(new ReminderMessageTask());
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
@@ -260,21 +259,19 @@ public class LotteryPlus extends JavaPlugin {
 	}
 	
 	public static void openGui() {
+		if(mainFrame == null) 
+			mainFrame = new MainFrame();
 		mainFrame.setVisible(true);
 		mainFrame.requestFocus();
 	}
 	
 	public static void openGui(String lotteryName) {
+		openGui();
 		mainFrame.openCreator(lotteryName);
-		mainFrame.setVisible(true);
-		mainFrame.requestFocus();
 	}
 	
-	public static int scheduleAsyncRepeatingTask(Runnable runnable,
-			long initialDelay, long reatingDelay) {
-		return instance
-				.getServer()
-				.getScheduler().runTaskTimerAsynchronously(instance, runnable, initialDelay, reatingDelay).getTaskId();
+	public static int scheduleAsyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
+		return instance.getServer().getScheduler().runTaskTimerAsynchronously(instance, runnable, initialDelay, reatingDelay).getTaskId();
 	}
 
 	public static int scheduleAsyncDelayedTask(Runnable runnable, long delay) {

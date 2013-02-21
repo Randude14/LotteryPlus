@@ -1,5 +1,7 @@
  package com.randude14.register.economy;
 
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -36,12 +38,16 @@ public class MaterialEconomy extends Economy {
 		}
 	}
 
-	public void deposit(String player, double d) {
+	public double deposit(String player, double d) {
 		int amount = (int)Math.floor(d);
 		Player p = Bukkit.getPlayer(player);
 		if(p != null) {
-			p.getInventory().addItem(new EconomyItemStack(material, amount));
+			Collection<ItemStack> col = p.getInventory().addItem(new EconomyItemStack(material, amount)).values();
+			amount = 0;
+			for(ItemStack stack : col)
+				amount += stack.getAmount();
 		}
+		return 0;
 	}
 
 	public void withdraw(String player, double d) {

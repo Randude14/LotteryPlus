@@ -19,8 +19,9 @@ public class VaultEconomy extends Economy {
 		return econ.has(player, amount);
 	}
 
-	public void deposit(String player, double amount) {
+	public double deposit(String player, double amount) {
 		econ.depositPlayer(player, amount);
+		return 0;
 	}
 
 	public void withdraw(String player, double amount) {

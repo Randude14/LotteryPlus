@@ -13,11 +13,11 @@ public abstract class Economy {
 	
 	public abstract boolean hasEnough(String player, double amount);
 	
-	public void desposit(Player player, double amount) {
-		deposit(player.getName(), amount);
+	public double desposit(Player player, double amount) {
+		return deposit(player.getName(), amount);
 	}
 	
-	public abstract void deposit(String player, double amount);
+	public abstract double deposit(String player, double amount);
 	
 	public void withdraw(Player player, double amount) {
 		withdraw(player.getName(), amount);
