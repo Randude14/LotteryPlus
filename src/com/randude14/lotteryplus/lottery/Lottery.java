@@ -50,7 +50,7 @@ public class Lottery implements Runnable {
 	private List<String> towny;
 	private final String lotteryName;
 	private final Random rand;
-	private LotteryOptions options;
+	private LotteryProperties options;
 	private Timer timer;
 	private Economy econ;
 	private boolean success;
@@ -260,11 +260,11 @@ public class Lottery implements Runnable {
 		return true;
 	}
 
-	public void setOptions(CommandSender sender, LotteryOptions options) throws InvalidLotteryException {
+	public void setOptions(CommandSender sender, LotteryProperties options) throws InvalidLotteryException {
 		setOptions(sender, options, false);
 	}
 
-	public void setOptions(CommandSender sender, LotteryOptions options, boolean force) throws InvalidLotteryException {
+	public void setOptions(CommandSender sender, LotteryProperties options, boolean force) throws InvalidLotteryException {
 		try {
 			// CHECK FOR NEGATIVE OPTIONS
 			double time = options.getDouble(Config.DEFAULT_TIME);
@@ -359,7 +359,7 @@ public class Lottery implements Runnable {
 		}
 	}
 
-	private void transfer(LotteryOptions oldOptions, LotteryOptions newOptions) {
+	private void transfer(LotteryProperties oldOptions, LotteryProperties newOptions) {
 		if (oldOptions != null) {
 			if(!success) {
 				if (!oldOptions.getBoolean(Config.DEFAULT_CLEAR_POT)) {
@@ -657,7 +657,6 @@ public class Lottery implements Runnable {
 		ChatUtils.sendRaw(sender, "lottery.info.tickets.left", "<number>", formatTicketsLeft());
 		if (sender instanceof Player)
 			ChatUtils.sendRaw(sender, "lottery.info.tickets.bought", "<number>", getTicketsBought(sender.getName()));
-		ChatUtils.sendRaw(sender, "lottery.info.aliases", "<aliases>", aliases);
 	}
 
 	private String formatTicketsLeft() {

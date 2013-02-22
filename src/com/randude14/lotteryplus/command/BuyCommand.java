@@ -56,7 +56,7 @@ public class BuyCommand implements Command {
 			return false;
 		}
 		if(lottery.buyTickets(player, tickets)) {
-			lottery.broadcast("lottery.mess.buy", "<player>", player, "<tickets>", tickets, "<lottery>", lottery.getName());
+			lottery.broadcast("lottery.mess.buy", "<player>", player.getName(), "<tickets>", tickets, "<lottery>", lottery.getName());
 			if(lottery.isOver()) {
 				lottery.draw();
 			}

@@ -71,7 +71,7 @@ public class ClaimManager {
 			}
 			saveClaims();
 		} else {
-			ChatUtils.send(player, "lottery.claim.none");
+			ChatUtils.send(player, "lottery.error.claim.none");
 		}
 	}
 	

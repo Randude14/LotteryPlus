@@ -106,7 +106,7 @@ public class LotteryPlus extends JavaPlugin {
 	}
 
 	private void saveExtras() {
-		CustomYaml enchants = new CustomYaml("enchantments.yml", false);
+		CustomYaml enchants = new CustomYaml("enchantments.yml");
 		FileConfiguration enchantsConfig = enchants.getConfig();
 		for (Enchantment enchant : Enchantment.values()) {
 			enchantsConfig.set(
@@ -115,13 +115,13 @@ public class LotteryPlus extends JavaPlugin {
 							enchant.getMaxLevel()));
 		}
 		enchants.saveConfig();
-		CustomYaml items = new CustomYaml("items.yml", false);
+		CustomYaml items = new CustomYaml("items.yml");
 		FileConfiguration itemsConfig = items.getConfig();
 		for (Material mat : Material.values()) {
 			itemsConfig.set("items." + mat.name(), mat.getId());
 		}
 		items.saveConfig();
-		CustomYaml colors = new CustomYaml("colors.yml", false);
+		CustomYaml colors = new CustomYaml("colors.yml");
 		FileConfiguration colorsConfig = colors.getConfig();
 		for (ChatColor color : ChatColor.values()) {
 			colorsConfig.set("colors." + color.name(),

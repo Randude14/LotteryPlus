@@ -11,10 +11,10 @@ import com.google.common.collect.ImmutableMap;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Property;
 
-public class LotteryOptions {
+public class LotteryProperties {
 	private final Map<String, Object> options = new HashMap<String, Object>();
 	
-	public LotteryOptions(Map<String, Object> map) {
+	public LotteryProperties(Map<String, Object> map) {
 		this.options.putAll(map);
 	}
 	

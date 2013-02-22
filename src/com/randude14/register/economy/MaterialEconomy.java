@@ -47,7 +47,7 @@ public class MaterialEconomy extends Economy {
 			for(ItemStack stack : col)
 				amount += stack.getAmount();
 		}
-		return 0;
+		return amount;
 	}
 
 	public void withdraw(String player, double d) {

@@ -20,7 +20,7 @@ import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
-import com.randude14.lotteryplus.lottery.LotteryOptions;
+import com.randude14.lotteryplus.lottery.LotteryProperties;
 
 @SuppressWarnings("rawtypes")
 public class LotteryManager {
@@ -39,7 +39,8 @@ public class LotteryManager {
 	}
 
 	public static boolean createLotterySection(CommandSender sender, String lotteryName) {
-		if (lotteries.containsKey(lotteryName.toLowerCase())) {
+		Lottery lottery = LotteryManager.getLottery(lotteryName);
+		if (lottery != null) {
 			ChatUtils.send(sender, "lottery.error.exists", "<lottery>", lotteryName);
 			return false;
 		}
@@ -50,8 +51,7 @@ public class LotteryManager {
 				return false;
 			}
 		}
-		ConfigurationSection section = lotteriesSection
-				.createSection(lotteryName);
+		ConfigurationSection section = lotteriesSection.createSection(lotteryName);
 		writeDefaults(section);
 		lotteriesConfig.saveConfig();
 		ChatUtils.send(sender, "lottery.section.created", "<lottery>", lotteryName);
@@ -90,7 +90,6 @@ public class LotteryManager {
 			ChatUtils.send(sender, "lottery.error.exists", "<lottery>", l.getName());
 			return false;
 		}
-		lotteriesConfig.reloadConfig();
 		ConfigurationSection section = getOrCreateLotteriesSection();
 		for (String sectionName : section.getKeys(false)) {
 			if (sectionName.equalsIgnoreCase(find)) {
@@ -99,7 +98,7 @@ public class LotteryManager {
 				Lottery lottery = new Lottery(sectionName);
 				Map<String, Object> values = lotteriesSection.getValues(true);
 				try {
-					lottery.setOptions(sender, new LotteryOptions(values));
+					lottery.setOptions(sender, new LotteryProperties(values));
 				} catch (Exception ex) {
 					Logger.info("lottery.exception.lottery.load", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -208,26 +207,29 @@ public class LotteryManager {
 			ChatUtils.send(sender, "lottery.error.drawing", "<lottery>", lottery.getName());
 			return false;
 		}
-		lotteriesConfig.reloadConfig();
-		ConfigurationSection section = getOrCreateLotteriesSection();
-		for (String sectionName : section.getKeys(false)) {
+		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection();
+		for (String sectionName : lotteriesSection.getKeys(false)) {
 			if (sectionName.equalsIgnoreCase(lottery.getName())) {
-				ConfigurationSection lotteriesSection = section
-						.getConfigurationSection(sectionName);
-				Map<String, Object> values = lotteriesSection.getValues(true);
+				ConfigurationSection lotterySection = lotteriesSection.getConfigurationSection(sectionName);
+				Map<String, Object> values = lotterySection.getValues(true);
 				try {
-					lottery.setOptions(sender, new LotteryOptions(values), force);
+					lottery.setOptions(sender, new LotteryProperties(values), force);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
-					lotteries.remove(lotteryName.toLowerCase());
+					lotteries.remove(lottery.getName().toLowerCase());
 					return false;
+				}
+				ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
+				if (savesSection != null) {
+					deleteSection(savesSection, lottery.getName());
 				}
 				ChatUtils.send(sender, "lottery.reload", "<lottery>", lottery.getName());
 				return true;
 			}
 		}
-		return true;
+		ChatUtils.send(sender, "lottery.error.section.notfound", "<lottery>", lottery.getName());
+		return false;
 	}
 
 	public static void reloadLotteries(CommandSender sender) {
@@ -247,7 +249,6 @@ public class LotteryManager {
 		if (!lotteriesConfig.exists()) {
 			lotteriesConfig.saveDefaultConfig();
 		}
-		lotteriesConfig.reloadConfig();
 		ConfigurationSection section = getOrCreateLotteriesSection();
 		ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
 		int numLotteries = 0;
@@ -263,7 +264,7 @@ public class LotteryManager {
 			Lottery lottery = new Lottery(lotteryName);
 			Map<String, Object> values = lotteriesSection.getValues(true);
 			try {
-				lottery.setOptions(sender, new LotteryOptions(values));
+				lottery.setOptions(sender, new LotteryProperties(values));
 			} catch (InvalidLotteryException ex) {
 				Logger.info("lottery.exception.lottery.load", "<lottery>", lotteryName);
 				ex.printStackTrace();
@@ -276,8 +277,7 @@ public class LotteryManager {
 	}
 
 	public static void saveLotteries() {
-		lotteriesConfig.reloadConfig(); // doesn't erase current options in place for future reloads
-		ConfigurationSection savesSection = lotteriesConfig.getConfig().createSection("saves");
+		ConfigurationSection savesSection = lotteriesConfig.getConfig(true).createSection("saves");
 		for (Lottery lottery : lotteries.values()) {
 			savesSection.createSection(lottery.getName(), lottery.save());
 		}
@@ -287,7 +287,7 @@ public class LotteryManager {
 	public static void saveLottery(String lotteryName) {
 		Lottery lottery = getLottery(lotteryName);
 		if(lottery != null) {
-			ConfigurationSection section = lotteriesConfig.getConfig();
+			ConfigurationSection section = lotteriesConfig.getConfig(true);
 			ConfigurationSection savesSection = section.getConfigurationSection("saves");
 			if(savesSection == null) savesSection = lotteriesConfig.getConfig().createSection("saves");
 			savesSection.createSection(lottery.getName(), lottery.save());
@@ -312,7 +312,9 @@ public class LotteryManager {
 			page = 1;
 		ChatUtils.sendRaw(sender, "lottery.list.headliner", "<page>", page, "<max>", max);
 		for (int cntr = (page * 10) - 10, stop = cntr + 10; cntr < stop && cntr < len; cntr++) {
-			ChatUtils.sendRaw(sender, "lottery.list.token", "<number>", cntr + 1, "<lottery>", list.get(cntr).getName());
+			Lottery lottery = list.get(cntr);
+			List<String> aliases = lottery.getAliases();
+			ChatUtils.sendRaw(sender, "lottery.list.token", "<number>", cntr + 1, "<lottery>", lottery.getName(), "<aliases>", aliases.isEmpty() ? "[none]" : aliases);
 		}
 	}
 
@@ -337,7 +339,7 @@ public class LotteryManager {
 	}
 
 	private static ConfigurationSection getOrCreateLotteriesSection() {
-		FileConfiguration config = lotteriesConfig.getConfig();
+		FileConfiguration config = lotteriesConfig.getConfig(true);
 		ConfigurationSection lotteriesSection = config.getConfigurationSection("lotteries");
 		return (lotteriesSection != null) ? lotteriesSection : config.createSection("lotteries");
 	}

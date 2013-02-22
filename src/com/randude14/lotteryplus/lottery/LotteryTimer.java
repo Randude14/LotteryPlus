@@ -11,7 +11,7 @@ public class LotteryTimer implements Timer {
 	protected LotteryTimer() {
 	}
 	
-	public void load(LotteryOptions options) {
+	public void load(LotteryProperties options) {
 		long defaultTime = toTime(options.getDouble(Config.DEFAULT_TIME));
 		if (options.contains("save-time") && options.contains("reset-time")) {
 			this.time = options.getLong("save-time", defaultTime);
@@ -22,12 +22,12 @@ public class LotteryTimer implements Timer {
 		}
 	}
 	
-	public void save(LotteryOptions options) {
+	public void save(LotteryProperties options) {
 		options.set("save-time", time);
 		options.set("reset-time", reset);
 	}
 
-	public void reset(LotteryOptions options) {
+	public void reset(LotteryProperties options) {
 		long t = toTime(Config.getDouble(Config.DEFAULT_TIME));
 		this.reset = t + reset;
 		this.time = reset;

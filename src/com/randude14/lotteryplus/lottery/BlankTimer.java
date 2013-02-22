@@ -8,13 +8,13 @@ public class BlankTimer implements Timer {
 	protected BlankTimer() {
 	}
 
-	public void load(LotteryOptions options) {
+	public void load(LotteryProperties options) {
 	}
 
-	public void save(LotteryOptions options) {
+	public void save(LotteryProperties options) {
 	}
 
-	public void reset(LotteryOptions options) {
+	public void reset(LotteryProperties options) {
 	}
 
 	public void onTick() {

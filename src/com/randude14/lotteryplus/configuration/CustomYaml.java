@@ -11,28 +11,15 @@ import com.randude14.lotteryplus.LotteryPlus;
 
 public class CustomYaml {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
-	private final FileConfiguration config;
+	private FileConfiguration config;
 	private final File configFile;
 	
 	public CustomYaml(String file) {
-		this(file, true);
-	}
-	
-	public CustomYaml(String file, boolean load) {
 		configFile = new File(plugin.getDataFolder(), file);
-		config = new YamlConfiguration();
-		if(load)
-			this.reloadConfig();
 	}
 	
 	public void reloadConfig() {
-		try {
-			config.load(configFile);
-		} catch (FileNotFoundException ex) {
-		} catch (Exception ex) {
-			Logger.info("plugin.exception.config.load", "<file>", configFile.getName());
-			ex.printStackTrace();
-		}
+		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 	
 	public void saveConfig() {
@@ -46,6 +33,12 @@ public class CustomYaml {
 	}
 	
 	public FileConfiguration getConfig() {
+		return getConfig(false);
+	}
+	
+	public FileConfiguration getConfig(boolean reload) {
+		if(config == null || reload) 
+			reloadConfig();
 		return config;
 	}
 	
@@ -54,8 +47,7 @@ public class CustomYaml {
 	}
 	
 	public void saveDefaultConfig() {
-		if(exists())
-			return;
+		if(exists()) return;
 		plugin.saveResource(configFile.getName(), false);
 	}
 }
