@@ -88,7 +88,6 @@ public class LotteryPlus extends JavaPlugin {
 		    .registerCommand("update", new UpdateCommand())
 		    .registerCommand("guic", new GuiCreatorCommand());
 		this.getCommand("lottery").setExecutor(cm);
-		this.getCommand("l").setExecutor(cm);
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
 				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);

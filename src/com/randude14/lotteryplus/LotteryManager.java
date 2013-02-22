@@ -93,12 +93,11 @@ public class LotteryManager {
 		ConfigurationSection section = getOrCreateLotteriesSection();
 		for (String sectionName : section.getKeys(false)) {
 			if (sectionName.equalsIgnoreCase(find)) {
-				ConfigurationSection lotteriesSection = section
-						.getConfigurationSection(sectionName);
+				ConfigurationSection lotteriesSection = section.getConfigurationSection(sectionName);
 				Lottery lottery = new Lottery(sectionName);
 				Map<String, Object> values = lotteriesSection.getValues(true);
 				try {
-					lottery.setOptions(sender, new LotteryProperties(values));
+					lottery.setProperties(sender, new LotteryProperties(values));
 				} catch (Exception ex) {
 					Logger.info("lottery.exception.lottery.load", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -196,6 +195,10 @@ public class LotteryManager {
 	public static boolean reloadLottery(String lotteryName) {
 		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, true);
 	}
+	
+	public static boolean reloadLottery(String lotteryName, boolean force) {
+		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, force);
+	}
 
 	public static boolean reloadLottery(CommandSender sender, String lotteryName, boolean force) {
 		Lottery lottery = LotteryManager.getLottery(lotteryName);
@@ -213,7 +216,7 @@ public class LotteryManager {
 				ConfigurationSection lotterySection = lotteriesSection.getConfigurationSection(sectionName);
 				Map<String, Object> values = lotterySection.getValues(true);
 				try {
-					lottery.setOptions(sender, new LotteryProperties(values), force);
+					lottery.setProperties(sender, new LotteryProperties(values), force);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -264,7 +267,7 @@ public class LotteryManager {
 			Lottery lottery = new Lottery(lotteryName);
 			Map<String, Object> values = lotteriesSection.getValues(true);
 			try {
-				lottery.setOptions(sender, new LotteryProperties(values));
+				lottery.setProperties(sender, new LotteryProperties(values));
 			} catch (InvalidLotteryException ex) {
 				Logger.info("lottery.exception.lottery.load", "<lottery>", lotteryName);
 				ex.printStackTrace();
