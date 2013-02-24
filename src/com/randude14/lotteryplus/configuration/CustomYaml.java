@@ -23,6 +23,7 @@ public class CustomYaml {
 	}
 	
 	public void saveConfig() {
+		if(config == null) return;
 		try {
 			config.save(configFile);
 		} catch (FileNotFoundException ex) {

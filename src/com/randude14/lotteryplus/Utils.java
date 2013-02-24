@@ -38,11 +38,23 @@ public class Utils {
 	
 	public static Location parseToLocation(String str) {
 		String[] lines = str.split("\\s");
-		World world = Bukkit.getWorld(lines[0]);
+		String worldName = "";
+		System.out.println(lines.length);
+		for(int cntr = 0;cntr < lines.length-3;cntr++) {
+			if(lines[cntr].equals("")) {
+				worldName += " ";
+			} else {
+				worldName += lines[cntr];
+			}
+			if(cntr != lines.length-4)
+				worldName += " ";
+		}
+		System.out.println(worldName);
+		World world = Bukkit.getWorld(worldName);
 		if(world == null) return null;
-		int x = Integer.parseInt(lines[1]);
-		int y = Integer.parseInt(lines[2]);
-		int z = Integer.parseInt(lines[3]);
+		int x = Integer.parseInt(lines[lines.length-3]);
+		int y = Integer.parseInt(lines[lines.length-2]);
+		int z = Integer.parseInt(lines[lines.length-1]);
 		return new Location(world, x, y, z);
 	}
 	

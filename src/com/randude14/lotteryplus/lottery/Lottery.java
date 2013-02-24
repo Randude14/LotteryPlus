@@ -25,6 +25,7 @@ import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.PluginSupport;
+import com.randude14.lotteryplus.Stats;
 import com.randude14.lotteryplus.Utils;
 import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
@@ -355,7 +356,7 @@ public class Lottery implements Runnable {
 				properties.set(Config.DEFAULT_USE_POT, !properties.getBoolean("item-only"));
 			}
 		} catch (Exception ex) {
-			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.properties.load", "<lottery>", lotteryName), ex);
+			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.lottery.load", "<lottery>", lotteryName), ex);
 		}
 	}
 
@@ -592,6 +593,7 @@ public class Lottery implements Runnable {
 			}
 		}
 		updateSigns();
+		Stats.inc(Stats.Stat.MONEY_SPENT, (int) Math.round(total));
 		LotteryManager.saveLottery(lotteryName);
 		return true;
 	}

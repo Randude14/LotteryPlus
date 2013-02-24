@@ -1,6 +1,7 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.gui.MainFrame;
 import com.randude14.lotteryplus.listeners.*;
+import com.randude14.lotteryplus.metrics.Metrics;
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
 
@@ -36,6 +38,7 @@ public class LotteryPlus extends JavaPlugin {
 	private static LotteryPlus instance = null;
 	private static final List<Task> tasks = new ArrayList<Task>();
 	private static MainFrame mainFrame;
+	private static Metrics metrics;
 	private File configFile;
 
 	public void onEnable() {
@@ -93,6 +96,11 @@ public class LotteryPlus extends JavaPlugin {
 				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
 			}
 		}, 0L);
+		try {
+			metrics = createMetrics();
+			metrics.start();
+		} catch (IOException ex) {
+		}
 		Logger.info("logger.enabled");
 	}
 	
@@ -127,6 +135,35 @@ public class LotteryPlus extends JavaPlugin {
 					Character.toString(color.getChar()));
 		}
 		colors.saveConfig();
+	}
+	
+	private Metrics createMetrics() throws IOException {
+		Metrics metrics = new Metrics(this);
+		Metrics.Graph data = metrics.createGraph("Data");
+		
+		// plot for players currently entered in lotteries
+		data.addPlotter(new Metrics.Plotter("Players Entered") {
+			public int getValue() {
+				return LotteryManager.getPlayersParticipating();
+			}
+		});
+		
+		// plot for total amount of money spent
+		data.addPlotter(new Metrics.Plotter("Money Spent") {
+			public int getValue() {
+				return Stats.reset(Stats.Stat.MONEY_SPENT);
+			}
+		});
+		
+		// plot for total amount of lotteries
+		data.addPlotter(new Metrics.Plotter("Total Lotteries") {
+			public int getValue() {
+				return LotteryManager.getLotteries().size();
+			}
+		});
+		
+		// TODO dependencies
+		return metrics;
 	}
 	
 	private static void callTasks() {
@@ -190,13 +227,14 @@ public class LotteryPlus extends JavaPlugin {
 		return true;
 	}
 
-	public static boolean hasPermission(CommandSender sender, Perm perm) {
+	public static boolean hasPermission(CommandSender sender, Perm perm) {/*
 		if(perm.hasPermission(sender)) {
 			return true;
 		} else {
 			Perm parent = perm.getParent();
 			return parent != null ? hasPermission(sender, parent) : false;
-		}
+		}*/
+		return true;
 	}
 	
 	public static boolean isThereNewUpdate(String currentVersion) {
@@ -305,6 +343,10 @@ public class LotteryPlus extends JavaPlugin {
 
 	public static boolean isSign(Location loc) {
 		return isSign(loc.getBlock());
+	}
+	
+	public static Metrics getMetrics() {
+		return metrics;
 	}
 	
 	public static final LotteryPlus getInstance() {

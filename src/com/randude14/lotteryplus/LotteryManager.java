@@ -346,6 +346,13 @@ public class LotteryManager {
 		ConfigurationSection lotteriesSection = config.getConfigurationSection("lotteries");
 		return (lotteriesSection != null) ? lotteriesSection : config.createSection("lotteries");
 	}
+	
+	public static int getPlayersParticipating() {
+		int part = 0;
+		for(Lottery lottery : lotteries.values()) 
+			part += lottery.getPlayersEntered();
+		return part;
+	}
 
 	static class TimerTask implements Runnable {
 
