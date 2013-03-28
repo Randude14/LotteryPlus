@@ -26,6 +26,10 @@ public class LotteryProperties {
 		return options.remove(key);
 	}
 	
+	public Object get(String key) {
+		return options.get(key);
+	}
+	
 	public long getLong(Property<Long> property) {
 		return getLong(property.getName(), Config.getLong(property));
 	}

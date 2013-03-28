@@ -2,11 +2,11 @@ package com.randude14.lotteryplus.lottery;
 
 public interface Timer {
 	
-	void load(LotteryProperties options);
+	void load(LotteryProperties properties);
 	
-	void save(LotteryProperties options);
+	void save(LotteryProperties properties);
 	
-	void reset(LotteryProperties options);
+	void reset(LotteryProperties properties);
 	
 	void onTick();
 	

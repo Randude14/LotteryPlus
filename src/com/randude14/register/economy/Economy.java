@@ -1,11 +1,12 @@
 package com.randude14.register.economy;
 
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.configuration.Config;
 
-public abstract class Economy {
+public abstract class Economy implements ConfigurationSerializable {
 	
 	public boolean hasEnough(Player player, double amount) {
 		return hasEnough(player.getName(), amount);
@@ -33,9 +34,8 @@ public abstract class Economy {
 	
 	public abstract boolean hasAccount(String player);
 	
-	public abstract int getMaterialID();
-	
-	public static Economy valueOf(int materialID) {
-		return (materialID < 0) ? new VaultEconomy() : new MaterialEconomy(materialID, Config.getString(Config.DEFAULT_MATERIAL_NAME));
+	@Deprecated
+	public static Economy getEconomy(int materialID) {
+		return (materialID < 0) ? new VaultEconomy() : new MaterialEconomy(""+materialID, Config.getString(Config.DEFAULT_MATERIAL_NAME));
 	}
 }

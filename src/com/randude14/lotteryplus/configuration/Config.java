@@ -77,6 +77,7 @@ public class Config {
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "").setDescription("config.description.worlds");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "").setDescription("config.description.towny");
 	public static final Property<String> DEFAULT_ALIASES = new Property<String>("defaults.aliases", "").setDescription("config.description.aliases");
+	public static final Property<String> DEFAULT_MATERIAL_ID = new Property<String>("defaults.material-id", Material.GOLD_INGOT.getId() + "").setDescription("config.description.material-id");
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true).setDescription("config.description.repeat");
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false).setDescription("config.description.clear-pot");
 	public static final Property<Boolean> DEFAULT_CLEAR_REWARDS = new Property<Boolean>("defaults.clear-rewards", false).setDescription("config.description.clear-rewards");
@@ -100,7 +101,6 @@ public class Config {
 	public static final Property<Integer> DEFAULT_MIN_PLAYERS = new Property<Integer>("defaults.min-players", 2).setDescription("config.description.min-players");
 	public static final Property<Integer> DEFAULT_MAX_PLAYERS = new Property<Integer>("defaults.max-players", 10).setDescription("config.description.max-players");
 	public static final Property<Integer> DEFAULT_TICKET_LIMIT = new Property<Integer>("defaults.ticket-limit", 0).setDescription("config.description.ticket-limit");
-	public static final Property<Integer> DEFAULT_MATERIAL_ID = new Property<Integer>("defaults.material-id", Material.GOLD_INGOT.getId()).setDescription("config.description.material-id");
 	public static final Property<Integer> DEFAULT_RESET_ADD_MAX_TICKETS = new Property<Integer>("defaults.reset-add-max-tickets", 0).setDescription("config.description.reset-add-max-tickets");
 	public static final Property<Integer> DEFAULT_RESET_ADD_MIN_PLAYERS = new Property<Integer>("defaults.reset-add-min-players", 0).setDescription("config.description.reset-add-min-players");
 	public static final Property<Integer> DEFAULT_RESET_ADD_MAX_PLAYERS = new Property<Integer>("defaults.reset-add-max-players", 0).setDescription("config.description.reset-add-max-players");

@@ -18,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,9 +31,14 @@ import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.gui.MainFrame;
 import com.randude14.lotteryplus.listeners.*;
+import com.randude14.lotteryplus.lottery.LotteryClaim;
+import com.randude14.lotteryplus.lottery.reward.ItemReward;
+import com.randude14.lotteryplus.lottery.reward.PotReward;
 import com.randude14.lotteryplus.metrics.Metrics;
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
+import com.randude14.register.economy.MaterialEconomy;
+import com.randude14.register.economy.VaultEconomy;
 
 public class LotteryPlus extends JavaPlugin {
 	private static LotteryPlus instance = null;
@@ -61,6 +67,7 @@ public class LotteryPlus extends JavaPlugin {
 		tasks.add(new ReminderMessageTask());
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
+		registerConfigurationClasses();
 		ClaimManager.loadClaims();
 		WinnersManager.loadWinners();
 		Perm.loadPermissions();
@@ -97,7 +104,7 @@ public class LotteryPlus extends JavaPlugin {
 			}
 		}, 0L);
 		try {
-			metrics = createMetrics();
+			metrics = new Metrics(this);
 			metrics.start();
 		} catch (IOException ex) {
 		}
@@ -137,33 +144,12 @@ public class LotteryPlus extends JavaPlugin {
 		colors.saveConfig();
 	}
 	
-	private Metrics createMetrics() throws IOException {
-		Metrics metrics = new Metrics(this);
-		Metrics.Graph data = metrics.createGraph("Data");
-		
-		// plot for players currently entered in lotteries
-		data.addPlotter(new Metrics.Plotter("Players Entered") {
-			public int getValue() {
-				return LotteryManager.getPlayersParticipating();
-			}
-		});
-		
-		// plot for total amount of money spent
-		data.addPlotter(new Metrics.Plotter("Money Spent") {
-			public int getValue() {
-				return Stats.reset(Stats.Stat.MONEY_SPENT);
-			}
-		});
-		
-		// plot for total amount of lotteries
-		data.addPlotter(new Metrics.Plotter("Total Lotteries") {
-			public int getValue() {
-				return LotteryManager.getLotteries().size();
-			}
-		});
-		
-		// TODO dependencies
-		return metrics;
+	private void registerConfigurationClasses() {
+		ConfigurationSerialization.registerClass(LotteryClaim.class);
+		ConfigurationSerialization.registerClass(ItemReward.class);
+		ConfigurationSerialization.registerClass(PotReward.class);
+		ConfigurationSerialization.registerClass(MaterialEconomy.class);
+		ConfigurationSerialization.registerClass(VaultEconomy.class);
 	}
 	
 	private static void callTasks() {
@@ -227,14 +213,13 @@ public class LotteryPlus extends JavaPlugin {
 		return true;
 	}
 
-	public static boolean hasPermission(CommandSender sender, Perm perm) {/*
+	public static boolean hasPermission(CommandSender sender, Perm perm) {
 		if(perm.hasPermission(sender)) {
 			return true;
 		} else {
 			Perm parent = perm.getParent();
 			return parent != null ? hasPermission(sender, parent) : false;
-		}*/
-		return true;
+		}
 	}
 	
 	public static boolean isThereNewUpdate(String currentVersion) {

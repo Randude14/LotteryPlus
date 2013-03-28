@@ -19,11 +19,6 @@ public class PotReward implements Reward {
 		this.pot = pot;
 	}
 	
-	public PotReward(final int materialID, final double pot) {
-		this.econ = Economy.valueOf(materialID);
-		this.pot = pot;
-	}
-	
 	public boolean rewardPlayer(Player player, String lottery) {
 		try {
 			double left = econ.deposit(player.getName(), pot);
@@ -41,16 +36,23 @@ public class PotReward implements Reward {
 		return ChatUtils.getRawName("lottery.reward.pot.info", "<pot>", econ.format(pot));
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static PotReward deserialize(Map<String, Object> map) {
-		double pot = (Double) map.get("pot");
-		int materialID = (map.containsKey("material-id")) ? (Integer) map.get("material-id") : -1;
-		return new PotReward(materialID, pot);
+		double pot = ((Number) map.get("pot")).doubleValue();
+		Economy econ = null;
+		if(map.containsKey("material-id")) {
+			int materialID = (map.containsKey("material-id")) ? (Integer) map.get("material-id") : -1;
+			econ = Economy.getEconomy(materialID);
+		} else {
+			econ = (Economy) map.get("econ");
+		}
+		return new PotReward(econ, pot);
 	}
 
 	public Map<String, Object> serialize() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("pot", pot);
-		map.put("material-id", econ.getMaterialID());
+		map.put("econ", econ);
 		return map;
 	}
 }

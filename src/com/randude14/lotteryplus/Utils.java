@@ -39,7 +39,6 @@ public class Utils {
 	public static Location parseToLocation(String str) {
 		String[] lines = str.split("\\s");
 		String worldName = "";
-		System.out.println(lines.length);
 		for(int cntr = 0;cntr < lines.length-3;cntr++) {
 			if(lines[cntr].equals("")) {
 				worldName += " ";
@@ -49,7 +48,6 @@ public class Utils {
 			if(cntr != lines.length-4)
 				worldName += " ";
 		}
-		System.out.println(worldName);
 		World world = Bukkit.getWorld(worldName);
 		if(world == null) return null;
 		int x = Integer.parseInt(lines[lines.length-3]);

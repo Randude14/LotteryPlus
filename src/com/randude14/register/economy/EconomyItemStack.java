@@ -5,10 +5,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class EconomyItemStack extends ItemStack {
 	
-	public EconomyItemStack(Material material, int amount) {
-		super(material, amount);
+	protected EconomyItemStack(Material material, int amount, short damage) {
+		super(material, amount, damage);
 	}
 	
+	@Override
     public boolean isSimilar(ItemStack stack) {
         if (stack == null) {
             return false;

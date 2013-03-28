@@ -1,10 +1,14 @@
 package com.randude14.register.economy;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.serialization.SerializableAs;
 
 import com.randude14.lotteryplus.ChatUtils;
 
-
+@SerializableAs("VaultEconomy")
 public class VaultEconomy extends Economy {
 	private final net.milkbowl.vault.economy.Economy econ;
 	
@@ -36,7 +40,11 @@ public class VaultEconomy extends Economy {
 		return econ.hasAccount(player);
 	}
 	
-	public int getMaterialID() {
-		return -1;
+	public Map<String, Object> serialize() {
+		return Collections.emptyMap();
+	}
+	
+	public static VaultEconomy deserialize(Map<String, Object> map) {
+		return new VaultEconomy();
 	}
 }

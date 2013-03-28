@@ -25,7 +25,6 @@ import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.PluginSupport;
-import com.randude14.lotteryplus.Stats;
 import com.randude14.lotteryplus.Utils;
 import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
@@ -307,15 +306,19 @@ public class Lottery implements Runnable {
 			this.properties = properties;
 			
 			// ECONOMY
-			econ = null;
-			if(properties.getBoolean(Config.DEFAULT_USE_VAULT)) {
-				if(PluginSupport.VAULT.isInstalled()) {
-					econ = new VaultEconomy();
-				}
+			if(properties.contains("econ")) {
+				econ = (Economy) properties.get("econ");
 			} else {
-				int materialID = properties.getInt(Config.DEFAULT_MATERIAL_ID);
-				String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
-				econ = new MaterialEconomy(materialID, name);
+				econ = null;
+				if(properties.getBoolean(Config.DEFAULT_USE_VAULT)) {
+					if(PluginSupport.VAULT.isInstalled()) {
+						econ = new VaultEconomy();
+					}
+				} else {
+					String materialID = properties.getString(Config.DEFAULT_MATERIAL_ID);
+					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
+					econ = new MaterialEconomy(materialID, name);
+				}
 			}
 			
 			if(econ == null) {
@@ -354,6 +357,7 @@ public class Lottery implements Runnable {
 			cooldowns.clear();
 			if(properties.contains("item-only")) {
 				properties.set(Config.DEFAULT_USE_POT, !properties.getBoolean("item-only"));
+				properties.remove("item-only");
 			}
 		} catch (Exception ex) {
 			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.lottery.load", "<lottery>", lotteryName), ex);
@@ -420,6 +424,7 @@ public class Lottery implements Runnable {
 	public Map<String, Object> save() {
 		timer.save(properties);
 		properties.remove("drawing");
+		properties.set("econ", econ);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.putAll(properties.getValues());
 		int cntr = 1;
@@ -593,7 +598,6 @@ public class Lottery implements Runnable {
 			}
 		}
 		updateSigns();
-		Stats.inc(Stats.Stat.MONEY_SPENT, (int) Math.round(total));
 		LotteryManager.saveLottery(lotteryName);
 		return true;
 	}

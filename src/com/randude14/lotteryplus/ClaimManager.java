@@ -7,14 +7,11 @@ import java.util.Map;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
-import com.randude14.lotteryplus.lottery.reward.ItemReward;
-import com.randude14.lotteryplus.lottery.reward.PotReward;
 import com.randude14.lotteryplus.lottery.reward.Reward;
 
 public class ClaimManager {
@@ -86,9 +83,6 @@ public class ClaimManager {
 	private static final CustomYaml claimsConfig;
 	
 	static {
-		ConfigurationSerialization.registerClass(LotteryClaim.class);
-		ConfigurationSerialization.registerClass(ItemReward.class);
-		ConfigurationSerialization.registerClass(PotReward.class);
 		claimsConfig = new CustomYaml("claims.yml");
 	}
 }

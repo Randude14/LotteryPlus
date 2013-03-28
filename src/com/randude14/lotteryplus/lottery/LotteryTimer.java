@@ -11,25 +11,25 @@ public class LotteryTimer implements Timer {
 	protected LotteryTimer() {
 	}
 	
-	public void load(LotteryProperties options) {
-		long defaultTime = toTime(options.getDouble(Config.DEFAULT_TIME));
-		if (options.contains("save-time") && options.contains("reset-time")) {
-			this.time = options.getLong("save-time", defaultTime);
-			this.reset = options.getLong("reset-time", defaultTime);
+	public void load(LotteryProperties properties) {
+		long defaultTime = toTime(properties.getDouble(Config.DEFAULT_TIME));
+		if (properties.contains("save-time") && properties.contains("reset-time")) {
+			this.time = properties.getLong("save-time", defaultTime);
+			this.reset = properties.getLong("reset-time", defaultTime);
 		} else {
 			long t = defaultTime;
 			this.time = this.reset = t;
 		}
 	}
 	
-	public void save(LotteryProperties options) {
-		options.set("save-time", time);
-		options.set("reset-time", reset);
+	public void save(LotteryProperties properties) {
+		properties.set("save-time", time);
+		properties.set("reset-time", reset);
 	}
 
-	public void reset(LotteryProperties options) {
-		long t = toTime(Config.getDouble(Config.DEFAULT_TIME));
-		this.reset = t + reset;
+	public void reset(LotteryProperties properties) {
+		long t = toTime(properties.getDouble(Config.DEFAULT_RESET_ADD_TIME));
+		this.reset += t;
 		this.time = reset;
 	}
 	

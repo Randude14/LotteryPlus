@@ -37,9 +37,9 @@ public enum Perm {
 		this.permission = value;
 	}
 	
-	private Perm(Permission value, Perm... childrenArray) {
+	private Perm(Permission value, Perm... children) {
 		this(value);
-		for(Perm child : childrenArray) {
+		for(Perm child : children) {
 			child.setParent(this);
 		}
 	}
@@ -60,12 +60,12 @@ public enum Perm {
 	
 	public boolean hasPermission(CommandSender sender) {
 		if(sender instanceof ConsoleCommandSender) return true;
-		return sender.hasPermission(permission);
+		return sender.hasPermission(permission.getName());
 	}
 	
 	public static void loadPermissions() {
 		for(Perm perm : Perm.values()) {
-			Bukkit.getPluginManager().addPermission(perm.permission);
+			Bukkit.getPluginManager().addPermission(perm.getPermission());
 		}
 	}
 	
