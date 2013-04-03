@@ -1,12 +1,13 @@
 package com.randude14.lotteryplus.tasks;
 
+import org.bukkit.scheduler.BukkitTask;
+
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.util.Time;
 
-public class UpdateCheckTask implements Task {
+public class UpdateCheckTask extends Task {
 	private static final String currentVersion = LotteryPlus.getVersion();
-	private int updateId;
 	
 	public void run() {
 		if(LotteryPlus.isThereNewUpdate(currentVersion)) {
@@ -14,11 +15,12 @@ public class UpdateCheckTask implements Task {
 		}
 	}
 	
-	public void scheduleTask() {
-		LotteryPlus.cancelTask(updateId);
-		updateId = -1;
-		if(!Config.getBoolean(Config.UPDATE_CHECK_ENABLE)) return;
+	public BukkitTask scheduleTask() {
 		long delay = Config.getLong(Config.UPDATE_DELAY) * Time.MINUTE.getBukkitTime();
-		updateId = LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
+		return LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
+	}
+
+	protected boolean shouldScheduleTask() {
+		return Config.getBoolean(Config.UPDATE_CHECK_ENABLE);
 	}
 }

@@ -22,6 +22,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -154,7 +155,7 @@ public class LotteryPlus extends JavaPlugin {
 	
 	private static void callTasks() {
 		for(Task task : tasks) {
-			task.scheduleTask();
+			task.reschedule();
 		}
 	}
 
@@ -292,26 +293,20 @@ public class LotteryPlus extends JavaPlugin {
 		mainFrame.openCreator(lotteryName);
 	}
 	
-	public static int scheduleAsyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
-		return instance.getServer().getScheduler().runTaskTimerAsynchronously(instance, runnable, initialDelay, reatingDelay).getTaskId();
+	public static BukkitTask scheduleAsyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
+		return instance.getServer().getScheduler().runTaskTimerAsynchronously(instance, runnable, initialDelay, reatingDelay);
 	}
 
-	public static int scheduleAsyncDelayedTask(Runnable runnable, long delay) {
-		return instance.getServer().getScheduler().runTaskLaterAsynchronously(instance, runnable, delay).getTaskId();
+	public static BukkitTask scheduleAsyncDelayedTask(Runnable runnable, long delay) {
+		return instance.getServer().getScheduler().runTaskLaterAsynchronously(instance, runnable, delay);
 	}
 
-	public static int scheduleSyncRepeatingTask(Runnable runnable,
-			long initialDelay, long reatingDelay) {
-		return instance
-				.getServer()
-				.getScheduler()
-				.scheduleSyncRepeatingTask(instance, runnable, initialDelay,
-						reatingDelay);
+	public static BukkitTask scheduleSyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
+		return instance.getServer().getScheduler().runTaskTimer(instance, runnable, initialDelay, reatingDelay);
 	}
 
-	public static int scheduleSyncDelayedTask(Runnable runnable, long delay) {
-		return instance.getServer().getScheduler()
-				.scheduleSyncDelayedTask(instance, runnable, delay);
+	public static BukkitTask scheduleSyncDelayedTask(Runnable runnable, long delay) {
+		return instance.getServer().getScheduler().runTaskLater(instance, runnable, delay);
 	}
 	
 	public static void cancelTask(int taskId) {

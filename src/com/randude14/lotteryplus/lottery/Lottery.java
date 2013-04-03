@@ -18,6 +18,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.ClaimManager;
@@ -51,10 +52,10 @@ public class Lottery implements Runnable {
 	private final String lotteryName;
 	private final Random rand;
 	private LotteryProperties properties;
+	private BukkitTask drawTask;
 	private Timer timer;
 	private Economy econ;
 	private boolean success;
-	private int drawId;
 
 	public Lottery(String name) {
 		this.cooldowns = Collections.synchronizedMap(new HashMap<String, Long>());
@@ -741,14 +742,15 @@ public class Lottery implements Runnable {
 			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		long delay = Config.getLong(Config.DRAW_DELAY);
-		drawId = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
+		drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
 		timer.setRunning(false);
 		properties.set("drawing", true);
 		updateSigns();
 	}
 
 	public synchronized void cancelDrawing() {
-		LotteryPlus.cancelTask(drawId);
+		if(drawTask == null) return;
+		drawTask.cancel();
 	}
 
 	private void clearPlayers() {
@@ -767,7 +769,7 @@ public class Lottery implements Runnable {
 			synchronized(cooldowns) {
 				cooldowns.clear();
 			}
-			drawId = -1;
+			drawTask = null;
 			List<String> players = getPlayers();
 			int entered = getPlayersEntered();
 			

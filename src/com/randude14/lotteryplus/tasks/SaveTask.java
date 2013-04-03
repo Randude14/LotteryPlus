@@ -1,13 +1,14 @@
 package com.randude14.lotteryplus.tasks;
 
+import org.bukkit.scheduler.BukkitTask;
+
 import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.util.Time;
 
-public class SaveTask implements Task {
-	private int updateId = -1;
+public class SaveTask extends Task {
 
 	public void run() {
 		boolean flag = Config.getBoolean(Config.SHOULD_LOG);
@@ -18,11 +19,12 @@ public class SaveTask implements Task {
 			Logger.info("logger.lottery.save.force");
 	}
 
-	public void scheduleTask() {
-		LotteryPlus.cancelTask(updateId);
-		updateId = -1;
-		if(!Config.getBoolean(Config.FORCE_SAVE_ENABLE)) return;
+	public BukkitTask scheduleTask() {
 		long delay = Config.getLong(Config.SAVE_DELAY) * Time.MINUTE.getBukkitTime();
-		updateId = LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
+		return LotteryPlus.scheduleSyncRepeatingTask(this, delay, delay);
+	}
+
+	protected boolean shouldScheduleTask() {
+		return Config.getBoolean(Config.FORCE_SAVE_ENABLE);
 	}
 }
