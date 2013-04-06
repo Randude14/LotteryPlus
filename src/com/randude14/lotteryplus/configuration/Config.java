@@ -34,27 +34,6 @@ public class Config {
 	public static final Property<String> SIGN_TAG = new Property<String>("properties.sign-tag", "&a[Lottery+]");
 	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
 	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
-	public static final Property[] configProperties = {SAVE_DELAY,
-		                        UPDATE_DELAY,
-		                        REMINDER_MESSAGE_TIME,
-		                        DRAW_DELAY,
-		                        BUY_DELAY,
-		                        FORCE_SAVE_ENABLE,
-		                        UPDATE_CHECK_ENABLE,
-		                        REMINDER_MESSAGE_ENABLE,
-		                        DROP_REWARD,
-		                        SHOULD_DROP,
-		                        BUY_ENABLE,
-		                        OPEN_INVENTORY,
-		                        SHOULD_LOG,
-		                        BUY_DURING_DRAW,
-		                        MAIN_LOTTERIES,
-		                        MONEY_FORMAT,
-		                        LINE_SEPARATOR,
-		                        CHAT_PREFIX,
-		                        SIGN_TAG,
-		                        MAIN_LOTTERY,
-		                        DEFAULT_FILTER};
 	
 	//SIGN FORMATS
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
@@ -151,7 +130,6 @@ public class Config {
 		                        DEFAULT_RESET_ADD_WARMUP};
 	
 	static {
-		Arrays.sort(Config.configProperties);
 		Arrays.sort(Config.lotteryDefaults);
 	}
 	

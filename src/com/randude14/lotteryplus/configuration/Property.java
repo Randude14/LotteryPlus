@@ -1,11 +1,9 @@
 package com.randude14.lotteryplus.configuration;
 
 import com.randude14.lotteryplus.ChatUtils;
-import com.randude14.lotteryplus.LotteryPlus;
 
 @SuppressWarnings("rawtypes")
 public class Property<T> implements Comparable<Property> {
-	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private final String path;
 	private final String name;
 	private String description;
@@ -39,14 +37,6 @@ public class Property<T> implements Comparable<Property> {
 	
 	public T getDefaultValue() {
 		return value;
-	}
-	
-	public Object getConfigValue() {
-		return plugin.getConfig().get(path);
-	}
-	
-	public void setConfigValue(Object value) {
-		plugin.getConfig().set(path, value);
 	}
 	
 	public int compareTo(Property prop) {
