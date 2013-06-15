@@ -46,7 +46,7 @@ public class LotteryPlus extends JavaPlugin {
 	private static final Command BUY_COMMAND = new BuyCommand();
 	private static final Command DRAW_COMMAND = new DrawCommand();
 	private static final Command INFO_COMMAND = new InfoCommand();
-	private static final Command CLAIM_COMMAND = new DrawCommand();
+	private static final Command CLAIM_COMMAND = new ClaimCommand();
 	private static final Command CREATE_COMMAND = new CreateCommand();
 	private static final Command RELOAD_COMMAND = new ReloadCommand();
 	private static final Command RELOAD_ALL_COMMAND = new ReloadAllCommand();
