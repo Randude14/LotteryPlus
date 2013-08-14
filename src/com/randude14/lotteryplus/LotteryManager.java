@@ -101,14 +101,14 @@ public class LotteryManager {
 				} catch (Exception ex) {
 					Logger.info("lottery.exception.lottery.load", "<lottery>", lottery.getName());
 					ex.printStackTrace();
-					continue;
+					return false;
 				}
 				ChatUtils.send(sender, "lottery.section.loaded", "<lottery>", lottery.getName());
 				lotteries.put(sectionName.toLowerCase(), lottery);
 				return true;
 			}
 		}
-		ChatUtils.send(sender, "lottery.notfound", "<lottery>", find);
+		ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", find);
 		return false;
 	}
 

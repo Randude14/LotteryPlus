@@ -43,24 +43,6 @@ import com.randude14.register.economy.VaultEconomy;
 
 public class LotteryPlus extends JavaPlugin {
 	private static LotteryPlus instance = null;
-	private static final Command BUY_COMMAND = new BuyCommand();
-	private static final Command DRAW_COMMAND = new DrawCommand();
-	private static final Command INFO_COMMAND = new InfoCommand();
-	private static final Command CLAIM_COMMAND = new DrawCommand();
-	private static final Command CREATE_COMMAND = new CreateCommand();
-	private static final Command RELOAD_COMMAND = new ReloadCommand();
-	private static final Command RELOAD_ALL_COMMAND = new ReloadAllCommand();
-	private static final Command LOAD_COMMAND = new LoadCommand();
-	private static final Command LIST_COMMAND = new ListCommand();
-	private static final Command UNLOAD_COMMAND = new UnloadCommand();
-	private static final Command ATP_COMMAND = new AddToPotCommand();
-	private static final Command WINNERS_COMMAND = new WinnersCommand();
-	private static final Command REWARD_COMMAND = new RewardCommand();
-	private static final Command SAVE_COMMAND = new SaveCommand();
-	private static final Command CONFIG_COMMAND = new ConfigCommand();
-	private static final Command VERSION_COMMAND = new VersionCommand();
-	private static final Command UPDATE_COMMAND = new UpdateCommand();
-	private static final Command GUI_CREATOR_COMMAND = new GuiCreatorCommand();
 	private static final List<Task> tasks = new ArrayList<Task>();
 	private static MainFrame mainFrame;
 	private static Metrics metrics;
@@ -95,26 +77,27 @@ public class LotteryPlus extends JavaPlugin {
 		callTasks();
 		saveExtras();
 		registerListeners();
+		Command atp = new AddToPotCommand();
 		CommandManager cm = new CommandManager()
-		    .registerCommand("buy", BUY_COMMAND)
-		    .registerCommand("draw", DRAW_COMMAND)
-		    .registerCommand("info", INFO_COMMAND)
-		    .registerCommand("claim", CLAIM_COMMAND)
-		    .registerCommand("create", CREATE_COMMAND)
-		    .registerCommand("reload", RELOAD_COMMAND)
-		    .registerCommand("reloadall", RELOAD_ALL_COMMAND)
-		    .registerCommand("load", LOAD_COMMAND)
-		    .registerCommand("list", LIST_COMMAND)
-		    .registerCommand("unload", UNLOAD_COMMAND)
-		    .registerCommand("addtopot", ATP_COMMAND)
-		    .registerCommand("atp", ATP_COMMAND)
-		    .registerCommand("winners", WINNERS_COMMAND)
-		    .registerCommand("reward", REWARD_COMMAND)
-		    .registerCommand("save", SAVE_COMMAND)
-		    .registerCommand("config", CONFIG_COMMAND)
-		    .registerCommand("version", VERSION_COMMAND)
-		    .registerCommand("update", UPDATE_COMMAND)
-		    .registerCommand("guic", GUI_CREATOR_COMMAND);
+		    .registerCommand("buy", new BuyCommand())
+		    .registerCommand("draw", new DrawCommand())
+		    .registerCommand("info", new InfoCommand())
+		    .registerCommand("claim", new ClaimCommand())
+		    .registerCommand("create", new CreateCommand())
+		    .registerCommand("reload", new ReloadCommand())
+		    .registerCommand("reloadall", new ReloadAllCommand())
+		    .registerCommand("load", new LoadCommand())
+		    .registerCommand("list", new ListCommand())
+		    .registerCommand("unload", new UnloadCommand())
+		    .registerCommand("addtopot", atp)
+		    .registerCommand("atp", atp)
+		    .registerCommand("winners", new WinnersCommand())
+		    .registerCommand("reward", new RewardCommand())
+		    .registerCommand("save", new SaveCommand())
+		    .registerCommand("config", new ConfigCommand())
+		    .registerCommand("version", new VersionCommand())
+		    .registerCommand("update", new UpdateCommand())
+		    .registerCommand("guic", new GuiCreatorCommand());
 		this.getCommand("lottery").setExecutor(cm);
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {

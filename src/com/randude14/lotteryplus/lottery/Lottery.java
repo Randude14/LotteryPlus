@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -287,6 +288,9 @@ public class Lottery implements Runnable {
 					if(loc != null) {
 						Block block = loc.getBlock();
 						if(LotteryPlus.isSign(block)) {
+							Material mat = block.getType();
+							block.setType(Material.AIR);
+							block.setType(mat);
 							Sign sign = (Sign) block.getState();
 							signs.add(sign);
 						} else {
@@ -679,7 +683,7 @@ public class Lottery implements Runnable {
 		return (left > 0) ? "" + left : "none";
 	}
 
-	public int getPlayersEntered() {
+	private int getPlayersEntered() {
 		Set<String> players = new HashSet<String>();
 		for (String key : properties.keySet()) {
 			if (key.startsWith("players.")) {
@@ -694,7 +698,7 @@ public class Lottery implements Runnable {
 		return players.size();
 	}
 
-	public List<String> getPlayers() {
+	private List<String> getPlayers() {
 		List<String> players = new ArrayList<String>();
 		for (String key : properties.keySet()) {
 			if (key.startsWith("players.")) {
@@ -709,18 +713,13 @@ public class Lottery implements Runnable {
 		return players;
 	}
 
-	public int getTicketsBought(String name) {
+	private int getTicketsBought(String name) {
 		return properties.getInt("players." + name, 0);
 	}
 	
-	public void addTickets(String name, int add) {
+	private void addTickets(String name, int add) {
 		int tickets = properties.getInt("players." + name, 0);
 		properties.set("players." + name, tickets + add);
-	}
-	
-	public void subTickets(String name, int remove) {
-		int tickets = properties.getInt("players." + name, 0);
-		properties.set("players." + name, tickets - remove);
 	}
 
 	public void draw() {

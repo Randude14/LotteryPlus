@@ -15,6 +15,10 @@ import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.Reward;
 
 public class ClaimManager {
+	
+	/*
+	 * Saves the claims
+	 */
 	private static void saveClaims() {
 		FileConfiguration config = claimsConfig.getConfig();
 		config.createSection("claims"); // clean config
@@ -27,6 +31,9 @@ public class ClaimManager {
 		claimsConfig.saveConfig();
 	}
 	
+	/*
+	 * Loads the claims
+	 */
 	public static void loadClaims() {
 		FileConfiguration config = claimsConfig.getConfig();
 		ConfigurationSection section = config.getConfigurationSection("claims");
@@ -39,7 +46,7 @@ public class ClaimManager {
 				continue;
 			for(String claimPath : playerSection.getKeys(false)) {
 				try {
-					playerClaims.add((LotteryClaim) playerSection.get(claimPath));
+					playerClaims.add(LotteryClaim.class.cast(playerSection.get(claimPath)));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -48,6 +55,11 @@ public class ClaimManager {
 		}
 	}
 
+	/*
+	 * @param name the name of the player for the claim to add
+	 * @param lottery the name of the lottery for the claim to add
+	 * @param rewards the list of rewards for the claim to add
+	 */
 	public static void addClaim(String name, String lottery, List<Reward> rewards) {
 		if (!claims.containsKey(name))
 			claims.put(name, new ArrayList<LotteryClaim>());
@@ -56,6 +68,9 @@ public class ClaimManager {
 		saveClaims();
 	}
 	
+	/*
+	 * @param player the @Player to rewards claims to if he/she has any
+	 */
 	public static void rewardClaims(Player player) {
 		List<LotteryClaim> playerClaims = claims.get(player.getName());
 		if(playerClaims != null && !playerClaims.isEmpty()) {
@@ -72,6 +87,9 @@ public class ClaimManager {
 		}
 	}
 	
+	/*
+	 * @param player the @Player to notify if he/she has any claims
+	 */
 	public static void notifyOfClaims(Player player) {
 		List<LotteryClaim> playerClaims = claims.get(player.getName());
 		if(playerClaims != null && !playerClaims.isEmpty()) {
@@ -79,7 +97,7 @@ public class ClaimManager {
 		}
 	} 
 
-	private static final Map<String, List<LotteryClaim>> claims = new HashMap<String, List<LotteryClaim>>();
+	private static final Map<String, List<LotteryClaim>> claims = new HashMap<String, List<LotteryClaim>>(); // keeps track of claims
 	private static final CustomYaml claimsConfig;
 	
 	static {

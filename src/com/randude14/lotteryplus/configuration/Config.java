@@ -8,11 +8,16 @@ import org.bukkit.Material;
 
 import com.randude14.lotteryplus.LotteryPlus;
 
+/*
+ * This class's methods are used for extracting info from the config
+ */
 @SuppressWarnings("rawtypes")
 public class Config {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	
-	//PROPERTIES
+	/*
+	 * These properties are used for basic plugin needs
+	 */
 	public static final Property<Long> SAVE_DELAY = new Property<Long>("properties.save-delay", 15L);
 	public static final Property<Long> UPDATE_DELAY = new Property<Long>("properties.update-delay", 60L);
 	public static final Property<Long> REMINDER_MESSAGE_TIME = new Property<Long>("properties.reminder-message-delay", 10L);
@@ -35,7 +40,9 @@ public class Config {
 	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
 	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
 	
-	//SIGN FORMATS
+	/*
+	 * These properties are used for the format on lottery signs
+	 */
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
 	public static final Property<String> UPDATE_SIGN_LINE_THREE = new Property<String>("sign-format.Update.line-3", "<time>");
 	public static final Property<String> UPDATE_SIGN_LINE_FOUR = new Property<String>("sign-format.Update.line-4", "<reward>");
@@ -46,7 +53,9 @@ public class Config {
 	public static final Property<String> OVER_SIGN_LINE_THREE = new Property<String>("sign-format.Over.line-3", "Over");
 	public static final Property<String> OVER_SIGN_LINE_FOUR = new Property<String>("sign-format.Over.line-4", "<winner>");
 	
-	//LOTTERY PROPERTIES
+	/*
+	 * These properties store the defaults for lotteries
+	 */
 	public static final Property<String> DEFAULT_SEED = new Property<String>("defaults.seed", "LotteryPlus").setDescription("config.description.seed");
 	public static final Property<String> DEFAULT_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "").setDescription("config.description.item-rewards");
 	public static final Property<String> DEFAULT_WARNING_TIMES = new Property<String>("defaults.warning-times", "").setDescription("config.description.warning-times");
@@ -88,6 +97,10 @@ public class Config {
 	public static final Property<Long> DEFAULT_RESET_ADD_COOLDOWN = new Property<Long>("defaults.reset-add-cooldown", 0L).setDescription("config.description.reset-add-cooldown");
 	public static final Property<Long> DEFAULT_WARMUP = new Property<Long>("defaults.warmup", 0L).setDescription("config.description.warmup");
 	public static final Property<Long> DEFAULT_RESET_ADD_WARMUP = new Property<Long>("defaults.reset-add-warmup", 0L).setDescription("config.description.reset-add-warmup");
+	/*
+	 * This array stores all the lottery defaults
+	 * @see com.randude14.lotteryplus.gui.LotteryCreator
+	 */
 	public static final Property[] lotteryDefaults = {DEFAULT_SEED, 
 		                        DEFAULT_ITEM_REWARDS, 
 		                        DEFAULT_WARNING_TIMES, 
@@ -130,29 +143,53 @@ public class Config {
 		                        DEFAULT_RESET_ADD_WARMUP};
 	
 	static {
-		Arrays.sort(Config.lotteryDefaults);
+		Arrays.sort(Config.lotteryDefaults); // sort the arrays
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the long that is stored in property
+	 */
 	public static long getLong(Property<Long> property) {
 		return plugin.getConfig().getLong(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the int that is stored in property
+	 */
 	public static int getInt(Property<Integer> property) {
 		return plugin.getConfig().getInt(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the double that is stored in property
+	 */
 	public static double getDouble(Property<Double> property) {
 		return plugin.getConfig().getDouble(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the boolean that is stored in property
+	 */
 	public static boolean getBoolean(Property<Boolean> property) {
 		return plugin.getConfig().getBoolean(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the @String that is stored in property
+	 */
 	public static String getString(Property<String> property) {
 		return plugin.getConfig().getString(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * @param property the @Property to extract from the config
+	 * @return the List<String> that is stored in property
+	 */
 	public static List<String> getStringList(Property<String> property) {
 		String value = getString(property);
 		if(value.equals("")) return Collections.emptyList();

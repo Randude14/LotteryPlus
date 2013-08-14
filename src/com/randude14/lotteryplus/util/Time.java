@@ -1,33 +1,60 @@
 package com.randude14.lotteryplus.util;
 
+/*
+ * Time constraints used in tasks and lottery timers
+ */
 public enum Time {
 	
+	/*
+	 * represents a minute
+	 */
 	MINUTE(60),
+	
+	/*
+	 * represents an hour
+	 */
 	HOUR(MINUTE, 60),
+	
+	/*
+	 * represents a day
+	 */
 	DAY(HOUR, 24),
+	
+	/*
+	 * represents a week
+	 */
 	WEEK(DAY, 7),
+	
+	/*
+	 * represents a second in server ticks
+	 */
 	SERVER_SECOND(20);
 	
 	private Time(long time) {
 		this.time = time;
 	}
 	
-	private Time(Time t, long time) {
-		this.time = t.getTime() * time;
+	private Time(Time time, long t) {
+		this.time = time.multi(t);
 	}
 
+	/*
+	 * @return time
+	 */
 	public long getTime() {
 		return time;
 	}
 	
+	/*
+	 * @return total time in server ticks
+	 */
 	public long getBukkitTime() {
-		return time * SERVER_SECOND.getTime();
+		return SERVER_SECOND.multi(time);
 	}
 	
-	public long multi(Time t) {
-		return t.getTime() * time;
-	}
-	
+	/*
+	 * @return t * time
+	 */
 	public long multi(long t) {
 		return t * time;
 	}
