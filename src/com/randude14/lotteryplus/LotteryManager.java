@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +25,7 @@ import com.randude14.lotteryplus.lottery.LotteryProperties;
 @SuppressWarnings("rawtypes")
 public class LotteryManager {
 	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml");
-	private static final Map<String, Lottery> lotteries = new LinkedHashMap<String, Lottery>();
+	private static final Map<String, Lottery> lotteries = new HashMap<String, Lottery>();
 	
 	public static void createLotterySection(CommandSender sender, String lotteryName, Map<String, Object> values) {
 		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection();
@@ -101,14 +101,14 @@ public class LotteryManager {
 				} catch (Exception ex) {
 					Logger.info("lottery.exception.lottery.load", "<lottery>", lottery.getName());
 					ex.printStackTrace();
-					return false;
+					continue;
 				}
 				ChatUtils.send(sender, "lottery.section.loaded", "<lottery>", lottery.getName());
 				lotteries.put(sectionName.toLowerCase(), lottery);
 				return true;
 			}
 		}
-		ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", find);
+		ChatUtils.send(sender, "lottery.notfound", "<lottery>", find);
 		return false;
 	}
 

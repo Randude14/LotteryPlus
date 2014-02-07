@@ -20,7 +20,7 @@ public class ReloadAllCommand implements Command {
 	}
 
 	public CommandAccess getAccess() {
-		return CommandAccess.BOTH;
+		return CommandAccess.CONSOLE;
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {

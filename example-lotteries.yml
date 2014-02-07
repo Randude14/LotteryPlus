@@ -68,9 +68,9 @@ lotteries:
     use-pot: false
     time: 1
     min-players: 1
-    item-rewards: 392*64 145
+    item-rewards: Potato item*64 145
     max-tickets: -1
-    reset-add-item-rewards: 264*64
+    reset-add-item-rewards: Diamond*64
     max-players: 10
     ticket-tax: 0
     ticket-cost: 10

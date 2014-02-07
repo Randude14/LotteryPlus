@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -96,14 +97,14 @@ public class Utils {
 					break;
 				}
 			}
-			int itemId = Integer.parseInt(line.substring(0, itemIndex));
+			Material material = Material.matchMaterial(line.substring(0, itemIndex));
 			if(sizeIndex >= 0) {
 				if(hyphonIndex >= 0)
 					stackSize = Integer.parseInt(line.substring(sizeIndex+1, hyphonIndex));
 				else
 					stackSize = Integer.parseInt(line.substring(sizeIndex+1));
 			}
-			ItemStack result = new ItemStack(itemId, stackSize, damage);
+			ItemStack result = new ItemStack(material, stackSize, damage);
 			String[] enchants = line.split("\\^");
 			if(enchants.length > 1) {
 				for(int cntr = 1;cntr < enchants.length;cntr++) {

@@ -90,7 +90,8 @@ public class PlayerListener implements Listener {
 						if (buyers.containsKey(player)) {
 							String lotteryName = buyers.remove(player);
 							if (lotteryName.equalsIgnoreCase(lottery.getName())) {
-								ChatUtils.sendRaw(player, "lottery.error.trans-cancelled");
+								ChatUtils.sendRaw(player,
+										"lottery.error.trans-cancelled");
 								ChatUtils.sendRaw(player, "plugin.headliner");
 								return;
 							}

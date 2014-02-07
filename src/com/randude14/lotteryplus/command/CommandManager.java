@@ -19,8 +19,10 @@ public class CommandManager implements CommandExecutor, Listable {
 
 	}
 
-	public CommandManager registerCommand(String label, Command command) {
-		commands.put(label.toLowerCase(), command);
+	public CommandManager registerCommand(Command command, String... labels) {
+		for(String label : labels) {
+			commands.put(label.toLowerCase(), command);
+		}
 		return this;
 	}
 

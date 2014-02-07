@@ -11,14 +11,8 @@ import org.bukkit.entity.Player;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Properties;
 
-/*
- * This classes methods are used for chat handling
- */
 public class ChatUtils {
 	
-	/*
-	 * @info Reload the messages from 'lang.properties'
-	 */
 	public static void reload() {
 		if(!defaultsLoaded) {
 			try {
@@ -28,7 +22,6 @@ public class ChatUtils {
 			}
 			defaultsLoaded = true;
 		}
-		// create file if it doesn't exist
 		if(!langFile.exists()) {
 			plugin.saveResource(langFile.getName(), false);
 		}
@@ -43,12 +36,6 @@ public class ChatUtils {
 		}
 	}
 	
-	/*
-	 * @info broadcasts a message to certain players and to the console
-	 * @param players the list of players to broadcast to
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void broadcast(List<Player> players, String code, Object... args) {
 		String[] messages = getMessages(code, args);
 		for (Player player : players) {
@@ -57,11 +44,6 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 	
-	/*
-	 * @info broadcasts a message to all players and to the console
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void broadcast(String code, Object... args) {
 		String[] messages = getMessages(code, args);
 		for (Player player : Bukkit.getOnlinePlayers()) {
@@ -70,12 +52,6 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 
-	/*
-	 * @info broadcasts a raw message to certain players and to the console
-	 * @param players the list of players to broadcast to
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void broadcastRaw(List<Player> players, String code, Object... args) {
 		String[] messages = getMessages(code, null, args);
 		for (Player player : players) {
@@ -84,11 +60,6 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 	
-	/*
-	 * @info broadcasts a message to all players and to the console
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void broadcastRaw(String code, Object... args) {
 		String[] messages = getMessages(code, null, args);
 		for (Player player : Bukkit.getOnlinePlayers()) {
@@ -97,88 +68,42 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 	
-	/*
-	 * @info sends a message to a @CommandSender
-	 * @param sender the @CommandSender to send the message to
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void send(CommandSender sender, String code, Object... args) {
 		sender.sendMessage(getMessages(code, getChatPrefix(), args));
 	}
 
-	/*
-	 * @info sends a raw message to a @CommandSender
-	 * @param sender the @CommandSender to send the message to
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in messages, see #getNameFor(String code, Object... args)
-	 */
 	public static void sendRaw(CommandSender sender, String code, Object... args) {
 		sender.sendMessage(getMessages(code, null, args));
 	}
 
-	/*
-	 * @param sender the @CommandSender to send the command help to, if he/she has permission
-	 * @param permission the @Perm to check
-	 * @param code the path to the command help message
-	 * @param cmd the @org.bukkit.command.Command that will be in the command help message
-	 * @return true if sender has permission and the message was sent, otherwise false
-	 */
 	public static boolean sendCommandHelp(CommandSender sender, Perm permission, String code, org.bukkit.command.Command cmd) {
 		if (!LotteryPlus.checkPermission(sender, permission))
 			return false;
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 		return true;
 	}
-	
-	/*
-	 * @info send a command help message
-	 * @param sender the @CommandSender to send the command help to, if he/she has permission
-	 * @param permission the @Perm to check
-	 * @param code the path to the command help message
-	 * @param cmd the @org.bukkit.command.Command that will be in the command help message
-	 */
 	public static void sendCommandHelp(CommandSender sender, String code, org.bukkit.command.Command cmd) {
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 	}
 
-	/*
-	 * @return the chat prefix that is used in sending messages
-	 */
 	public static final String getChatPrefix() {
 		return replaceColorCodes(Config.getString(Config.CHAT_PREFIX));
 	}
 
-	/*
-	 * @param mess the message to replace codes
-	 * @return the "color code" replaced message
-	 */
+	// replace color codes with the colors
 	public static final String replaceColorCodes(String mess) {
 		return mess.replaceAll(colorCodes, "\u00A7$2");
 	}
 	
-	/*
-	 * @param mess the message to wipe color codes off of
-	 * @return the "color code" free message, see #getNameFor(String code, Object... args)
-	 */
+	// get rid of color codes
 	public static final String cleanColorCodes(String mess) {
 		return mess.replaceAll(colorCodes, "");
 	}
 	
-	/*
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in message(s), see #getNameFor(String code, Object... args)
-	 * @info uses default chat prefix
-	 */
 	public static String[] getMessages(String code, Object... args) {
 		return getMessages(code, getChatPrefix(), args);
 	}
-
-	/*
-	 * @param code the path to the message
-	 * @param prefix the prefix used in the message(s)
-	 * @param args this is used to replace 'tags' in message(s), see #getNameFor(String code, Object... args)
-	 */
+	
 	public static String[] getMessages(String code, String prefix, Object... args) {
 		String mess = getNameFor(code, args);
 		String[] messages = mess.split(Config.getString(Config.LINE_SEPARATOR));
@@ -189,12 +114,7 @@ public class ChatUtils {
 		}
 		return messages;
 	}
-
-	/*
-	 * @param code the path to the message
-	 * @param args this is used to replace 'tags' in message
-	 *   '<player> bought a ticket' and you pass in ["<player>", "Randude14"] as the args, it would send 'Randude14 bought a ticket!'
-	 */
+	
 	public static String getNameFor(String code, Object... args) {
 		String mess = properties.getProperty(code);
 		if(mess == null) mess = code;

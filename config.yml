@@ -66,6 +66,9 @@ properties:
     main-lotteries: ''
     
     # the default filter used in '/lottery list <page>'
+    # name: sorts alphabetically by name 
+    # config: sorts based on the order they were in the config
+    # pot: sorts by how large the pots are
     default-filter: ''
     
 
@@ -119,9 +122,6 @@ defaults:
     
     # time added to the lottery timer when a player buys a ticket, x seconds
     warmup: 0
-
-    # seed used for the random generator
-    seed: 'LotteryPlus'
     
     # this account will receive all taxes from 'pot-tax' and "ticket-tax"
     tax-account: ''
@@ -154,13 +154,13 @@ defaults:
     win-again: true
 
     # item rewards that are added to the lottery
-    # defined examples: '35:3*64' - stack of light blue wool
-    # format -> 'materialID:meta_data*amount'
-    # more examples: '351:0 351*1 351:2*1'
+    # defined examples: 'Wool:3*64' - stack of light blue wool
+    # format -> 'material:meta_data*amount'
+    # more examples: 'Ink sack:0 Ink sack*1 Ink sack:2*1'
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:
-    # '278^DURABILITY:3' -> this creates a diamond pickaxe with a DURABILITY with a level of 3
+    # 'Diamond Pickaxe^DURABILITY:3' -> this creates a diamond pickaxe with a DURABILITY with a level of 3
     #
     item-rewards: ''
 
@@ -188,8 +188,8 @@ defaults:
     # whether to use vault
     use-vault: true
     
-    # id for material used when 'use-vault' is false
-    material-id: 266
+    # the material used when 'use-vault' is false
+    material: Gold ingot
     
     # alias for the currency when 'use-vault' is false
     material-name: Gold Ingot
@@ -260,12 +260,12 @@ defaults:
     reset-add-time: 0
     
     # items add after failed drawing
-    # defined examples: '35:3*64' - stack of light blue wool
-    # format -> 'materialID:meta_data*amount'
-    # more examples: '351:0 351*1 351:2*1'
+    # defined examples: 'Wool:3*64' - stack of light blue wool
+    # format -> 'material:meta_data*amount'
+    # more examples: 'Ink sack:0 Ink sack*1 Ink sack:2*1'
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:
-    # '278^DURABILITY:3' -> this creates a diamond pickaxe with a DURABILITY with a level of 3
+    # 'Diamond Pickaxe^DURABILITY:3' -> this creates a diamond pickaxe with a DURABILITY with a level of 3
     #
     reset-add-item-rewards: ''

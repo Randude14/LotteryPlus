@@ -36,7 +36,6 @@ public class PotReward implements Reward {
 		return ChatUtils.getRawName("lottery.reward.pot.info", "<pot>", econ.format(pot));
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static PotReward deserialize(Map<String, Object> map) {
 		double pot = ((Number) map.get("pot")).doubleValue();
 		Economy econ = null;

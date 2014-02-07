@@ -1,5 +1,6 @@
 package com.randude14.lotteryplus.lottery;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,13 +8,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -51,7 +50,6 @@ public class Lottery implements Runnable {
 	private List<String> worlds;
 	private List<String> towny;
 	private final String lotteryName;
-	private final Random rand;
 	private LotteryProperties properties;
 	private BukkitTask drawTask;
 	private Timer timer;
@@ -64,7 +62,6 @@ public class Lottery implements Runnable {
 		this.rewards = new ArrayList<Reward>();
 		this.signs = new ArrayList<Sign>();
 		this.lotteryName = name;
-		this.rand = new Random();
 		success = false;
 		this.perms.add(new WorldPermission(this));
 		if(PluginSupport.TOWNY.isInstalled()) {
@@ -288,9 +285,6 @@ public class Lottery implements Runnable {
 					if(loc != null) {
 						Block block = loc.getBlock();
 						if(LotteryPlus.isSign(block)) {
-							Material mat = block.getType();
-							block.setType(Material.AIR);
-							block.setType(mat);
 							Sign sign = (Sign) block.getState();
 							signs.add(sign);
 						} else {
@@ -320,7 +314,7 @@ public class Lottery implements Runnable {
 						econ = new VaultEconomy();
 					}
 				} else {
-					String materialID = properties.getString(Config.DEFAULT_MATERIAL_ID);
+					String materialID = properties.getString(Config.DEFAULT_MATERIAL);
 					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
 					econ = new MaterialEconomy(materialID, name);
 				}
@@ -329,9 +323,6 @@ public class Lottery implements Runnable {
 			if(econ == null) {
 				throw new NullPointerException(ChatUtils.getRawName("lottery.exception.economy.load", "<lottery>", lotteryName));
 			}
-
-			// SET SEED FOR RANDOM
-			rand.setSeed(Utils.loadSeed(properties.getString(Config.DEFAULT_SEED)));
 
 			// LOAD ITEM REWARDS
 			String itemRewards = properties.getString(Config.DEFAULT_ITEM_REWARDS);
@@ -488,8 +479,8 @@ public class Lottery implements Runnable {
 			int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
 			int num = getTicketsBought(player);
 			if (ticketLimit > 0) {
-				int players = getPlayers().size();
-				if (players >= ticketLimit) {
+				int total = getTotalTicketsBought();
+				if (total >= ticketLimit) {
 					return;
 				}
 				if (reward + num > ticketLimit) {
@@ -498,6 +489,7 @@ public class Lottery implements Runnable {
 			}
 			addTickets(player, reward);
 			broadcast("lottery.vote.reward.mess", "<player>", player, "<number>", reward, "<lottery>", lotteryName);
+			LotteryManager.saveLottery(lotteryName);
 		}
 	}
 	
@@ -519,7 +511,7 @@ public class Lottery implements Runnable {
 			return false;
 		}
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
-		if (ticketLimit > 0 && getPlayers().size() >= ticketLimit) {
+		if (ticketLimit > 0 && getTotalTicketsBought() >= ticketLimit) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.soldout");
 			return false;
 		}
@@ -616,8 +608,8 @@ public class Lottery implements Runnable {
 		}
 		int num = getTicketsBought(player);
 		if (ticketLimit > 0) {
-			int players = getPlayers().size();
-			if (players >= ticketLimit) {
+			int total = getTotalTicketsBought();
+			if (total >= ticketLimit) {
 				ChatUtils.send(rewarder, "lottery.error.tickets.soldout", "<lottery>", lotteryName);
 				return false;
 			}
@@ -641,8 +633,8 @@ public class Lottery implements Runnable {
 		if(ticketLimit <= 0) {
 			return false;
 		}
-		int players = getPlayers().size();
-		if(players < ticketLimit) {
+		int total = getTotalTicketsBought();
+		if(total < ticketLimit) {
 			return false;
 		}
 		int minPlayers = properties.getInt(Config.DEFAULT_MIN_PLAYERS);
@@ -679,11 +671,11 @@ public class Lottery implements Runnable {
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
 		if (ticketLimit <= 0)
 			return "no limit";
-		int left = ticketLimit - getPlayers().size();
+		int left = ticketLimit - getTotalTicketsBought();
 		return (left > 0) ? "" + left : "none";
 	}
 
-	private int getPlayersEntered() {
+	public int getPlayersEntered() {
 		Set<String> players = new HashSet<String>();
 		for (String key : properties.keySet()) {
 			if (key.startsWith("players.")) {
@@ -698,7 +690,7 @@ public class Lottery implements Runnable {
 		return players.size();
 	}
 
-	private List<String> getPlayers() {
+	public List<String> getPlayers() {
 		List<String> players = new ArrayList<String>();
 		for (String key : properties.keySet()) {
 			if (key.startsWith("players.")) {
@@ -712,14 +704,30 @@ public class Lottery implements Runnable {
 		}
 		return players;
 	}
+	
+	public int getTotalTicketsBought() {
+		int total = 0;
+		for (String key : properties.keySet()) {
+			if (key.startsWith("players.")) {
+				int num = properties.getInt(key, 0);
+				total += num;
+			}
+		}
+		return total;
+	}
 
-	private int getTicketsBought(String name) {
+	public int getTicketsBought(String name) {
 		return properties.getInt("players." + name, 0);
 	}
 	
-	private void addTickets(String name, int add) {
+	public void addTickets(String name, int add) {
 		int tickets = properties.getInt("players." + name, 0);
 		properties.set("players." + name, tickets + add);
+	}
+	
+	public void subTickets(String name, int remove) {
+		int tickets = properties.getInt("players." + name, 0);
+		properties.set("players." + name, tickets - remove);
 	}
 
 	public void draw() {
@@ -769,7 +777,6 @@ public class Lottery implements Runnable {
 				cooldowns.clear();
 			}
 			drawTask = null;
-			List<String> players = getPlayers();
 			int entered = getPlayersEntered();
 			
 			// check if there were enough players entered in drawing
@@ -781,7 +788,8 @@ public class Lottery implements Runnable {
 			}
 			
 			// pick winner
-			String winner = Lottery.pickRandomPlayer(rand, players, properties.getInt(Config.DEFAULT_TICKET_LIMIT));
+			List<String> players = getPlayers();
+			String winner = Lottery.pickRandomPlayer(players, properties.getInt(Config.DEFAULT_TICKET_LIMIT));
 			if (winner == null) {
 				broadcast("lottery.error.drawing.nowinner");
 				properties.set("drawing", false);
@@ -838,22 +846,16 @@ public class Lottery implements Runnable {
 		}
 	}
 
-	private static String pickRandomPlayer(Random rand, List<String> players, int ticketLimit) {
+	private static String pickRandomPlayer(List<String> players, int ticketLimit) {
+		SecureRandom rand = new SecureRandom();
 		Collections.shuffle(players, rand);
 		if (ticketLimit <= 0) {
 			return players.get(rand.nextInt(players.size()));
 		} else {
-			List<Integer> spots = new ArrayList<Integer>();
-			for(int i = 0;i < ticketLimit;i++)
-				spots.add(i);
-			Map<Integer, String> map = new HashMap<Integer, String>();
-			while(!players.isEmpty()) {
-				int index = spots.remove(rand.nextInt(spots.size()));
-				String player = players.remove(rand.nextInt(players.size()));
-				map.put(index, player);
-			}
 			int winningNumber = rand.nextInt(ticketLimit);
-			return map.get(winningNumber);
+			if(winningNumber >= players.size()) 
+				return null;
+			return players.get(winningNumber);
 		}
 	}
 

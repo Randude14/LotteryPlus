@@ -38,8 +38,7 @@ public class MaterialEconomy extends Economy {
 			} else {
 				index = line.length();
 			}
-			int id = Integer.parseInt(line.substring(0, index));
-			this.material = Material.getMaterial(id);
+			this.material = Material.matchMaterial(line.substring(0, index));
 		} catch (Exception ex) {
 			throw new RuntimeException("Could not load material data from: " + line, ex);
 		}
@@ -97,21 +96,18 @@ public class MaterialEconomy extends Economy {
 	
 	public Map<String, Object> serialize() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("id", material.getId());
+		map.put("mat", material.name());
 		map.put("data", data);
 		map.put("name", name);
 		return map;
 	}
 	
 	public MaterialEconomy deserialize(Map<String, Object> map) {
-		int id = ((Number) map.get("id")).intValue();
-		Material mat = Material.getMaterial(id);
+		Material mat;
+		if(map.containsKey("id")) mat = Material.matchMaterial(map.get("id").toString());
+		else mat = Material.matchMaterial(map.get("mat").toString());
 		short data = ((Number) map.get("data")).shortValue();
 		String name = map.get("name").toString();
 		return new MaterialEconomy(mat, data, name);
-	}
-	
-	public int getMaterialID() {
-		return material.getId();
 	}
 }

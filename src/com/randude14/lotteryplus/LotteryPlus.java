@@ -2,14 +2,10 @@ package com.randude14.lotteryplus;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.UIManager;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,10 +19,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.randude14.lotteryplus.command.*;
 import com.randude14.lotteryplus.configuration.CustomYaml;
@@ -38,11 +30,14 @@ import com.randude14.lotteryplus.lottery.reward.PotReward;
 import com.randude14.lotteryplus.metrics.Metrics;
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
+import com.randude14.lotteryplus.util.Time;
+import com.randude14.lotteryplus.util.Updater;
 import com.randude14.register.economy.MaterialEconomy;
 import com.randude14.register.economy.VaultEconomy;
 
 public class LotteryPlus extends JavaPlugin {
 	private static LotteryPlus instance = null;
+	private static Updater updater = null;
 	private static final List<Task> tasks = new ArrayList<Task>();
 	private static MainFrame mainFrame;
 	private static Metrics metrics;
@@ -77,31 +72,29 @@ public class LotteryPlus extends JavaPlugin {
 		callTasks();
 		saveExtras();
 		registerListeners();
-		Command atp = new AddToPotCommand();
 		CommandManager cm = new CommandManager()
-		    .registerCommand("buy", new BuyCommand())
-		    .registerCommand("draw", new DrawCommand())
-		    .registerCommand("info", new InfoCommand())
-		    .registerCommand("claim", new ClaimCommand())
-		    .registerCommand("create", new CreateCommand())
-		    .registerCommand("reload", new ReloadCommand())
-		    .registerCommand("reloadall", new ReloadAllCommand())
-		    .registerCommand("load", new LoadCommand())
-		    .registerCommand("list", new ListCommand())
-		    .registerCommand("unload", new UnloadCommand())
-		    .registerCommand("addtopot", atp)
-		    .registerCommand("atp", atp)
-		    .registerCommand("winners", new WinnersCommand())
-		    .registerCommand("reward", new RewardCommand())
-		    .registerCommand("save", new SaveCommand())
-		    .registerCommand("config", new ConfigCommand())
-		    .registerCommand("version", new VersionCommand())
-		    .registerCommand("update", new UpdateCommand())
-		    .registerCommand("guic", new GuiCreatorCommand());
+		    .registerCommand(new BuyCommand(), "buy")
+		    .registerCommand(new DrawCommand(), "draw")
+		    .registerCommand(new InfoCommand(), "info")
+		    .registerCommand(new ClaimCommand(), "claim")
+		    .registerCommand(new CreateCommand(), "create")
+		    .registerCommand(new ReloadCommand(), "reload")
+		    .registerCommand(new ReloadAllCommand(), "reloadall")
+		    .registerCommand(new LoadCommand(), "load")
+		    .registerCommand(new ListCommand(), "list")
+		    .registerCommand(new UnloadCommand(), "unload")
+		    .registerCommand(new AddToPotCommand(), "addtopot", "atp")
+		    .registerCommand(new WinnersCommand(), "winners")
+		    .registerCommand(new RewardCommand(), "reward")
+		    .registerCommand(new SaveCommand(), "save")
+		    .registerCommand(new ConfigCommand(), "config")
+		    .registerCommand(new VersionCommand(), "version")
+		    .registerCommand(new UpdateCommand(), "update")
+		    .registerCommand(new GuiCreatorCommand(), "guic");
 		this.getCommand("lottery").setExecutor(cm);
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
-				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), 20L, 20L);
+				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), Time.SERVER_SECOND.getBukkitTime(), Time.SERVER_SECOND.getBukkitTime());
 			}
 		}, 0L);
 		try {
@@ -109,6 +102,7 @@ public class LotteryPlus extends JavaPlugin {
 			metrics.start();
 		} catch (IOException ex) {
 		}
+		updater = new Updater(this, 36229, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		Logger.info("logger.enabled");
 	}
 	
@@ -133,7 +127,7 @@ public class LotteryPlus extends JavaPlugin {
 		CustomYaml items = new CustomYaml("items.yml");
 		FileConfiguration itemsConfig = items.getConfig();
 		for (Material mat : Material.values()) {
-			itemsConfig.set("items." + mat.name(), mat.getId());
+			itemsConfig.set("items." + mat.name(), "");
 		}
 		items.saveConfig();
 		CustomYaml colors = new CustomYaml("colors.yml");
@@ -204,6 +198,17 @@ public class LotteryPlus extends JavaPlugin {
 		// create the object instead of returning null
 		return instance.getServer().getOfflinePlayer(name);
 	}
+	
+	public static void updateCheck(CommandSender sender) {
+		Updater.UpdateResult result = updater.getResult();
+		if(result == Updater.UpdateResult.UPDATE_AVAILABLE) {
+			String latestVersion = updater.getLatestName();
+			String currentVersion = "v" + LotteryPlus.getVersion();
+			ChatUtils.send(sender, "plugin.update-available", "<current_version>", currentVersion, "<new_version>", latestVersion);
+		} else {
+			ChatUtils.send(sender, "plugin.error.no-update");
+		}
+	}
 
 	public static boolean checkPermission(CommandSender sender,
 			Perm permission) {
@@ -223,64 +228,6 @@ public class LotteryPlus extends JavaPlugin {
 		}
 	}
 	
-	public static boolean isThereNewUpdate(String currentVersion) {
-		String latestVersion = currentVersion;
-		try {
-			URL url = new URL("http://dev.bukkit.org/server-mods/lotteryplus/files.rss");
-			Document doc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder()
-					.parse(url.openConnection().getInputStream());
-			doc.getDocumentElement().normalize();
-			NodeList nodes = doc.getElementsByTagName("item");
-			Node firstNode = nodes.item(0);
-			if (firstNode.getNodeType() == 1) {
-				Element firstElement = (Element) firstNode;
-				NodeList firstElementTagName = firstElement
-						.getElementsByTagName("title");
-				Element firstNameElement = (Element) firstElementTagName
-						.item(0);
-				NodeList firstNodes = firstNameElement.getChildNodes();
-				latestVersion = firstNodes.item(0).getNodeValue();
-			}
-		} catch (Exception ex) {
-			latestVersion = currentVersion;
-		}
-		return !latestVersion.endsWith(currentVersion);
-	}
-	
-	public static void updateCheck(String currentVersion) {
-		updateCheck(Bukkit.getConsoleSender(), currentVersion);
-	}
-	
-	public static void updateCheck(CommandSender sender, String currentVersion) {
-		String latestVersion = currentVersion;
-		try {
-			URL url = new URL("http://dev.bukkit.org/server-mods/lotteryplus/files.rss");
-			Document doc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder()
-					.parse(url.openConnection().getInputStream());
-			doc.getDocumentElement().normalize();
-			NodeList nodes = doc.getElementsByTagName("item");
-			Node firstNode = nodes.item(0);
-			if (firstNode.getNodeType() == 1) {
-				Element firstElement = (Element) firstNode;
-				NodeList firstElementTagName = firstElement
-						.getElementsByTagName("title");
-				Element firstNameElement = (Element) firstElementTagName
-						.item(0);
-				NodeList firstNodes = firstNameElement.getChildNodes();
-				latestVersion = firstNodes.item(0).getNodeValue();
-			}
-		} catch (Exception ex) {
-			latestVersion = currentVersion;
-		}
-		if(!latestVersion.endsWith(currentVersion)) {
-			ChatUtils.send(sender, "plugin.update-available", "<current_version>", currentVersion, "<new_version>", latestVersion);
-		} else {
-			ChatUtils.send(sender, "plugin.error.no-update");
-		}
-	}
-	
 	public static void openGui() {
 		if(mainFrame == null) 
 			mainFrame = new MainFrame();
@@ -291,6 +238,10 @@ public class LotteryPlus extends JavaPlugin {
 	public static void openGui(String lotteryName) {
 		openGui();
 		mainFrame.openCreator(lotteryName);
+	}
+	
+	public static String getVersion() {
+		return instance.getDescription().getVersion();
 	}
 	
 	public static BukkitTask scheduleAsyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
@@ -313,10 +264,6 @@ public class LotteryPlus extends JavaPlugin {
 		instance.getServer().getScheduler().cancelTask(taskId);
 	}
 	
-	public static String getVersion() {
-		return instance.getDescription().getVersion();
-	}
-
 	public static boolean isSign(Block block) {
 		return block.getState() instanceof Sign;
 	}

@@ -2,7 +2,7 @@ package com.randude14.lotteryplus;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+//import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
@@ -58,9 +58,9 @@ public enum Perm {
 		return permission;
 	}
 	
-	public boolean hasPermission(CommandSender sender) {
+	public boolean hasPermission(CommandSender sender) {/*
 		if(sender instanceof ConsoleCommandSender) return true;
-		return sender.hasPermission(permission.getName());
+		return sender.hasPermission(permission.getName());*/return true;
 	}
 	
 	public static void loadPermissions() {
