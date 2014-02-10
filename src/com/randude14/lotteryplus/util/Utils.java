@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus;
+package com.randude14.lotteryplus.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
+import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.configuration.Config;
 
 public class Utils {
@@ -92,7 +93,7 @@ public class Utils {
 			}
 			for(int cntr = 0;cntr < line.length();cntr++) {
 				char c = line.charAt(cntr);
-				if(!Character.isDigit(c)) {
+				if(c == ':' || c == '*' || c == '^') {
 					itemIndex = cntr;
 					break;
 				}

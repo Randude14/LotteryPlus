@@ -21,6 +21,7 @@ import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryProperties;
+import com.randude14.lotteryplus.util.Utils;
 
 @SuppressWarnings("rawtypes")
 public class LotteryManager {

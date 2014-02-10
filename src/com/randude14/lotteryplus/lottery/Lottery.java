@@ -26,12 +26,12 @@ import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.PluginSupport;
-import com.randude14.lotteryplus.Utils;
 import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.permission.*;
 import com.randude14.lotteryplus.lottery.reward.*;
 import com.randude14.lotteryplus.util.Time;
+import com.randude14.lotteryplus.util.Utils;
 import com.randude14.register.economy.*;
 
 public class Lottery implements Runnable {
