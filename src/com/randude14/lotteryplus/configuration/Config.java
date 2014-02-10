@@ -47,10 +47,10 @@ public class Config {
 	public static final Property<String> OVER_SIGN_LINE_FOUR = new Property<String>("sign-format.Over.line-4", "<winner>");
 	
 	//LOTTERY PROPERTIES
-	public static final Property<String> DEFAULT_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "").setDescription("config.description.item-rewards");
+	//public static final Property<String> DEFAULT_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "").setDescription("config.description.item-rewards");
 	public static final Property<String> DEFAULT_WARNING_TIMES = new Property<String>("defaults.warning-times", "").setDescription("config.description.warning-times");
 	public static final Property<String> DEFAULT_MATERIAL_NAME = new Property<String>("defaults.material-name", "Gold Ingot").setDescription("config.description.material-name");
-	public static final Property<String> DEFAULT_RESET_ADD_ITEM_REWARDS = new Property<String>("defaults.reset-add-item-rewards", "").setDescription("config.description.reset-add-item-rewards");
+	//public static final Property<String> DEFAULT_RESET_ADD_ITEM_REWARDS = new Property<String>("defaults.reset-add-item-rewards", "").setDescription("config.description.reset-add-item-rewards");
 	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "").setDescription("config.description.tax-taccount");
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "").setDescription("config.description.worlds");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "").setDescription("config.description.towny");
@@ -87,10 +87,10 @@ public class Config {
 	public static final Property<Long> DEFAULT_RESET_ADD_COOLDOWN = new Property<Long>("defaults.reset-add-cooldown", 0L).setDescription("config.description.reset-add-cooldown");
 	public static final Property<Long> DEFAULT_WARMUP = new Property<Long>("defaults.warmup", 0L).setDescription("config.description.warmup");
 	public static final Property<Long> DEFAULT_RESET_ADD_WARMUP = new Property<Long>("defaults.reset-add-warmup", 0L).setDescription("config.description.reset-add-warmup");
-	public static final Property[] lotteryDefaults = {DEFAULT_ITEM_REWARDS, 
+	public static final Property[] lotteryDefaults = {//DEFAULT_ITEM_REWARDS, 
 		                        DEFAULT_WARNING_TIMES, 
 		                        DEFAULT_MATERIAL_NAME, 
-		                        DEFAULT_RESET_ADD_ITEM_REWARDS, 
+		                        //DEFAULT_RESET_ADD_ITEM_REWARDS, 
 		                        DEFAULT_TAX_ACCOUNT, 
 		                        DEFAULT_WORLDS, 
 		                        DEFAULT_TOWNY, 

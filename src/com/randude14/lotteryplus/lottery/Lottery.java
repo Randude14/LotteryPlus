@@ -17,7 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+//import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.randude14.lotteryplus.ChatUtils;
@@ -273,6 +273,7 @@ public class Lottery implements Runnable {
 			Validate.isTrue(pot >= 0.0, ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
 			Validate.isTrue(ticketCost >= 0.0, ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
 
+			// 
 			if (force) {
 				rewards.clear();
 			} else {
@@ -289,11 +290,9 @@ public class Lottery implements Runnable {
 							signs.add(sign);
 						} else {
 							Logger.info("lottery.error.sign.load", "<loc>", str);
-							properties.remove("sign" + cntr);
 						}
 					} else {
 						Logger.info("lottery.error.loc.load", "<line>", str);
-						properties.remove("sign" + cntr);
 					}
 					cntr++;
 				}
@@ -324,14 +323,6 @@ public class Lottery implements Runnable {
 				throw new NullPointerException(ChatUtils.getRawName("lottery.exception.economy.load", "<lottery>", lotteryName));
 			}
 
-			// LOAD ITEM REWARDS
-			String itemRewards = properties.getString(Config.DEFAULT_ITEM_REWARDS);
-			if (!(itemRewards == null || itemRewards.equals(""))) {
-				for(ItemStack item : Utils.getItemStacks(itemRewards)) {
-					rewards.add(new ItemReward(item));
-				}
-			}
-
 			// LOAD TIME
 			if(properties.getBoolean(Config.DEFAULT_USE_TIMER)) {
 				this.timer = new LotteryTimer();
@@ -350,7 +341,7 @@ public class Lottery implements Runnable {
 			// ALIASES
 			aliases = properties.getStringList(Config.DEFAULT_ALIASES);
 			
-			cooldowns.clear();
+			cooldowns.clear(); //clear the cooldowns
 			if(properties.contains("item-only")) {
 				properties.set(Config.DEFAULT_USE_POT, !properties.getBoolean("item-only"));
 				properties.remove("item-only");
@@ -885,12 +876,6 @@ public class Lottery implements Runnable {
 		properties.set(Config.DEFAULT_MIN_PLAYERS, properties.getInt(Config.DEFAULT_MIN_PLAYERS) + properties.getInt(Config.DEFAULT_RESET_ADD_MIN_PLAYERS));
 		properties.set(Config.DEFAULT_TICKET_TAX, properties.getDouble(Config.DEFAULT_TICKET_TAX) + properties.getDouble(Config.DEFAULT_RESET_ADD_TICKET_TAX));
 		properties.set(Config.DEFAULT_POT_TAX, properties.getDouble(Config.DEFAULT_POT_TAX) + properties.getDouble(Config.DEFAULT_RESET_ADD_POT_TAX));
-		String read = properties.getString(Config.DEFAULT_RESET_ADD_ITEM_REWARDS);
-		if(read != null && !read.isEmpty()) {
-			for(ItemStack item : Utils.getItemStacks(read)) {
-				rewards.add(new ItemReward(item));
-			}
-		}
 	}
 	
 	public boolean equals(Lottery other) {

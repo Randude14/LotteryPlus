@@ -44,12 +44,8 @@ public class LotteryClaim implements ConfigurationSerializable {
 	public static LotteryClaim deserialize(Map<String, Object> serialMap) {
 		String lotteryName = (String) serialMap.get("lottery-name");
 		List<Reward> rewards = new ArrayList<Reward>();
-		for(int cntr = 1;true;cntr++) {
-			if(serialMap.containsKey("reward" + cntr)) {
-				rewards.add((Reward) serialMap.get("reward" + cntr));
-			} else {
-				break;
-			}
+		for(int cntr = 1;serialMap.containsKey("reward" + cntr);cntr++) {
+			rewards.add((Reward) serialMap.get("reward" + cntr));
 		}
 		return new LotteryClaim(lotteryName, rewards);
 	}

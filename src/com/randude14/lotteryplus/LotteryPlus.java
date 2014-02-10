@@ -209,6 +209,10 @@ public class LotteryPlus extends JavaPlugin {
 			ChatUtils.send(sender, "plugin.error.no-update");
 		}
 	}
+	
+	public static boolean dispatchCommand(String command) {
+		return instance.getServer().dispatchCommand(instance.getServer().getConsoleSender(), command);
+	}
 
 	public static boolean checkPermission(CommandSender sender,
 			Perm permission) {
