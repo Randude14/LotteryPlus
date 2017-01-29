@@ -5,3 +5,8 @@ Change Log.gdoc
 /.settings
 /bin
 /lib
+.settings
+LotteryPlus.git
+.classpath
+.gitignore
+.project
