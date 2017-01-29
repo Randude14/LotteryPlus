@@ -749,6 +749,8 @@ public class Lottery implements Runnable {
 		drawTask.cancel();
 	}
 
+	//clears players
+	//called usually after a successful drawing has occurred.
 	private void clearPlayers() {
 		List<String> keys = new ArrayList<String>(properties.keySet());
 		for (int cntr = 0; cntr < keys.size(); cntr++) {
