@@ -6,8 +6,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.ChatUtils;
+<<<<<<< HEAD
 import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.RewardManager;
+=======
+import com.randude14.lotteryplus.ClaimManager;
+import com.randude14.lotteryplus.Perm;
+>>>>>>> upstream/master
 import com.randude14.lotteryplus.LotteryPlus;
 
 public class ClaimCommand implements Command {
@@ -17,8 +22,12 @@ public class ClaimCommand implements Command {
 		if (!LotteryPlus.checkPermission(sender, Perm.CLAIM)) {
 			return false;
 		}
+<<<<<<< HEAD
 		Player player = (Player) sender;
 		RewardManager.rewardPlayer(player);
+=======
+		ClaimManager.rewardClaims((Player) sender);
+>>>>>>> upstream/master
 		return true;
 	}
 

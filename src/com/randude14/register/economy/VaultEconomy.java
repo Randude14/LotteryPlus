@@ -4,12 +4,18 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+<<<<<<< HEAD
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
+=======
+import org.bukkit.configuration.serialization.SerializableAs;
+
+import com.randude14.lotteryplus.ChatUtils;
+>>>>>>> upstream/master
 
 @SerializableAs("VaultEconomy")
 public class VaultEconomy extends Economy {
@@ -22,6 +28,7 @@ public class VaultEconomy extends Economy {
 		}
 	}
 
+<<<<<<< HEAD
 	public boolean hasEnough(String playerName, double amount) {
 		OfflinePlayer player = LotteryPlus.getOfflinePlayer(playerName);
 		return econ.has(player, amount);
@@ -29,12 +36,23 @@ public class VaultEconomy extends Economy {
 
 	public double deposit(String playerName, double amount) {
 		OfflinePlayer player = LotteryPlus.getOfflinePlayer(playerName);
+=======
+	public boolean hasEnough(String player, double amount) {
+		return econ.has(player, amount);
+	}
+
+	public double deposit(String player, double amount) {
+>>>>>>> upstream/master
 		econ.depositPlayer(player, amount);
 		return 0;
 	}
 
+<<<<<<< HEAD
 	public void withdraw(String playerName, double amount) {
 		OfflinePlayer player = LotteryPlus.getOfflinePlayer(playerName);
+=======
+	public void withdraw(String player, double amount) {
+>>>>>>> upstream/master
 		econ.withdrawPlayer(player, amount);
 	}
 	
@@ -42,8 +60,12 @@ public class VaultEconomy extends Economy {
 		return econ.format(amount);
 	}
 	
+<<<<<<< HEAD
 	public boolean hasAccount(String playerName) {
 		OfflinePlayer player = LotteryPlus.getOfflinePlayer(playerName);
+=======
+	public boolean hasAccount(String player) {
+>>>>>>> upstream/master
 		return econ.hasAccount(player);
 	}
 	
@@ -54,6 +76,7 @@ public class VaultEconomy extends Economy {
 	public static VaultEconomy deserialize(Map<String, Object> map) {
 		return new VaultEconomy();
 	}
+<<<<<<< HEAD
 
 	public boolean hasEnough(Player player, double amount) {
 		return this.hasEnough(player.getName(), amount);
@@ -70,4 +93,6 @@ public class VaultEconomy extends Economy {
 	public boolean hasAccount(Player player) {
 		return this.hasAccount(player.getName());
 	}
+=======
+>>>>>>> upstream/master
 }

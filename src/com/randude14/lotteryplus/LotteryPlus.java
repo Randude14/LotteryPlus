@@ -1,12 +1,19 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
+<<<<<<< HEAD
+=======
+import java.io.IOException;
+>>>>>>> upstream/master
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.UIManager;
+<<<<<<< HEAD
 
 import org.bukkit.Bukkit;
+=======
+>>>>>>> upstream/master
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,7 +24,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
+<<<<<<< HEAD
 import org.bukkit.entity.Player;
+=======
+>>>>>>> upstream/master
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -29,6 +39,10 @@ import com.randude14.lotteryplus.listeners.*;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.ItemReward;
 import com.randude14.lotteryplus.lottery.reward.PotReward;
+<<<<<<< HEAD
+=======
+import com.randude14.lotteryplus.metrics.Metrics;
+>>>>>>> upstream/master
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
 import com.randude14.lotteryplus.util.Time;
@@ -41,6 +55,10 @@ public class LotteryPlus extends JavaPlugin {
 	private static Updater updater = null;
 	private static final List<Task> tasks = new ArrayList<Task>();
 	private static MainFrame mainFrame;
+<<<<<<< HEAD
+=======
+	private static Metrics metrics;
+>>>>>>> upstream/master
 	private File configFile;
 
 	public void onEnable() {
@@ -64,7 +82,11 @@ public class LotteryPlus extends JavaPlugin {
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
 		registerConfigurationClasses();
+<<<<<<< HEAD
 		RewardManager.loadRewardClaims();
+=======
+		ClaimManager.loadClaims();
+>>>>>>> upstream/master
 		WinnersManager.loadWinners();
 		Perm.loadPermissions();
 		int numLotteries = LotteryManager.loadLotteries();
@@ -97,7 +119,15 @@ public class LotteryPlus extends JavaPlugin {
 				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), Time.SERVER_SECOND.getBukkitTime(), Time.SERVER_SECOND.getBukkitTime());
 			}
 		}, 0L);
+<<<<<<< HEAD
 		
+=======
+		try {
+			metrics = new Metrics(this);
+			metrics.start();
+		} catch (IOException ex) {
+		}
+>>>>>>> upstream/master
 		updater = new Updater(this, 36229, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		Logger.info("logger.enabled");
 	}
@@ -175,7 +205,10 @@ public class LotteryPlus extends JavaPlugin {
 	}
 
 	// uses binary search
+<<<<<<< HEAD
 	@SuppressWarnings("deprecation")
+=======
+>>>>>>> upstream/master
 	public static OfflinePlayer getOfflinePlayer(String name) {
 		OfflinePlayer[] players = instance.getServer().getOfflinePlayers();
 		int left = 0;
@@ -193,6 +226,7 @@ public class LotteryPlus extends JavaPlugin {
 
 		// if it doesn't exist, then have the server
 		// create the object instead of returning null
+<<<<<<< HEAD
 		return Bukkit.getOfflinePlayer(name);
 	}
 	
@@ -202,6 +236,9 @@ public class LotteryPlus extends JavaPlugin {
 			return player.getPlayer();
 		else 
 			return null;
+=======
+		return instance.getServer().getOfflinePlayer(name);
+>>>>>>> upstream/master
 	}
 	
 	public static void updateCheck(CommandSender sender) {
@@ -281,6 +318,13 @@ public class LotteryPlus extends JavaPlugin {
 		return isSign(loc.getBlock());
 	}
 	
+<<<<<<< HEAD
+=======
+	public static Metrics getMetrics() {
+		return metrics;
+	}
+	
+>>>>>>> upstream/master
 	public static final LotteryPlus getInstance() {
 		return instance;
 	}

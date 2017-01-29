@@ -21,7 +21,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.randude14.lotteryplus.ChatUtils;
+<<<<<<< HEAD
 import com.randude14.lotteryplus.RewardManager;
+=======
+import com.randude14.lotteryplus.ClaimManager;
+>>>>>>> upstream/master
 import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
@@ -308,8 +312,15 @@ public class Lottery implements Runnable {
 				econ = (Economy) properties.get("econ");
 			} else {
 				econ = null;
+<<<<<<< HEAD
 				if(properties.getBoolean(Config.DEFAULT_USE_VAULT) && PluginSupport.VAULT.isInstalled()) {
 					econ = new VaultEconomy();
+=======
+				if(properties.getBoolean(Config.DEFAULT_USE_VAULT)) {
+					if(PluginSupport.VAULT.isInstalled()) {
+						econ = new VaultEconomy();
+					}
+>>>>>>> upstream/master
 				} else {
 					String materialID = properties.getString(Config.DEFAULT_MATERIAL);
 					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
@@ -542,7 +553,11 @@ public class Lottery implements Runnable {
 		if (!canBuy(player, tickets)) {
 			return false;
 		}
+<<<<<<< HEAD
 		if (!econ.hasAccount(player)) {
+=======
+		if (!econ.hasAccount(name)) {
+>>>>>>> upstream/master
 			ChatUtils.sendRaw(player, "lottery.error.noaccount");
 			return false;
 		}
@@ -553,17 +568,29 @@ public class Lottery implements Runnable {
 		double add = ticketCost - (ticketCost * (ticketTax / 100));
 		double d = add * (double) tickets;
 		double taxes = total - d;
+<<<<<<< HEAD
 		if (!econ.hasEnough(player, total)) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.notenough");
 			return false;
 		}
 		econ.withdraw(player, total);
+=======
+		if (!econ.hasEnough(name, total)) {
+			ChatUtils.sendRaw(player, "lottery.error.tickets.notenough");
+			return false;
+		}
+		econ.withdraw(name, total);
+>>>>>>> upstream/master
 		if(taxAccount != null && econ.hasAccount(taxAccount)) {
 			double left = econ.deposit(taxAccount, taxes);
 			if(left > 0) {
 				List<Reward> list = new ArrayList<Reward>();
 				list.add(new PotReward(econ, left));
+<<<<<<< HEAD
 				RewardManager.addRewardClaim(taxAccount, lotteryName, list);
+=======
+				ClaimManager.addClaim(taxAccount, lotteryName, list);
+>>>>>>> upstream/master
 			}
 		}
 		addTickets(name, tickets);
@@ -608,7 +635,11 @@ public class Lottery implements Runnable {
 			}
 		}
 		properties.set("players." + player, num + tickets);
+<<<<<<< HEAD
 		Player p = LotteryPlus.getBukkitPlayer(player);
+=======
+		Player p = Bukkit.getPlayer(player);
+>>>>>>> upstream/master
 		if (p != null) {
 			ChatUtils.send(p, "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		}
@@ -749,8 +780,11 @@ public class Lottery implements Runnable {
 		drawTask.cancel();
 	}
 
+<<<<<<< HEAD
 	//clears players
 	//called usually after a successful drawing has occurred.
+=======
+>>>>>>> upstream/master
 	private void clearPlayers() {
 		List<String> keys = new ArrayList<String>(properties.keySet());
 		for (int cntr = 0; cntr < keys.size(); cntr++) {
@@ -809,11 +843,22 @@ public class Lottery implements Runnable {
 			WinnersManager.logWinner(logWinner.toString());
 			
 			// reward winner if online
+<<<<<<< HEAD
 			Player pWinner = LotteryPlus.getBukkitPlayer(winner);
 			if(pWinner != null)
 				RewardManager.rewardPlayer(pWinner, lotteryName, rewards);
 			else
 				RewardManager.addRewardClaim(winner, lotteryName, rewards);
+=======
+			Player pWinner = Bukkit.getPlayer(winner);
+			boolean rewarded = false;
+			if (pWinner != null) {
+				rewarded = Lottery.handleRewards(pWinner, lotteryName, rewards);
+			}
+			if(!rewarded) {
+				ClaimManager.addClaim(winner, lotteryName, rewards);
+			}
+>>>>>>> upstream/master
 			
 			// set up for next drawing
 			properties.set("winner", winner);
@@ -847,6 +892,24 @@ public class Lottery implements Runnable {
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	public static boolean handleRewards(Player player, String lottery, List<Reward> list) {
+		Iterator<Reward> rewards = list.iterator();
+		while(rewards.hasNext()) {
+			Reward reward = rewards.next();
+			if(reward.rewardPlayer(player, lottery)) {
+				rewards.remove();
+			}
+		}
+		if(!list.isEmpty()) {
+			ChatUtils.send(player, "lottery.reward.leftover");
+			return false;
+		}
+		return true;
+	}
+
+>>>>>>> upstream/master
 	private void resetData() {
 		timer.reset(properties);
 		properties.set(Config.DEFAULT_TICKET_COST, properties.getDouble(Config.DEFAULT_TICKET_COST) + properties.getDouble(Config.DEFAULT_RESET_ADD_TICKET_COST));

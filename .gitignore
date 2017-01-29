@@ -4,9 +4,13 @@
 Change Log.gdoc
 /.settings
 /bin
+<<<<<<< HEAD
 /lib
 .settings
 LotteryPlus.git
 .classpath
 .gitignore
 .project
+=======
+/lib
+>>>>>>> upstream/master

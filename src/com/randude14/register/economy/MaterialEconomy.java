@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+<<<<<<< HEAD
+=======
+import org.bukkit.Bukkit;
+>>>>>>> upstream/master
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
@@ -43,6 +47,7 @@ public class MaterialEconomy extends Economy {
 		}
 	}
 
+<<<<<<< HEAD
 	public boolean hasEnough(Player player, double amount) {
 		amount = Math.floor(amount);
 		ItemStack currency = new EconomyItemStack(material, 1, data);
@@ -70,13 +75,53 @@ public class MaterialEconomy extends Economy {
 	}
 
 	public void withdraw(Player player, double d) {
+=======
+	public boolean hasEnough(String player, double amount) {
+		amount = Math.floor(amount);
+		Player p = Bukkit.getPlayer(player);
+		if(p != null) {
+			ItemStack currency = new EconomyItemStack(material, 1, data);
+			int total = 0;
+			for(ItemStack stack : p.getInventory().getContents()) {
+				if(currency.isSimilar(stack)) {
+					total += stack.getAmount();
+				}
+			}
+			return total >= amount;
+		} else {
+			return false;
+		}
+	}
+
+	public double deposit(String player, double d) {
+		int amount = (int)Math.floor(d);
+		Player p = Bukkit.getPlayer(player);
+		if(p != null) {
+			Collection<ItemStack> col = p.getInventory().addItem(new EconomyItemStack(material, amount, data)).values();
+			amount = 0;
+			for(ItemStack stack : col)
+				amount += stack.getAmount();
+			p.updateInventory();
+		}
+		return amount;
+	}
+
+	public void withdraw(String player, double d) {
+>>>>>>> upstream/master
 		if(!hasEnough(player, d)) {
 			return;
 		}
 		int amount = (int)Math.floor(d);
+<<<<<<< HEAD
 		if(player != null) {
 			player.getInventory().removeItem(new EconomyItemStack(material, amount, data));
 			player.updateInventory();
+=======
+		Player p = Bukkit.getPlayer(player);
+		if(p != null) {
+			p.getInventory().removeItem(new EconomyItemStack(material, amount, data));
+			p.updateInventory();
+>>>>>>> upstream/master
 		}
 	}
 
@@ -84,11 +129,15 @@ public class MaterialEconomy extends Economy {
 		return ChatUtils.getRawName("lottery.economy.item", "<material>", name, "<amount>", (int) Math.floor(amount));
 	}
 
+<<<<<<< HEAD
 	public boolean hasAccount(Player player) {
 		return true;
 	}
 	
 	public boolean hasAccount(String playerName) {
+=======
+	public boolean hasAccount(String player) {
+>>>>>>> upstream/master
 		return true;
 	}
 	

@@ -20,9 +20,15 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.randude14.lotteryplus.ChatUtils;
+<<<<<<< HEAD
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.RewardManager;
+=======
+import com.randude14.lotteryplus.ClaimManager;
+import com.randude14.lotteryplus.LotteryManager;
+import com.randude14.lotteryplus.Perm;
+>>>>>>> upstream/master
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
@@ -33,7 +39,11 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
+<<<<<<< HEAD
 		RewardManager.notifyOfRewardClaims(player);
+=======
+		ClaimManager.notifyOfClaims(player);
+>>>>>>> upstream/master
 		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split("\\s+");
 		for (String lotteryName : mainLotteries) {
 			Lottery lottery = LotteryManager.getLottery(player, lotteryName);

@@ -40,10 +40,23 @@ public enum Perm {
 	private Perm(Permission value, Perm... children) {
 		this(value);
 		for(Perm child : children) {
+<<<<<<< HEAD
 			child.getPermission().addParent(permission, true);
 		}
 	}
 	
+=======
+			child.setParent(this);
+		}
+	}
+	
+	private void setParent(Perm parentValue) {
+		if(this.parent != null)
+			return;
+		this.parent = parentValue;
+	}
+	
+>>>>>>> upstream/master
 	public Perm getParent() {
 		return parent;
 	}
