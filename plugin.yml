@@ -1,0 +1,11 @@
+name: LotteryPlus
+main: com.randude14.lotteryplus.LotteryPlus
+author: Randude14
+description: 'Powerful and functional lottery interface that makes lotteries easy to make and fun to play!'
+website: 'http://dev.bukkit.org/server-mods/lotteryplus/'
+version: 1.0
+softdepend: [Vault, Towny, Votifier]
+commands: 
+    lottery: 
+        description: 'Type for list of commands for LotteryPlus'
+        aliases: [l, lot, lotto]
