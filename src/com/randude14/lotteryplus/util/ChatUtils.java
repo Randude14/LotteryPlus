@@ -1,10 +1,10 @@
 package com.randude14.lotteryplus.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -25,26 +25,28 @@ public class ChatUtils {
 		
 		LotteryPlus plugin = LotteryPlus.getInstance();
 		
-		if(!langFile.exists()) {
-			plugin.saveResource(langFile.getName(), false);
-			return;
-		}
-		
 		//update files
-		try {
-			
-		    PropertiesConfiguration config = new PropertiesConfiguration();
-		    config.read(new FileReader(langFile.getPath()));
+		try {			
+		    Properties config = new Properties();
+		    config.load(new FileReader(langFile.getPath()));
 		    
-		    for(Object object : defaults.keySet()) {
-		    	String key = object.toString();
+		    plugin.saveResource(langFile.getName(), true);
+		    
+		    PropertiesConfiguration saveTo = new PropertiesConfiguration();
+		    saveTo.read(new FileReader(langFile.getPath()));
+		    
+		    Iterator<String> it = defaults.getKeys();
+		    while(it.hasNext()) {
+		    	String key = it.next();
 		    	
-		    	if(!config.containsKey(key)) {
-		    		config.setProperty(key, defaults.getProperty(key));
+		    	if(config.containsKey(key)) {
+		    		saveTo.setProperty(key, config.getProperty(key));
+		    	} else {
+		    		saveTo.setProperty(key, defaults.getProperty(key));
 		    	}
 		    }
 		    
-		    config.write(new FileWriter(langFile.getPath()));
+		    saveTo.write(new FileWriter(langFile.getPath()));
 		} catch (Exception ex) {
 			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
@@ -58,10 +60,10 @@ public class ChatUtils {
 			langFile = new File(plugin.getDataFolder(), "lang.properties");
 		
 		if(defaults == null) {
-			defaults = new Properties();
+			defaults = new PropertiesConfiguration();
 			try {
-				defaults.load(plugin.getResource(langFile.getName()));
-			} catch (IOException e) {
+				defaults.read(new InputStreamReader(plugin.getResource(langFile.getName())));
+			} catch (Exception e) {
 				Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 				e.printStackTrace();
 			}
@@ -70,9 +72,8 @@ public class ChatUtils {
 		saveLangFile();
 		
 		try {			
-			properties = new Properties(defaults);
-			properties.load(new FileInputStream(langFile.getPath()));
-			properties.clear();
+			properties = new PropertiesConfiguration();
+			properties.read(new FileReader(langFile.getPath()));
 		} catch (Exception ex) {
 			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
@@ -160,7 +161,7 @@ public class ChatUtils {
 	}
 	
 	public static String getNameFor(String code, Object... args) {
-		String mess = properties.getProperty(code);
+		String mess = properties.getProperty(code).toString();
 		if(mess == null) mess = code;
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
 			String string = args[cntr+1].toString();
@@ -172,7 +173,7 @@ public class ChatUtils {
 	}
 	
 	public static String getRawName(String code, Object... args) {
-		String mess = properties.getProperty(code);
+		String mess = properties.getProperty(code).toString();
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
 			String string = args[cntr+1].toString();
 			if(string == null || string.equals("")) string = "\"\"";
@@ -182,8 +183,8 @@ public class ChatUtils {
 	}
 	
 	private static File langFile;
-	private static Properties properties;
-	private static Properties defaults;
+	private static PropertiesConfiguration properties;
+	private static PropertiesConfiguration defaults;
 	private static final String colorCodes;
 	
 	static {
