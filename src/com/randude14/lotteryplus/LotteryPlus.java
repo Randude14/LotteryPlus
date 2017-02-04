@@ -44,15 +44,14 @@ public class LotteryPlus extends JavaPlugin {
 	private MainFrame mainFrame;	
 	private WinnersManager wManager;
 	private RewardManager rManager;
-	private File configFile;
 
 	public void onEnable() {
 		instance = this;
+		
 		File dataFolder = getDataFolder();
 		dataFolder.mkdirs();
-		configFile = new File(dataFolder, "config.yml");
-		ChatUtils.reload();
 
+		File configFile = new File(dataFolder, "config.yml");
 		if (!configFile.exists()) {
 			Logger.info("logger.config.defaults");
 			saveDefaultConfig();
@@ -63,20 +62,26 @@ public class LotteryPlus extends JavaPlugin {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		
 		tasks.add(new ReminderMessageTask());
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
-		registerConfigurationClasses();
+		
 		rManager = new RewardManager();
 		rManager.loadRewardClaims();
 		wManager = new WinnersManager();
 		wManager.onEnable();
+		
 		int numLotteries = LotteryManager.loadLotteries();
 		Logger.info("logger.lottery.num", "<number>", numLotteries);
+		
 		callTasks();
 		saveExtras();
 		registerListeners();
 		Perm.loadPermissions();
+		registerConfigurationClasses();
+		ChatUtils.reload();
+		
 		CommandManager cm = new CommandManager()
 		    .registerCommand(new BuyCommand(), "buy")
 		    .registerCommand(new DrawCommand(), "draw")
@@ -97,6 +102,7 @@ public class LotteryPlus extends JavaPlugin {
 		    .registerCommand(new UpdateCommand(), "update")
 		    .registerCommand(new GuiCreatorCommand(), "guic");
 		this.getCommand("lottery").setExecutor(cm);
+		
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
 				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), Time.SERVER_SECOND.getBukkitTime(), Time.SERVER_SECOND.getBukkitTime());
@@ -104,6 +110,7 @@ public class LotteryPlus extends JavaPlugin {
 		}, 0L);
 		
 		updater = new Updater(this, 36229, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
+		
 		Logger.info("logger.enabled");
 	}
 	
@@ -116,6 +123,8 @@ public class LotteryPlus extends JavaPlugin {
 	}
 
 	private void saveExtras() {
+		
+		
 		CustomYaml enchants = new CustomYaml("enchantments.yml");
 		FileConfiguration enchantsConfig = enchants.getConfig();
 		for (Enchantment enchant : Enchantment.values()) {
@@ -125,12 +134,16 @@ public class LotteryPlus extends JavaPlugin {
 							enchant.getMaxLevel()));
 		}
 		enchants.saveConfig();
+		
+		
 		CustomYaml items = new CustomYaml("items.yml");
 		FileConfiguration itemsConfig = items.getConfig();
 		for (Material mat : Material.values()) {
 			itemsConfig.set("items." + mat.name(), "");
 		}
 		items.saveConfig();
+		
+		
 		CustomYaml colors = new CustomYaml("colors.yml");
 		FileConfiguration colorsConfig = colors.getConfig();
 		for (ChatColor color : ChatColor.values()) {
@@ -158,10 +171,6 @@ public class LotteryPlus extends JavaPlugin {
 		instance.reloadConfig();
 		ChatUtils.reload();
 		callTasks();
-	}
-	
-	public static void disable() {
-		instance.getServer().getPluginManager().disablePlugin(instance);
 	}
 
 	private void registerListeners() {

@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Properties {
 	private Map<String, String> props = new HashMap<String, String>();
@@ -23,6 +24,10 @@ public class Properties {
 	
 	public Properties getDefaults() {
 		return this.defaults;
+	}
+	
+	public Set<String> keySet() {
+		return props.keySet();
 	}
 	
 	public void load(File file) throws IOException {
@@ -67,6 +72,18 @@ public class Properties {
 	public String getProperty(String key, String def) {
 		String value = props.get(key);
 		return (value == null) ? def : value;
+	}
+	
+	public void put(String key, String value) {
+		props.put(key, value);
+	}
+	
+	public boolean has(String find) {
+		for(String key : props.keySet()) {
+			if(key.equalsIgnoreCase(find))
+				return true;
+		}
+		return false;
 	}
 	
 	public void clear() {

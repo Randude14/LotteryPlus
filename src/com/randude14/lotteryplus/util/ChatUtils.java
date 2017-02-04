@@ -2,6 +2,7 @@ package com.randude14.lotteryplus.util;
 
 import java.io.File;
 import java.util.List;
+import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +17,20 @@ import com.randude14.lotteryplus.configuration.Properties;
 
 public class ChatUtils {
 	
+	public static void saveLangFile() {
+		try {
+			Scanner scan = new Scanner(LotteryPlus.getInstance().getResource(langFile.getName()));
+			
+		} catch (Exception ex) {
+			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
+			ex.printStackTrace();
+		}
+	}
+	
 	public static void reload() {
+		
+		LotteryPlus plugin = LotteryPlus.getInstance();
+		
 		if(!defaultsLoaded) {
 			try {
 				defaults.load(plugin.getResource(langFile.getName()));
@@ -25,9 +39,11 @@ public class ChatUtils {
 			}
 			defaultsLoaded = true;
 		}
+		
 		if(!langFile.exists()) {
 			plugin.saveResource(langFile.getName(), false);
 		}
+		
 		try {
 			properties.clear();
 			properties.load(langFile);
@@ -141,7 +157,6 @@ public class ChatUtils {
 		return cleanColorCodes(mess);
 	}
 	
-	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private static final File langFile = new File(LotteryPlus.getInstance().getDataFolder(), "lang.properties");
 	private static final Properties properties = new Properties();
 	private static final Properties defaults = new Properties();
