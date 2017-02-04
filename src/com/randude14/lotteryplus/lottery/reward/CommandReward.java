@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class CommandReward implements Reward {
 	private String name, message, command;
@@ -33,7 +33,7 @@ public class CommandReward implements Reward {
 	}
 
 	public String getInfo() {
-		return null;
+		return "lottery.reward.command.info";
 	}
 	
 }

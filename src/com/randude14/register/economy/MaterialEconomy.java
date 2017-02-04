@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.randude14.lotteryplus.ChatUtils;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 @SerializableAs("MaterialEconomy")
 @SuppressWarnings("deprecation")
@@ -44,45 +43,40 @@ public class MaterialEconomy extends Economy {
 		}
 	}
 
-	public boolean hasEnough(String player, double amount) {
+	public boolean hasEnough(Player player, double amount) {
 		amount = Math.floor(amount);
-		Player p = Bukkit.getPlayer(player);
-		if(p != null) {
-			ItemStack currency = new EconomyItemStack(material, 1, data);
-			int total = 0;
-			for(ItemStack stack : p.getInventory().getContents()) {
-				if(currency.isSimilar(stack)) {
-					total += stack.getAmount();
-				}
+		ItemStack currency = new EconomyItemStack(material, 1, data);
+		int total = 0;
+		for(ItemStack stack : player.getInventory().getContents()) {
+			if(currency.isSimilar(stack)) {
+				total += stack.getAmount();
 			}
-			return total >= amount;
-		} else {
-			return false;
 		}
+		return total >= amount;
 	}
 
-	public double deposit(String player, double d) {
+	public double deposit(Player player, double d) {
 		int amount = (int)Math.floor(d);
-		Player p = Bukkit.getPlayer(player);
-		if(p != null) {
-			Collection<ItemStack> col = p.getInventory().addItem(new EconomyItemStack(material, amount, data)).values();
-			amount = 0;
-			for(ItemStack stack : col)
-				amount += stack.getAmount();
-			p.updateInventory();
-		}
+		Collection<ItemStack> col = player.getInventory().addItem(new EconomyItemStack(material, amount, data)).values();
+		amount = 0;
+		for(ItemStack stack : col)
+			amount += stack.getAmount();
+		player.updateInventory();
 		return amount;
 	}
+	
+	public double deposit(String player, double d) {
+		return d;
+	}
 
-	public void withdraw(String player, double d) {
+	public void withdraw(Player player, double d) {
 		if(!hasEnough(player, d)) {
 			return;
 		}
 		int amount = (int)Math.floor(d);
-		Player p = Bukkit.getPlayer(player);
-		if(p != null) {
-			p.getInventory().removeItem(new EconomyItemStack(material, amount, data));
-			p.updateInventory();
+		if(player != null) {
+			player.getInventory().removeItem(new EconomyItemStack(material, amount, data));
+			player.updateInventory();
 		}
 	}
 
@@ -90,7 +84,11 @@ public class MaterialEconomy extends Economy {
 		return ChatUtils.getRawName("lottery.economy.item", "<material>", name, "<amount>", (int) Math.floor(amount));
 	}
 
-	public boolean hasAccount(String player) {
+	public boolean hasAccount(Player player) {
+		return true;
+	}
+	
+	public boolean hasAccount(String playerName) {
 		return true;
 	}
 	
@@ -102,10 +100,8 @@ public class MaterialEconomy extends Economy {
 		return map;
 	}
 	
-	public MaterialEconomy deserialize(Map<String, Object> map) {
-		Material mat;
-		if(map.containsKey("id")) mat = Material.matchMaterial(map.get("id").toString());
-		else mat = Material.matchMaterial(map.get("mat").toString());
+	public static MaterialEconomy deserialize(Map<String, Object> map) {
+		Material mat = Material.matchMaterial(map.get("mat").toString());
 		short data = ((Number) map.get("data")).shortValue();
 		String name = map.get("name").toString();
 		return new MaterialEconomy(mat, data, name);

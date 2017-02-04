@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus;
+package com.randude14.lotteryplus.util;
 
 import java.io.File;
 import java.util.List;
@@ -8,6 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.randude14.lotteryplus.Logger;
+import com.randude14.lotteryplus.LotteryPlus;
+import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Properties;
 
@@ -77,11 +80,12 @@ public class ChatUtils {
 	}
 
 	public static boolean sendCommandHelp(CommandSender sender, Perm permission, String code, org.bukkit.command.Command cmd) {
-		if (!LotteryPlus.checkPermission(sender, permission))
+		if (!permission.checkPermission(sender))
 			return false;
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 		return true;
 	}
+	
 	public static void sendCommandHelp(CommandSender sender, String code, org.bukkit.command.Command cmd) {
 		sendRaw(sender, code, "<command>", cmd.getLabel());
 	}

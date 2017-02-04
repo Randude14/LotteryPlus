@@ -15,10 +15,10 @@ import javax.swing.event.*;
 
 import org.bukkit.Bukkit;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Property;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 @SuppressWarnings({"serial", "rawtypes"})
 public class LotteryCreator extends JPanel implements ActionListener {

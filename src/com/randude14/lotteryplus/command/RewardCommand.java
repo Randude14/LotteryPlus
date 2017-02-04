@@ -5,18 +5,15 @@ import java.util.List;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.lottery.Lottery;
+import com.randude14.lotteryplus.util.ChatUtils;
+import com.randude14.lotteryplus.util.Utils;
 
 public class RewardCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!LotteryPlus.checkPermission(sender, Perm.REWARD)) {
-			return false;
-		}
 		Lottery lottery = LotteryManager.getLottery(args[1]);
 		if(lottery == null) {
 			ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", args[1]);
@@ -26,7 +23,7 @@ public class RewardCommand implements Command {
 			ChatUtils.send(sender, "plugin.command.reward.error.yourself");
 			return false;
 		}
-		OfflinePlayer player = LotteryPlus.getOfflinePlayer(args[0]);
+		OfflinePlayer player = Utils.getOfflinePlayer(args[0]);
 		String name = player.getName();
 		try {
 			int tickets = Integer.parseInt(args[2]);
@@ -43,14 +40,17 @@ public class RewardCommand implements Command {
 	public CommandAccess getAccess() {
 		return CommandAccess.BOTH;
 	}
+	
+    public Perm getPermission() {
+		return Perm.REWARD;
+	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
 		ChatUtils.sendCommandHelp(sender, Perm.REWARD, "plugin.command.reward", cmd);
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(LotteryPlus.hasPermission(sender, Perm.REWARD))
-			list.add("plugin.command.reward");
+		list.add("plugin.command.reward");
 	}
 	
 	public int minValues() {

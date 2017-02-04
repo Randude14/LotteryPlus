@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,6 +21,7 @@ import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryProperties;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -322,8 +323,8 @@ public class LotteryManager {
 		}
 	}
 
-	public static boolean isSignRegistered(Sign sign) {
-		if (LotteryPlus.isSign(sign.getLocation()))
+	public static boolean isSignRegistered(Location sign) {
+		if (LotteryPlus.isSign(sign))
 			return false;
 		for (Lottery lottery : lotteries.values()) {
 			if (lottery.hasRegisteredSign(sign)) {

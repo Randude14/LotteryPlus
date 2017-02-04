@@ -4,23 +4,23 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.Perm;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
-import com.randude14.lotteryplus.WinnersManager;
 
 public class WinnersCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!LotteryPlus.checkPermission(sender, Perm.WINNERS)) {
-			return false;
-		}
-		WinnersManager.listWinners(sender);
+		LotteryPlus.getWinnersManager().listWinners(sender);
 		return true;
 	}
 
 	public CommandAccess getAccess() {
 		return CommandAccess.BOTH;
+	}
+	
+    public Perm getPermission() {
+		return Perm.WINNERS;
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
@@ -28,8 +28,7 @@ public class WinnersCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(LotteryPlus.hasPermission(sender, Perm.WINNERS))
-			list.add("plugin.command.winners");
+		list.add("plugin.command.winners");
 	}
 	
 	public int minValues() {

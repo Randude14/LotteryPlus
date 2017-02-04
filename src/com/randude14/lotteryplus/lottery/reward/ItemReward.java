@@ -6,8 +6,8 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.configuration.Config;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 @SerializableAs("ItemReward")
 public class ItemReward implements Reward {
@@ -26,7 +26,6 @@ public class ItemReward implements Reward {
 				return false;
 			}
 		}
-		ChatUtils.send(player, "lottery.reward.item", "<amount>", reward.getAmount(), "<item>", reward.getType().name(), "<lottery>", lottery);
 		return true;
 	}
 	

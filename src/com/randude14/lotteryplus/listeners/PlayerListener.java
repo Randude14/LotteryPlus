@@ -19,13 +19,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import com.randude14.lotteryplus.ChatUtils;
-import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class PlayerListener implements Listener {
 	private final Map<Player, String> buyers = new HashMap<Player, String>();
@@ -33,7 +32,7 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		ClaimManager.notifyOfClaims(player);
+		LotteryPlus.getRewardsManager().notifyOfRewardClaims(player);
 		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split("\\s+");
 		for (String lotteryName : mainLotteries) {
 			Lottery lottery = LotteryManager.getLottery(player, lotteryName);
@@ -73,9 +72,9 @@ public class PlayerListener implements Listener {
 			lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 			event.setCancelled(true);
 			if (player.isSneaking()) {
-				if (LotteryPlus.checkPermission(player, Perm.SIGN_REMOVE)) {
+				if (Perm.SIGN_REMOVE.checkPermission(player)) {
 					Lottery lottery = LotteryManager.getLottery(player, lines[1]);
-					if (lottery != null && lottery.unregisterSign(sign)) {
+					if (lottery != null && lottery.unregisterSign(event.getClickedBlock().getLocation())) {
 						ChatUtils.send(player, "lottery.sign.removed", "<lottery>", lottery.getName());
 						block.breakNaturally();
 					}
@@ -83,7 +82,7 @@ public class PlayerListener implements Listener {
 			} else {
 				for (Lottery lottery : LotteryManager.getLotteries()) {
 					if (lottery.hasRegisteredSign(block)) {
-						if (!LotteryPlus.checkPermission(player, Perm.SIGN_USE)) {
+						if (!Perm.SIGN_USE.checkPermission(player)) {
 							return;
 						}
 						lines[1] = lottery.getName();
@@ -104,7 +103,7 @@ public class PlayerListener implements Listener {
 						return;
 					}
 				}
-				if (LotteryPlus.checkPermission(player, Perm.SIGN_CREATE)) {
+				if (Perm.SIGN_CREATE.checkPermission(player)) {
 					createSign(player, sign, event);
 				}
 			}
@@ -177,7 +176,7 @@ public class PlayerListener implements Listener {
 	}
 
 	private void createSign(Player player, Sign sign, Cancellable cancel) {
-		if (!LotteryPlus.checkPermission(player, Perm.SIGN_CREATE)) {
+		if (!Perm.SIGN_CREATE.checkPermission(player)) {
 			return;
 		}
 		String[] lines = sign.getLines();
@@ -194,7 +193,7 @@ public class PlayerListener implements Listener {
 		}
 		lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 		lines[1] = lottery.getName();
-		boolean success = lottery.registerSign(player, sign);
+		boolean success = lottery.registerSign(player, sign.getLocation());
 		if(success) {
 			ChatUtils.send(player, "lottery.sign.created", "<lottery>", lottery.getName());
 		} else {

@@ -17,19 +17,16 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-//import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.randude14.lotteryplus.ChatUtils;
-import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.PluginSupport;
-import com.randude14.lotteryplus.WinnersManager;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.permission.*;
 import com.randude14.lotteryplus.lottery.reward.*;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Time;
 import com.randude14.lotteryplus.util.Utils;
 import com.randude14.register.economy.*;
@@ -45,7 +42,7 @@ public class Lottery implements Runnable {
 	private final Map<String, Long> cooldowns;
 	private final List<Permission> perms;
 	private final List<Reward> rewards;
-	private final List<Sign> signs;
+	private final List<Location> signs;
 	private List<String> aliases;
 	private List<String> worlds;
 	private List<String> towny;
@@ -60,7 +57,7 @@ public class Lottery implements Runnable {
 		this.cooldowns = Collections.synchronizedMap(new HashMap<String, Long>());
 		this.perms = new ArrayList<Permission>();
 		this.rewards = new ArrayList<Reward>();
-		this.signs = new ArrayList<Sign>();
+		this.signs = new ArrayList<Location>();
 		this.lotteryName = name;
 		success = false;
 		this.perms.add(new WorldPermission(this));
@@ -187,7 +184,9 @@ public class Lottery implements Runnable {
 		}
 		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
 			public void run() {
-				for(Sign sign : signs) {
+				for(Location loc : signs) {
+					Block block = loc.getBlock();
+					Sign sign = (Sign) block.getState();
 					sign.setLine(0, line1);
 					sign.setLine(1, line2);
 					sign.setLine(2, line3);
@@ -286,8 +285,7 @@ public class Lottery implements Runnable {
 					if(loc != null) {
 						Block block = loc.getBlock();
 						if(LotteryPlus.isSign(block)) {
-							Sign sign = (Sign) block.getState();
-							signs.add(sign);
+							signs.add(loc);
 						} else {
 							Logger.info("lottery.error.sign.load", "<loc>", str);
 						}
@@ -308,10 +306,8 @@ public class Lottery implements Runnable {
 				econ = (Economy) properties.get("econ");
 			} else {
 				econ = null;
-				if(properties.getBoolean(Config.DEFAULT_USE_VAULT)) {
-					if(PluginSupport.VAULT.isInstalled()) {
-						econ = new VaultEconomy();
-					}
+				if(properties.getBoolean(Config.DEFAULT_USE_VAULT) && PluginSupport.VAULT.isInstalled()) {
+					econ = new VaultEconomy();
 				} else {
 					String materialID = properties.getString(Config.DEFAULT_MATERIAL);
 					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
@@ -415,49 +411,48 @@ public class Lottery implements Runnable {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.putAll(properties.getValues());
 		int cntr = 1;
-		for(Sign sign : signs) {
-			map.put("sign" + cntr++, Utils.parseLocation(sign.getLocation()));
+		for(Location sign : signs) {
+			map.put("sign" + cntr++, Utils.parseLocation(sign));
 		}
 		return map;
 	}
 	
-	public boolean registerSign(CommandSender sender, Sign sign) {
+	public boolean registerSign(CommandSender sender, Location sign) {
 		if(!checkAccess(sender)) {
 			return false;
 		}
-		if(hasRegisteredSign(sign)) return false;
+		if(hasRegisteredSign(sign.getBlock())) return false;
 		signs.add(sign);
 		updateSigns();
 		return true;
 	}
 	
-	public boolean hasRegisteredSign(Block block) {
-		for(Sign s : signs) {
-			if(LotteryPlus.locsInBounds(block.getLocation(), s.getLocation())) {
+	public boolean hasRegisteredSign(Location loc) {
+		for(Location sign : signs) {
+			if(Utils.locsInBounds(loc, sign)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	public boolean hasRegisteredSign(Sign sign) {
-		for(Sign s : signs) {
-			if(LotteryPlus.locsInBounds(sign.getLocation(), s.getLocation())) {
-				return true;
-			}
-		}
-		return false;
+	public boolean hasRegisteredSign(Block blockToTest) {
+		return hasRegisteredSign(blockToTest.getLocation());
 	}
 	
-	public boolean unregisterSign(Sign sign) {
+	public boolean unregisterSign(Location loc) {
 		for(int cntr = 0;cntr < signs.size();cntr++) {
-			Sign s = signs.get(cntr);
-			if(LotteryPlus.locsInBounds(sign.getLocation(), s.getLocation())) {
+			Location sign = signs.get(cntr);
+			if(Utils.locsInBounds(sign, loc)) {
 				signs.remove(cntr);
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	public boolean unregisterSign(Block sign) {
+		return unregisterSign(sign.getLocation());
 	}
 	
 	public void onVote(String player) {
@@ -540,14 +535,16 @@ public class Lottery implements Runnable {
 	}
 
 	public synchronized boolean buyTickets(Player player, int tickets) {
+		
 		String name = player.getName();
 		if (!canBuy(player, tickets)) {
 			return false;
 		}
-		if (!econ.hasAccount(name)) {
+		if (!econ.hasAccount(player)) {
 			ChatUtils.sendRaw(player, "lottery.error.noaccount");
 			return false;
 		}
+		
 		String taxAccount = properties.getString(Config.DEFAULT_TAX_ACCOUNT);
 		double ticketCost = properties.getDouble(Config.DEFAULT_TICKET_COST);
 		double total = ticketCost * (double) tickets;
@@ -555,31 +552,37 @@ public class Lottery implements Runnable {
 		double add = ticketCost - (ticketCost * (ticketTax / 100));
 		double d = add * (double) tickets;
 		double taxes = total - d;
-		if (!econ.hasEnough(name, total)) {
+		
+		if (!econ.hasEnough(player, total)) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.notenough");
 			return false;
 		}
-		econ.withdraw(name, total);
+		econ.withdraw(player, total);
+		
 		if(taxAccount != null && econ.hasAccount(taxAccount)) {
 			double left = econ.deposit(taxAccount, taxes);
 			if(left > 0) {
 				List<Reward> list = new ArrayList<Reward>();
 				list.add(new PotReward(econ, left));
-				ClaimManager.addClaim(taxAccount, lotteryName, list);
+				LotteryPlus.getRewardsManager().addRewardClaim(taxAccount, lotteryName, list);
 			}
 		}
+		
 		addTickets(name, tickets);
+		
 		ChatUtils.sendRaw(player, "lottery.tickets.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		if (properties.getBoolean(Config.DEFAULT_USE_POT)) {
 			ChatUtils.sendRaw(player, "lottery.pot.mess", "<money>", econ.format(d), "<lottery>", lotteryName);
 			properties.set(Config.DEFAULT_POT,
 					properties.getDouble(Config.DEFAULT_POT) + d);
 		}
+		
 		long cooldown = properties.getLong(Config.DEFAULT_COOLDOWN);
 		long warmup = properties.getLong(Config.DEFAULT_WARMUP);
 		long time = timer.getTime() - cooldown + warmup;
 		timer.setTime(time);
 		long delay = Config.getLong(Config.BUY_DELAY);
+		
 		if(delay >= 0) {
 			synchronized(cooldowns) {
 				cooldowns.put(name, delay);
@@ -610,7 +613,7 @@ public class Lottery implements Runnable {
 			}
 		}
 		properties.set("players." + player, num + tickets);
-		Player p = Bukkit.getPlayer(player);
+		Player p = Utils.getBukkitPlayer(player);
 		if (p != null) {
 			ChatUtils.send(p, "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		}
@@ -806,17 +809,12 @@ public class Lottery implements Runnable {
 				logWinner.append(", ");
 				logWinner.append("[" + reward.getInfo() + "]");
 			}			
-			WinnersManager.logWinner(logWinner.toString());
+			LotteryPlus.getWinnersManager().logWinner(logWinner.toString());
 			
 			// reward winner if online
-			Player pWinner = Bukkit.getPlayer(winner);
-			boolean rewarded = false;
-			if (pWinner != null) {
-				rewarded = Lottery.handleRewards(pWinner, lotteryName, rewards);
-			}
-			if(!rewarded) {
-				ClaimManager.addClaim(winner, lotteryName, rewards);
-			}
+			Player pWinner = Utils.getBukkitPlayer(winner);
+			if(pWinner != null)
+				LotteryPlus.getRewardsManager().rewardPlayer(pWinner, lotteryName, rewards);
 			
 			// set up for next drawing
 			properties.set("winner", winner);
@@ -848,21 +846,6 @@ public class Lottery implements Runnable {
 				return null;
 			return players.get(winningNumber);
 		}
-	}
-
-	public static boolean handleRewards(Player player, String lottery, List<Reward> list) {
-		Iterator<Reward> rewards = list.iterator();
-		while(rewards.hasNext()) {
-			Reward reward = rewards.next();
-			if(reward.rewardPlayer(player, lottery)) {
-				rewards.remove();
-			}
-		}
-		if(!list.isEmpty()) {
-			ChatUtils.send(player, "lottery.reward.leftover");
-			return false;
-		}
-		return true;
 	}
 
 	private void resetData() {

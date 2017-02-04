@@ -4,19 +4,26 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
+import com.randude14.lotteryplus.Perm;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class GuiCreatorCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(args.length == 0) LotteryPlus.openGui();
-		else LotteryPlus.openGui(args[0]);
+		String lotteryName = null;
+		if(args.length > 0)
+			lotteryName = args[0];
+		LotteryPlus.openGui(lotteryName);
 		return false;
 	}
 
 	public CommandAccess getAccess() {
 		return CommandAccess.CONSOLE;
+	}
+	
+    public Perm getPermission() {
+		return null;
 	}
 	
 	public void listCommands(CommandSender sender, List<String> commands) {

@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.configuration;
 
-import com.randude14.lotteryplus.ChatUtils;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 @SuppressWarnings("rawtypes")
 public class Property<T> implements Comparable<Property> {

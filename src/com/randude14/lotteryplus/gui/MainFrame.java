@@ -20,9 +20,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.configuration.Property;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 @SuppressWarnings({"rawtypes", "serial"})
 public class MainFrame extends JFrame {

@@ -5,24 +5,24 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.randude14.lotteryplus.ChatUtils;
-import com.randude14.lotteryplus.ClaimManager;
 import com.randude14.lotteryplus.Perm;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
 
 public class ClaimCommand implements Command {
 	
-	public boolean execute(CommandSender sender,
-			org.bukkit.command.Command cmd, String[] args) {
-		if (!LotteryPlus.checkPermission(sender, Perm.CLAIM)) {
-			return false;
-		}
-		ClaimManager.rewardClaims((Player) sender);
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+		Player player = (Player) sender;
+		LotteryPlus.getRewardsManager().checkForPlayerClaims(player);
 		return true;
 	}
 
 	public CommandAccess getAccess() {
 		return CommandAccess.PLAYER;
+	}
+	
+    public Perm getPermission() {
+		return Perm.CLAIM;
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
@@ -30,8 +30,7 @@ public class ClaimCommand implements Command {
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (LotteryPlus.hasPermission(sender, Perm.CLAIM))
-			list.add("plugin.command.claim");
+		list.add("plugin.command.claim");
 	}
 	
 	public int minValues() {

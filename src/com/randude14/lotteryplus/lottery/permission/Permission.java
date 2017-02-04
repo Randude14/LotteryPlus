@@ -2,7 +2,7 @@ package com.randude14.lotteryplus.lottery.permission;
 
 import org.bukkit.command.CommandSender;
 
-import com.randude14.lotteryplus.ChatUtils;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public abstract class Permission {
 	

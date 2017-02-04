@@ -1,15 +1,15 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.UIManager;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -27,20 +27,23 @@ import com.randude14.lotteryplus.listeners.*;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.ItemReward;
 import com.randude14.lotteryplus.lottery.reward.PotReward;
-import com.randude14.lotteryplus.metrics.Metrics;
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Time;
 import com.randude14.lotteryplus.util.Updater;
 import com.randude14.register.economy.MaterialEconomy;
 import com.randude14.register.economy.VaultEconomy;
 
 public class LotteryPlus extends JavaPlugin {
+	
 	private static LotteryPlus instance = null;
-	private static Updater updater = null;
-	private static final List<Task> tasks = new ArrayList<Task>();
-	private static MainFrame mainFrame;
-	private static Metrics metrics;
+	
+	private Updater updater = null;
+	private final List<Task> tasks = new ArrayList<Task>();
+	private MainFrame mainFrame;	
+	private WinnersManager wManager;
+	private RewardManager rManager;
 	private File configFile;
 
 	public void onEnable() {
@@ -64,14 +67,16 @@ public class LotteryPlus extends JavaPlugin {
 		tasks.add(new SaveTask());
 		tasks.add(new UpdateCheckTask());
 		registerConfigurationClasses();
-		ClaimManager.loadClaims();
-		WinnersManager.loadWinners();
-		Perm.loadPermissions();
+		rManager = new RewardManager();
+		rManager.loadRewardClaims();
+		wManager = new WinnersManager();
+		wManager.onEnable();
 		int numLotteries = LotteryManager.loadLotteries();
 		Logger.info("logger.lottery.num", "<number>", numLotteries);
 		callTasks();
 		saveExtras();
 		registerListeners();
+		Perm.loadPermissions();
 		CommandManager cm = new CommandManager()
 		    .registerCommand(new BuyCommand(), "buy")
 		    .registerCommand(new DrawCommand(), "draw")
@@ -97,20 +102,16 @@ public class LotteryPlus extends JavaPlugin {
 				LotteryPlus.scheduleAsyncRepeatingTask(new LotteryManager.TimerTask(), Time.SERVER_SECOND.getBukkitTime(), Time.SERVER_SECOND.getBukkitTime());
 			}
 		}, 0L);
-		try {
-			metrics = new Metrics(this);
-			metrics.start();
-		} catch (IOException ex) {
-		}
+		
 		updater = new Updater(this, 36229, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		Logger.info("logger.enabled");
 	}
 	
 	public void onDisable() {
 		Logger.info("logger.disabled");
+		wManager.onDisable();
 		getServer().getScheduler().cancelTasks(this);
 		LotteryManager.saveLotteries();
-		WinnersLogger.close();
 		instance = null;
 	}
 
@@ -148,7 +149,7 @@ public class LotteryPlus extends JavaPlugin {
 	}
 	
 	private static void callTasks() {
-		for(Task task : tasks) {
+		for(Task task : instance.tasks) {
 			task.reschedule();
 		}
 	}
@@ -172,37 +173,14 @@ public class LotteryPlus extends JavaPlugin {
 		}
 	}
 	
-	public static boolean locsInBounds(Location loc1, Location loc2) {
-		return loc1.getBlockX() == loc2.getBlockX()
-				&& loc1.getBlockY() == loc2.getBlockY()
-				&& loc1.getBlockZ() == loc2.getBlockZ();
-	}
-
-	// uses binary search
-	public static OfflinePlayer getOfflinePlayer(String name) {
-		OfflinePlayer[] players = instance.getServer().getOfflinePlayers();
-		int left = 0;
-		int right = players.length - 1;
-		while (left <= right) {
-			int mid = (left + right) / 2;
-			int result = players[mid].getName().compareToIgnoreCase(name);
-			if (result == 0)
-				return players[mid];
-			else if (result < 0)
-				left = mid + 1;
-			else
-				right = mid - 1;
-		}
-
-		// if it doesn't exist, then have the server
-		// create the object instead of returning null
-		return instance.getServer().getOfflinePlayer(name);
+	public static Server getBukkitServer() {
+		return instance.getServer();
 	}
 	
 	public static void updateCheck(CommandSender sender) {
-		Updater.UpdateResult result = updater.getResult();
+		Updater.UpdateResult result = instance.updater.getResult();
 		if(result == Updater.UpdateResult.UPDATE_AVAILABLE) {
-			String latestVersion = updater.getLatestName();
+			String latestVersion = instance.updater.getLatestName();
 			String currentVersion = "v" + LotteryPlus.getVersion();
 			ChatUtils.send(sender, "plugin.update-available", "<current_version>", currentVersion, "<new_version>", latestVersion);
 		} else {
@@ -213,39 +191,26 @@ public class LotteryPlus extends JavaPlugin {
 	public static boolean dispatchCommand(String command) {
 		return instance.getServer().dispatchCommand(instance.getServer().getConsoleSender(), command);
 	}
-
-	public static boolean checkPermission(CommandSender sender,
-			Perm permission) {
-		if (!hasPermission(sender, permission)) {
-			ChatUtils.send(sender, "plugin.error.permission");
-			return false;
-		}
-		return true;
-	}
-
-	public static boolean hasPermission(CommandSender sender, Perm perm) {
-		if(perm.hasPermission(sender)) {
-			return true;
-		} else {
-			Perm parent = perm.getParent();
-			return parent != null ? hasPermission(sender, parent) : false;
-		}
-	}
-	
-	public static void openGui() {
-		if(mainFrame == null) 
-			mainFrame = new MainFrame();
-		mainFrame.setVisible(true);
-		mainFrame.requestFocus();
-	}
 	
 	public static void openGui(String lotteryName) {
-		openGui();
-		mainFrame.openCreator(lotteryName);
+		if(instance.mainFrame == null) 
+			instance.mainFrame = new MainFrame();
+		instance.mainFrame.setVisible(true);
+		instance.mainFrame.requestFocus();
+		if(lotteryName != null)
+			instance.mainFrame.openCreator(lotteryName);
 	}
 	
 	public static String getVersion() {
 		return instance.getDescription().getVersion();
+	}
+	
+	public static WinnersManager getWinnersManager() {
+		return instance.wManager;
+	}
+	
+	public static RewardManager getRewardsManager() {
+		return instance.rManager;
 	}
 	
 	public static BukkitTask scheduleAsyncRepeatingTask(Runnable runnable, long initialDelay, long reatingDelay) {
@@ -274,10 +239,6 @@ public class LotteryPlus extends JavaPlugin {
 
 	public static boolean isSign(Location loc) {
 		return isSign(loc.getBlock());
-	}
-	
-	public static Metrics getMetrics() {
-		return metrics;
 	}
 	
 	public static final LotteryPlus getInstance() {

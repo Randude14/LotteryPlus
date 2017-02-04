@@ -14,7 +14,7 @@ public class WinnersLogger extends java.util.logging.Logger {
 	private static final String winnersLogString = plugin.getDataFolder() + "/winners.log";
 	private static final File winnersLogFile = new File(winnersLogString);
 	
-	private WinnersLogger() {
+	public WinnersLogger() {
 		super("WinnersLogger", null);
 		setUseParentHandlers(false);
 		try {
@@ -41,13 +41,8 @@ public class WinnersLogger extends java.util.logging.Logger {
 		}
 	}
 	
-	private static final WinnersLogger logger = new WinnersLogger();
-	public static void log(String record) {
-		logger.info(record);
-	}
-	
-	public static void close() {
-		for(Handler handler : logger.getHandlers()) {
+	public void close() {
+		for(Handler handler : this.getHandlers()) {
 			try {
 				handler.close();
 			} catch (Exception ex) {

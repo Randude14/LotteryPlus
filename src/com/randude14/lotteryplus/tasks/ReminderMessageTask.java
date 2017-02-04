@@ -2,9 +2,9 @@ package com.randude14.lotteryplus.tasks;
 
 import org.bukkit.scheduler.BukkitTask;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
+import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Time;
 
 public class ReminderMessageTask extends Task {

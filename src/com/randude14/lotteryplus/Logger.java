@@ -2,6 +2,8 @@ package com.randude14.lotteryplus;
 
 import org.bukkit.Bukkit;
 
+import com.randude14.lotteryplus.util.ChatUtils;
+
 public class Logger {
 	public static final LotteryPlus plugin = LotteryPlus.getInstance();
 	

@@ -2,6 +2,7 @@ package com.randude14.lotteryplus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +11,19 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import com.randude14.lotteryplus.configuration.CustomYaml;
-import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.Reward;
+import com.randude14.lotteryplus.util.ChatUtils;
 
-public class ClaimManager {
-	private static void saveClaims() {
+public class RewardManager {
+	private final Map<String, List<LotteryClaim>> claims = new HashMap<String, List<LotteryClaim>>();
+	private final CustomYaml claimsConfig;
+	
+	public RewardManager() {
+		claimsConfig = new CustomYaml("claims.yml");
+	}
+	
+	private void saveRewardClaims() {
 		FileConfiguration config = claimsConfig.getConfig();
 		config.createSection("claims"); // clean config
 		for(String player : claims.keySet()) {
@@ -27,7 +35,7 @@ public class ClaimManager {
 		claimsConfig.saveConfig();
 	}
 	
-	public static void loadClaims() {
+	public void loadRewardClaims() {
 		FileConfiguration config = claimsConfig.getConfig();
 		ConfigurationSection section = config.getConfigurationSection("claims");
 		if(section == null)
@@ -48,41 +56,63 @@ public class ClaimManager {
 		}
 	}
 
-	public static void addClaim(String name, String lottery, List<Reward> rewards) {
+	public void addRewardClaim(String name, String lottery, List<Reward> rewards) {
 		if (!claims.containsKey(name))
 			claims.put(name, new ArrayList<LotteryClaim>());
 		LotteryClaim claim = new LotteryClaim(lottery, rewards);
 		claims.get(name).add(claim);
-		saveClaims();
+		this.saveRewardClaims();
 	}
 	
-	public static void rewardClaims(Player player) {
+	public boolean rewardPlayer(Player player, String lottery, List<Reward> rewards) {
+		this.givePlayerRewards(player, lottery, rewards);
+		if(!rewards.isEmpty()) {
+			this.addRewardClaim(player.getName(), lottery, rewards);
+			return false;
+		}
+		return true;
+	}
+	
+	public void checkForPlayerClaims(Player player) {
 		List<LotteryClaim> playerClaims = claims.get(player.getName());
 		if(playerClaims != null && !playerClaims.isEmpty()) {
 			for(int cntr = 0;cntr < playerClaims.size();cntr++) {
 				LotteryClaim claim = playerClaims.get(cntr);
-				if(Lottery.handleRewards(player, claim.getLotteryName(), claim.getRewards())) {
+				String lotteryName = claim.getLotteryName();
+				List<Reward> rewards = claim.getRewards();
+				this.givePlayerRewards(player, lotteryName, rewards);
+				if(rewards.isEmpty()) {
 					playerClaims.remove(cntr);
 					cntr--;
 				}
 			}
-			saveClaims();
+			if(playerClaims.isEmpty())
+				claims.remove(player.getName());
+			this.saveRewardClaims();
 		} else {
 			ChatUtils.send(player, "lottery.error.claim.none");
 		}
 	}
 	
-	public static void notifyOfClaims(Player player) {
+	public void notifyOfRewardClaims(Player player) {
 		List<LotteryClaim> playerClaims = claims.get(player.getName());
 		if(playerClaims != null && !playerClaims.isEmpty()) {
 			ChatUtils.send(player, "lottery.claim.notify");
 		}
-	} 
-
-	private static final Map<String, List<LotteryClaim>> claims = new HashMap<String, List<LotteryClaim>>();
-	private static final CustomYaml claimsConfig;
+	}
 	
-	static {
-		claimsConfig = new CustomYaml("claims.yml");
+	private void givePlayerRewards(Player player, String lottery, List<Reward> rewards) {
+		Iterator<Reward> it = rewards.iterator();
+		while(it.hasNext()) {
+			Reward reward = it.next();
+			String info = reward.getInfo();
+			ChatUtils.send(player, "lottery.reward.giving", "<reward>", info);
+			if(reward.rewardPlayer(player, lottery)) {
+				it.remove();
+				ChatUtils.send(player, "lottery.reward.rewarded", "<reward>", info);
+			} else {
+				ChatUtils.send(player, "lottery.reward.leftover", "<reward>", info, "<updatedreward>", reward.getInfo());
+			}
+		}
 	}
 }

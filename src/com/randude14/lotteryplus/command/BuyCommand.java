@@ -5,19 +5,15 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class BuyCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!LotteryPlus.checkPermission(sender, Perm.BUY)) {
-			return false;
-		}
 		if(args.length == 1) return buyTickets((Player) sender, args[0], Config.getString(Config.MAIN_LOTTERY));
 		else return buyTickets((Player) sender, args[1], args[0]);
 	}
@@ -26,16 +22,17 @@ public class BuyCommand implements Command {
 		return CommandAccess.PLAYER;
 	}
 	
+    public Perm getPermission() {
+		return Perm.BUY;
+	}
+	
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(LotteryPlus.hasPermission(sender, Perm.BUY)){
-			list.add("plugin.command.buy");
-			list.add("plugin.command.buy.main");
-		}
+		list.add("plugin.command.buy");
+		list.add("plugin.command.buy.main");
 	}
 	
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
 		ChatUtils.sendCommandHelp(sender, Perm.BUY, "plugin.command.buy", cmd);
-		ChatUtils.sendCommandHelp(sender, Perm.BUY, "plugin.command.buy.main", cmd);
 	}
 	
 	public int minValues() {

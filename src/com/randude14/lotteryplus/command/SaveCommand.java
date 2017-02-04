@@ -4,17 +4,13 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.Perm;
-import com.randude14.lotteryplus.LotteryPlus;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class SaveCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if(!LotteryPlus.checkPermission(sender, Perm.FORCE_SAVE)) {
-			return false;
-		}
 		LotteryManager.saveLotteries();
 		ChatUtils.send(sender, "plugin.command.save.mess");
 		return true;
@@ -23,14 +19,17 @@ public class SaveCommand implements Command {
 	public CommandAccess getAccess() {
 		return CommandAccess.BOTH;
 	}
+	
+    public Perm getPermission() {
+		return Perm.FORCE_SAVE;
+	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
 		ChatUtils.sendCommandHelp(sender, Perm.FORCE_SAVE, "plugin.command.save", cmd);
 	}
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if(LotteryPlus.hasPermission(sender, Perm.FORCE_SAVE))
-			list.add("plugin.command.save");
+		list.add("plugin.command.save");
 	}
 	
 	public int minValues() {

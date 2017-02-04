@@ -12,9 +12,9 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
-import com.randude14.lotteryplus.ChatUtils;
 import com.randude14.lotteryplus.LotteryManager;
-import com.randude14.lotteryplus.LotteryPlus;
+import com.randude14.lotteryplus.util.ChatUtils;
+import com.randude14.lotteryplus.util.Utils;
 
 public class SignProtectorListener implements Listener {
 
@@ -53,7 +53,7 @@ public class SignProtectorListener implements Listener {
 		BlockFace attached = ((org.bukkit.material.Sign) check.getState()
 				.getData()).getAttachedFace();
 		Block blockAttached = check.getRelative(attached);
-		return !LotteryPlus.locsInBounds(blockAttached.getLocation(),
+		return !Utils.locsInBounds(blockAttached.getLocation(),
 				broken.getLocation());
 	}
 

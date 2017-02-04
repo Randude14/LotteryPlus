@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.lottery;
 
-import com.randude14.lotteryplus.ChatUtils;
+import com.randude14.lotteryplus.util.ChatUtils;
 
 public class BlankTimer implements Timer {
 	private boolean running = false;
