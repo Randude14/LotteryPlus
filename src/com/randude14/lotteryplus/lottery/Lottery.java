@@ -262,7 +262,7 @@ public class Lottery implements Runnable {
 		setProperties(sender, properties, false);
 	}
 
-	public void setProperties(CommandSender sender, LotteryProperties properties, boolean force) throws InvalidLotteryException {
+	public void setProperties(CommandSender sender, LotteryProperties properties, boolean clearRewards) throws InvalidLotteryException {
 		try {
 			// CHECK FOR NEGATIVE properties
 			double time = properties.getDouble(Config.DEFAULT_TIME);
@@ -273,7 +273,7 @@ public class Lottery implements Runnable {
 			Validate.isTrue(ticketCost >= 0.0, ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
 
 			// 
-			if (force) {
+			if (clearRewards) {
 				rewards.clear();
 			} else {
 				transfer(this.properties, properties);

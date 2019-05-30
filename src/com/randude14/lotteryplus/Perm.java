@@ -7,6 +7,9 @@ import org.bukkit.permissions.PermissionDefault;
 
 import com.randude14.lotteryplus.util.ChatUtils;
  
+/*
+ * This class is used for determining whether a player has permission to use certain commands or use specific objects
+ */
 public enum Perm {
    
     SUPER_PERM(new Permission("lottery.*", PermissionDefault.FALSE)),
@@ -35,28 +38,44 @@ public enum Perm {
     SIGN_USE(new Permission("lottery.sign.use", PermissionDefault.TRUE), PARENT_SIGN);
    
     private Perm(Permission permission) {
-        this(permission, null); //Parent will end up null for superperm (technically we could go with '*' for the entire server, but eh.)
+        this(permission, null);
     }
    
-    private Perm(Permission permission, Perm parent) { //Make this the more complicated one so that everything gets done and we can plug in default values for simpler constructors
+    private Perm(Permission permission, Perm parent) { 
         this.permission = permission;
         this.parent = parent;
         if(parent != null)
         	this.permission.addParent(parent.getPermission(), true);
     }
    
+    /*
+     * Return the parent for this permission
+     */
     public Perm getParent() {
         return parent;
     }
    
+    /*
+     * Return the Bukkit version of this permission
+     */
     public Permission getPermission() {
         return permission;
     }
     
+    /*
+     * Check if user has permission
+     * 
+     * @param sender - user to check
+     */
     public boolean hasPermission(CommandSender sender) {
     	return sender.hasPermission(permission);
     }
    
+    /*
+     * Check if user has permission. If they do not, sends a warning message that they do not
+     * 
+     * @param sender - user to check
+     */
     public boolean checkPermission(CommandSender sender) {
 		if (!sender.hasPermission(permission)) {
 			ChatUtils.send(sender, "plugin.error.permission");
@@ -65,12 +84,15 @@ public enum Perm {
 		return true;
 	}
    
+    /*
+     * Load all permissions to the Bukkit server
+     */
     public static void loadPermissions() {
         for(Perm perm : Perm.values()) {
             Bukkit.getPluginManager().addPermission(perm.getPermission());
         }
     }
    
-    private final Permission permission;
-    private Perm parent;
+    private final Permission permission; // the Bukkit version of this permission
+    private Perm parent;                 // the parent of this permission
 }

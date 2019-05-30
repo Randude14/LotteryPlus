@@ -8,6 +8,9 @@ import org.bukkit.command.CommandSender;
 import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.util.ChatUtils;
 
+/*
+ * Calls 
+ */
 public class WinnersManager {
 	private final CustomYaml winnersConfig = new CustomYaml("winners.yml");
 	private final List<String> winners = new ArrayList<String>();

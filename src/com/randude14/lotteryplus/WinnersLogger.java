@@ -9,6 +9,9 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/*
+ * Logs the winners so that they server admins can view them
+ */
 public class WinnersLogger extends java.util.logging.Logger {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private static final String winnersLogString = plugin.getDataFolder() + "/winners.log";
@@ -17,20 +20,27 @@ public class WinnersLogger extends java.util.logging.Logger {
 	public WinnersLogger() {
 		super("WinnersLogger", null);
 		setUseParentHandlers(false);
+		
 		try {
 			if(!winnersLogFile.exists())
 				winnersLogFile.createNewFile();
+			
 			FileHandler handler = new FileHandler(winnersLogString);
 			handler.setFormatter(new WinnerFormatter());
 			handler.setLevel(Level.INFO);
-			addHandler(handler);
+			addHandler(handler); // add file handler
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 	
+	/*
+	 * Formats the winners with time stamping and the rewards that were given
+	 */
 	class WinnerFormatter extends Formatter {
 		private final SimpleDateFormat dateFormatter = new SimpleDateFormat("[yyyy-MMM-ddd] [hh:mm:ss]");
+		
 		public String format(LogRecord record) {
 			StringBuffer sb = new StringBuffer();
 			sb.append(dateFormatter.format(new Date()));
@@ -41,6 +51,9 @@ public class WinnersLogger extends java.util.logging.Logger {
 		}
 	}
 	
+	/*
+	 * Called on closing of this logger. Closes all handlers
+	 */
 	public void close() {
 		for(Handler handler : this.getHandlers()) {
 			try {
