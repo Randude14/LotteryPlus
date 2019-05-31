@@ -1,7 +1,10 @@
 package com.randude14.lotteryplus.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -56,10 +59,56 @@ public class Utils {
 				&& loc1.getBlockZ() == loc2.getBlockZ();
 	}
 	
+	public static String getUniqueName(OfflinePlayer player) {
+		return player.getName() + LotteryPlus.NAME_SEPARATOR + player.getUniqueId();
+	}
+	
+	public static String stripNameOfId(String player) {
+        int colonIndex = player.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+		
+		if(colonIndex >= 0) {
+			return player.substring(0, colonIndex);
+		}
+		
+		return player;
+	}
+	
+	
+	private static final Comparator<OfflinePlayer> offlineplayerComp = (OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
+	
+	public static boolean isSamePlayer(OfflinePlayer player, String name) {
+		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+		
+		if(colonIndex >= 0) {
+			String id = name.substring(colonIndex+1);
+			UUID uuid = UUID.fromString(id);
+			OfflinePlayer check = Bukkit.getOfflinePlayer(uuid);
+			return player.getUniqueId() == check.getUniqueId();
+		}
+		
+		 return player.getName().equalsIgnoreCase(name);
+	}
+	
 	// uses binary search
 	@SuppressWarnings("deprecation")
 	public static OfflinePlayer getOfflinePlayer(String name) {
+		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+		
+		if(colonIndex >= 0) {
+			String id = name.substring(colonIndex+1);
+			UUID uuid = UUID.fromString(id);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+			if(player != null) {
+				return player;
+			} else {
+				name = name.substring(0, colonIndex);
+			}
+		}
+		
 		OfflinePlayer[] players = LotteryPlus.getBukkitServer().getOfflinePlayers();
+		
+		Arrays.sort(players, offlineplayerComp);
+		
 		int left = 0;
 		int right = players.length - 1;
 		while (left <= right) {
@@ -103,7 +152,6 @@ public class Utils {
 		try {
 			short damage = 0;
 			int stackSize = 1;
-			int colenIndex = line.indexOf(':');
 			int sizeIndex = line.indexOf('*');
 			int hyphonIndex = line.indexOf('^');
 			int itemIndex = line.length();

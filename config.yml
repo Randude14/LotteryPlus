@@ -160,7 +160,7 @@ defaults:
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:
-    # 'Diamond Pickaxe^DURABILITY:3' -> this creates a diamond pickaxe with a DURABILITY with a level of 3
+    # 'Diamond_Pickaxe^DURABILITY:3' -> this creates a diamond pickaxe with a durability enchantment with a level of 3
     #
     item-rewards: ''
 

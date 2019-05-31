@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.Reward;
 import com.randude14.lotteryplus.util.ChatUtils;
+import com.randude14.lotteryplus.util.Utils;
 
 /*
  * This class keeps track of the rewards given to the winners of the lotteries
@@ -80,7 +82,8 @@ public class RewardManager {
 	/*
 	 * Called when a player is offline during the drawing
 	 */
-	public void addRewardClaim(String name, String lottery, List<Reward> rewards) {
+	public void addRewardClaim(OfflinePlayer player, String lottery, List<Reward> rewards) {
+		String name = Utils.getUniqueName(player);
 		
 		if (!claims.containsKey(name))
 			claims.put(name, new ArrayList<LotteryClaim>());
@@ -103,19 +106,28 @@ public class RewardManager {
 	public boolean rewardPlayer(Player player, String lottery, List<Reward> rewards) {
 		this.givePlayerRewards(player, lottery, rewards);
 		if(!rewards.isEmpty()) {
-			this.addRewardClaim(player.getName(), lottery, rewards);
+			this.addRewardClaim(player, lottery, rewards);
 			return false;
 		}
 		return true;
 	}
 	
 	/*
-	 * Checks if a player has any unclaimed rewards
+	 * Checks if a player has any unclaimed rewards and if they do, reward them
 	 * 
 	 * @param player - player to check
 	 */
 	public void checkForPlayerClaims(Player player) {
-		List<LotteryClaim> playerClaims = claims.get(player.getName());
+		
+		// new system also stores the player's unique id
+		List<LotteryClaim> playerClaims = claims.get(Utils.getUniqueName(player));
+		
+		// check for old storage of claims that saved only by player name
+		List<LotteryClaim> oldClaims = claims.get(player.getName());
+		
+		if(!oldClaims.isEmpty())
+			playerClaims.addAll(oldClaims);
+		
 		
 		if(playerClaims != null && !playerClaims.isEmpty()) {
 			
@@ -143,6 +155,8 @@ public class RewardManager {
 		} else {
 			ChatUtils.send(player, "lottery.error.claim.none");
 		}
+		
+		
 	}
 	
 	/*

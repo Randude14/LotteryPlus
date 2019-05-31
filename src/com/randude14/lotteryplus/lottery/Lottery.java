@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -455,14 +456,17 @@ public class Lottery implements Runnable {
 		return unregisterSign(sign.getLocation());
 	}
 	
-	public void onVote(String player) {
+	public void onVote(String playerName) {
 		int reward = properties.getInt(Config.DEFAULT_VOTIFIER_REWARD);
 		if(reward > 0) {
 			String prevWinner = properties.getString("winner", "");
-			if(prevWinner.equalsIgnoreCase(player) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+			if(prevWinner.equalsIgnoreCase(playerName) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 				return;
 			}
 			int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
+			
+			OfflinePlayer player = Utils.getOfflinePlayer(playerName);
+			
 			int num = getTicketsBought(player);
 			if (ticketLimit > 0) {
 				int total = getTotalTicketsBought();
@@ -480,32 +484,40 @@ public class Lottery implements Runnable {
 	}
 	
 	private boolean canBuy(Player player, int tickets) {
+		
 		if(!properties.getBoolean(Config.DEFAULT_BUY_TICKETS)) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.disabled", "<lottery>", lotteryName);
 			return false;
 		}
+		
 		String prevWinner = properties.getString("winner", "");
+		
 		if(prevWinner.equalsIgnoreCase(player.getName()) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(player, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
 		}
+		
 		if(!checkAccess(player)) {
 			return false;
 		}
+		
 		if (isDrawing() && !Config.getBoolean(Config.BUY_DURING_DRAW)) {
 			ChatUtils.sendRaw(player, "lottery.error.drawing");
 			return false;
 		}
+		
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
+		
 		if (ticketLimit > 0 && getTotalTicketsBought() >= ticketLimit) {
 			ChatUtils.sendRaw(player, "lottery.error.tickets.soldout");
 			return false;
 		}
+		
 		String name = player.getName();
 		int maxTickets = properties.getInt(Config.DEFAULT_MAX_TICKETS);
 		int maxPlayers = properties.getInt(Config.DEFAULT_MAX_PLAYERS);
 		int playersEntered = getPlayersEntered();
-		int num = getTicketsBought(name);
+		int num = getTicketsBought(player);
 		if (maxTickets > 0) {
 			if (num >= maxTickets) {
 				ChatUtils.sendRaw(player, "lottery.error.tickets.anymore");
@@ -564,11 +576,12 @@ public class Lottery implements Runnable {
 			if(left > 0) {
 				List<Reward> list = new ArrayList<Reward>();
 				list.add(new PotReward(econ, left));
-				LotteryPlus.getRewardsManager().addRewardClaim(taxAccount, lotteryName, list);
+				OfflinePlayer offlineplayer = Utils.getOfflinePlayer(name);
+				LotteryPlus.getRewardsManager().addRewardClaim(offlineplayer, lotteryName, list);
 			}
 		}
 		
-		addTickets(name, tickets);
+		addTickets(player, tickets);
 		
 		ChatUtils.sendRaw(player, "lottery.tickets.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		if (properties.getBoolean(Config.DEFAULT_USE_POT)) {
@@ -593,13 +606,16 @@ public class Lottery implements Runnable {
 		return true;
 	}
 
-	public synchronized boolean rewardPlayer(CommandSender rewarder, String player, int tickets) {
+	public synchronized boolean rewardPlayer(CommandSender rewarder, String playerName, int tickets) {
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
 		String prevWinner = properties.getString("winner", "");
-		if(prevWinner.equalsIgnoreCase(player) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
-			ChatUtils.send(rewarder, "lottery.error.already-won.reward", "<lottery>", lotteryName, "<player>", player);
+		if(prevWinner.equalsIgnoreCase(playerName) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+			ChatUtils.send(rewarder, "lottery.error.already-won.reward", "<lottery>", lotteryName, "<player>", playerName);
 			return false;
 		}
+		
+		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
+		
 		int num = getTicketsBought(player);
 		if (ticketLimit > 0) {
 			int total = getTotalTicketsBought();
@@ -612,10 +628,9 @@ public class Lottery implements Runnable {
 				return false;
 			}
 		}
-		properties.set("players." + player, num + tickets);
-		Player p = Utils.getBukkitPlayer(player);
-		if (p != null) {
-			ChatUtils.send(p, "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
+		
+		if (player.isOnline()) {
+			ChatUtils.send(player.getPlayer(), "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		}
 		updateSigns();
 		LotteryManager.saveLottery(lotteryName);
@@ -658,7 +673,7 @@ public class Lottery implements Runnable {
 		ChatUtils.sendRaw(sender, "lottery.info.players", "<players>", getPlayersEntered());
 		ChatUtils.sendRaw(sender, "lottery.info.tickets.left", "<number>", formatTicketsLeft());
 		if (sender instanceof Player)
-			ChatUtils.sendRaw(sender, "lottery.info.tickets.bought", "<number>", getTicketsBought(sender.getName()));
+			ChatUtils.sendRaw(sender, "lottery.info.tickets.bought", "<number>", getTicketsBought((Player) sender));
 	}
 
 	private String formatTicketsLeft() {
@@ -710,16 +725,20 @@ public class Lottery implements Runnable {
 		return total;
 	}
 
-	public int getTicketsBought(String name) {
-		return properties.getInt("players." + name, 0);
+	public int getTicketsBought(OfflinePlayer player) {
+		return properties.getInt("players." + Utils.getUniqueName(player), 0);
 	}
 	
-	public void addTickets(String name, int add) {
+	public void addTickets(OfflinePlayer player, int add) {
+		String name = Utils.getUniqueName(player);
+		
 		int tickets = properties.getInt("players." + name, 0);
 		properties.set("players." + name, tickets + add);
 	}
 	
-	public void subTickets(String name, int remove) {
+	public void subTickets(OfflinePlayer player, int remove) {
+		String name = Utils.getUniqueName(player);
+		
 		int tickets = properties.getInt("players." + name, 0);
 		properties.set("players." + name, tickets - remove);
 	}
@@ -731,17 +750,20 @@ public class Lottery implements Runnable {
 	// sender: sender that initiated force draw, may be null if drawing was done
 	// 'naturally'
 	public synchronized void draw(CommandSender sender) {
+		
 		if (properties.getBoolean("drawing", false)) {
 			if (sender != null) {
 				ChatUtils.send(sender, "lottery.error.drawing", "<lottery>", lotteryName);
 			}
 			return;
 		}
+		
 		if (sender == null) {
 			broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
 		} else {
 			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
+		
 		long delay = Config.getLong(Config.DRAW_DELAY);
 		drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
 		timer.setRunning(false);
@@ -793,7 +815,7 @@ public class Lottery implements Runnable {
 			}
 			
 			// broadcast winner		
-			broadcast("lottery.drawing.winner.mess", "<winner>", winner);
+			broadcast("lottery.drawing.winner.mess", "<winner>", Utils.stripNameOfId(winner));
 			
 			// add pot reward
 			if (properties.getBoolean(Config.DEFAULT_USE_POT)) {

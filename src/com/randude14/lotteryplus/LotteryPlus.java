@@ -51,6 +51,8 @@ public class LotteryPlus extends JavaPlugin {
 	 */
 	private static LotteryPlus instance = null;
 	
+	public static final String NAME_SEPARATOR = "-";
+	
 	private Updater updater = null;                         // used to check if there is a new version of this plugin
 	private final List<Task> tasks = new ArrayList<Task>(); // keeps track of plugin task threads
 	private MainFrame mainFrame;	                        // the gui used to create lotteries
