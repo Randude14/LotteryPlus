@@ -1,10 +1,13 @@
 package com.randude14.lotteryplus.command;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.command.CommandExecutor;
@@ -70,7 +73,7 @@ public class CommandManager implements CommandExecutor {
 		return false;
 	}
 	
-    public void listCommands(CommandSender sender, List<String> list) {
+    public void listCommands(CommandSender sender, Set<String> list) {
 		for(Command command : commands.values()) {
 			CommandAccess access = command.getAccess();
 			Perm permission = command.getPermission();
@@ -81,10 +84,9 @@ public class CommandManager implements CommandExecutor {
 	}
 
     private void getCommands(CommandSender sender, org.bukkit.command.Command cmd, int page) {
-		List<String> list = new CommandList();
+		Set<String> list = new TreeSet<String>();
 		list.add("plugin.command.main");
 		listCommands(sender, list);
-		Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
 		
 		int len = list.size();
 		int max = (len / 10) + 1;
@@ -94,21 +96,17 @@ public class CommandManager implements CommandExecutor {
 			page = max;
 		if (page < 1)
 			page = 1;
-		int cntr = (page * 10) - 10;
+		int skipTo = (page * 10) - 10;
+		
 		ChatUtils.sendRaw(sender, "plugin.command.headliner", "<page>", page, "<max>", max);
-		for (int stop = cntr + 10; cntr < stop && cntr < len; cntr++) {
-			ChatUtils.sendRaw(sender, list.get(cntr), "<command>", cmd.getLabel());
+		Iterator<String> iterator = list.iterator();
+		
+		// skip to where the page is
+		while(iterator.hasNext() && skipTo-- > 0)
+			iterator.next();
+		
+		for (int cntr = 0;cntr < 10 && iterator.hasNext();cntr++) {
+			ChatUtils.sendRaw(sender, iterator.next(), "<command>", cmd.getLabel());
 		}
 	}
-    
-    @SuppressWarnings("serial")
-	private class CommandList extends ArrayList<String> {
-    	@Override
-    	public boolean add(String str) {
-    		if(contains(str)) {
-    			return false;
-    		}
-    		return super.add(str);
-    	}
-    }
 }

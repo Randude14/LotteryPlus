@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.command;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.command.CommandSender;
 
@@ -35,7 +35,7 @@ public class LoadCommand implements Command {
 		ChatUtils.sendCommandHelp(sender, Perm.LOAD, "plugin.command.load2", cmd);
 	}
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, Set<String> list) {
 		list.add("plugin.command.load1");
 		list.add("plugin.command.load2");
 	}

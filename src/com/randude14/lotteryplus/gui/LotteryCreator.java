@@ -41,7 +41,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		setLayout(new BorderLayout());
 	}
 
-	protected boolean initComponents(Map<Property, Object> map) {
+	protected boolean initComponents(Map<Property<?>, Object> map) {
 		defaults = new DefaultListModel<Property>();
 		for(Property prop : Config.lotteryDefaults) {
 			if(!map.containsKey(prop)) {

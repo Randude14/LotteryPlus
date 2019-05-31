@@ -54,7 +54,7 @@ public class MainFrame extends JFrame {
 				return;
 			}
 		}
-		Map<Property, Object> map = new HashMap<Property, Object>();
+		Map<Property<?>, Object> map = new HashMap<Property<?>, Object>();
 		lotteryName = LotteryManager.putAll(lotteryName, map);
 		LotteryCreator creator = new LotteryCreator(this, lotteryName);
 		if(!creator.initComponents(map)) {

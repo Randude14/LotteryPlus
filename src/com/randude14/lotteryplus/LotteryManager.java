@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.CustomYaml;
+import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.lottery.LotteryProperties;
@@ -191,6 +192,43 @@ public class LotteryManager {
 		}
 		lotteriesConfig.saveConfig();
 		return true;
+	}
+	
+	/*
+	 * Tries to find a section for the lotteryName and fills the given map with its values
+	 * 
+	 * @param lotteryName - section to search for
+	 * @param putin - map to put in
+	 * @return the name of the section
+	 */
+	public static String putAll(String lotteryName, Map<Property<?>, Object> putin) {
+		ConfigurationSection lotteriesSection = LotteryManager.getOrCreateLotteriesSection();
+		
+		// go through each section
+		for (String key : lotteriesSection.getKeys(false)) {
+			
+			// find section
+			if (key.equalsIgnoreCase(lotteryName)) {
+				ConfigurationSection section = lotteriesSection.getConfigurationSection(key);
+				Map<String, Object> values = section.getValues(false);
+				
+				// go through the default values for lotteries
+				for(Property<?> prop : Config.lotteryDefaults) {
+					String name = prop.getName();
+					
+					// if section contains this property add it
+					if(values.containsKey(name)) {
+						putin.put(prop, values.get(name));
+					}
+					
+				}
+	
+				lotteryName = key;
+				break;
+			}
+		}
+		
+		return lotteryName;
 	}
 
 	/*

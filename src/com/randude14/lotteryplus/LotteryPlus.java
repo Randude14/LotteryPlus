@@ -27,6 +27,7 @@ import com.randude14.lotteryplus.listeners.*;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.ItemReward;
 import com.randude14.lotteryplus.lottery.reward.PotReward;
+import com.randude14.lotteryplus.support.PluginSupport;
 import com.randude14.lotteryplus.support.VotifierListener;
 import com.randude14.lotteryplus.tasks.*;
 import com.randude14.lotteryplus.util.ChatUtils;

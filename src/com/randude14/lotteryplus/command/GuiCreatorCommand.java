@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.command;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.command.CommandSender;
 
@@ -26,7 +26,7 @@ public class GuiCreatorCommand implements Command {
 		return null;
 	}
 	
-	public void listCommands(CommandSender sender, List<String> commands) {
+	public void listCommands(CommandSender sender, Set<String> commands) {
 		commands.add("plugin.command.gui");
 		commands.add("plugin.command.gui-creator");
 	}

@@ -1,4 +1,4 @@
-package com.randude14.lotteryplus;
+package com.randude14.lotteryplus.support;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -7,6 +7,10 @@ import org.bukkit.plugin.Plugin;
  * This class is used to check if a certain plugin is also loaded onto the server
  * before actuall calling certain classes so that the Java class loader does
  * not throw errors when loading LotteryPlus
+ * 
+ * @see Vault - https://dev.bukkit.org/projects/vault?gameCategorySlug=bukkit-plugins&projectID=33184
+ * @see Votifier - https://dev.bukkit.org/projects/votifier?gameCategorySlug=bukkit-plugins&projectID=32925
+ * @see Towny - http://towny.palmergames.com/
  */
 public enum PluginSupport {
 	VAULT("Vault", "net.milkbowl.vault.Vault"),

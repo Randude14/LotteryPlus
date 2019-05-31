@@ -11,12 +11,19 @@ import org.bukkit.entity.Player;
 import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Utils;
 
+/*
+ * This economy bridges out to a plugin called Vault that serves as an economy wrapper and
+ * hooks into other major economy plugins without needing to create a different class for each one
+ * 
+ * @see Vault's bukkit dev page at https://dev.bukkit.org/projects/vault?gameCategorySlug=bukkit-plugins&projectID=33184 
+ */
 @SerializableAs("VaultEconomy")
 public class VaultEconomy extends Economy {
 	private final net.milkbowl.vault.economy.Economy econ;
 	
 	public VaultEconomy() {
 		econ = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class).getProvider();
+		
 		if(econ == null) {
 			throw new NullPointerException(ChatUtils.getRawName("plugin.exception.vault.economy"));
 		}

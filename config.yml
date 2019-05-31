@@ -154,9 +154,9 @@ defaults:
     win-again: true
 
     # item rewards that are added to the lottery
-    # defined examples: 'Wool:3*64' - stack of light blue wool
-    # format -> 'material:meta_data*amount'
-    # more examples: 'Ink sack:0 Ink sack*1 Ink sack:2*1'
+    # defined examples: 'white_wool*64' - stack of white wool
+    # format -> 'material*amount'
+    # more examples: 'Ink sack:0 Ink sack*1'
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:

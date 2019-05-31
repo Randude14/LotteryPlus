@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.command;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -49,7 +49,7 @@ public class RewardCommand implements Command {
 		ChatUtils.sendCommandHelp(sender, Perm.REWARD, "plugin.command.reward", cmd);
 	}
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, Set<String> list) {
 		list.add("plugin.command.reward");
 	}
 	

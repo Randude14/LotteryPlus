@@ -1,6 +1,6 @@
 package com.randude14.lotteryplus.command;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,7 +26,7 @@ public class BuyCommand implements Command {
 		return Perm.BUY;
 	}
 	
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, Set<String> list) {
 		list.add("plugin.command.buy");
 		list.add("plugin.command.buy.main");
 	}
