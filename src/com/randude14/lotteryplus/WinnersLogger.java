@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /*
- * Logs the winners so that they server admins can view them
+ * Extends the Logger class and logs the winners using a date and time stamp
  */
 public class WinnersLogger extends java.util.logging.Logger {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
