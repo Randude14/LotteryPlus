@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
@@ -74,7 +75,8 @@ public class Utils {
 	}
 	
 	
-	private static final Comparator<OfflinePlayer> offlineplayerComp = (OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
+	private static final Comparator<OfflinePlayer> offlineplayerComp = 
+			(OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
 	
 	public static boolean isSamePlayer(OfflinePlayer player, String name) {
 		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
@@ -145,69 +147,110 @@ public class Utils {
 		return rewards;
 	}
 	
+	/*
+	 * Loads an item stack containing in-game items. 
+	 * Instructions on how it reads the line is an insert from the config below.
+	 * 
+	 * @param line - line to read from
+	 * @return - the item stack
+	 * 
+	 * /////// IMPORTED FROM CONFIG ///////////
+	 * item rewards that are added to the lottery
+     * defined examples: 'white_wool*64' - stack of white wool
+     * format -> 'material*amount'
+     * more examples: 'Ink sack:0 Ink sack*1'
+     *
+     * for enchantments, create your item like described above,
+     * add '^', the enchantment, add ':', then the level, like so:
+     * 'Diamond_Pickaxe^durablility:3' -> this creates a diamond pickaxe with a durability enchantment with a level of 3
+	 */
 	private static ItemStack loadItemStack(String line) {
+		
 		if(line == null || line.isEmpty()) {
 			return null;
 		}
+		
 		try {
-			short damage = 0;
 			int stackSize = 1;
 			int sizeIndex = line.indexOf('*');
 			int hyphonIndex = line.indexOf('^');
-			int itemIndex = line.length();
-			if(colenIndex < 0) {
-				if(sizeIndex < 0)
-					colenIndex = line.length();
-				else
-					colenIndex = sizeIndex;
-			}
-			else {
-				if(sizeIndex < 0)
-					damage = Short.parseShort(line.substring(colenIndex+1));
-				else
-					damage = Short.parseShort(line.substring(colenIndex+1, sizeIndex));
-			}
-			for(int cntr = 0;cntr < line.length();cntr++) {
-				char c = line.charAt(cntr);
-				if(c == ':' || c == '*' || c == '^') {
-					itemIndex = cntr;
-					break;
+			
+			// keep track of the material index. assume the name goes to the end
+			int materialIndex = line.length();
+			
+			// get size
+			if (sizeIndex >= 0) {
+				
+				// if there is an enchantment
+				if (hyphonIndex >= 0) {
+					stackSize = Integer.parseInt( line.substring(sizeIndex+1, hyphonIndex) );
+					
+				} else {
+					stackSize = Integer.parseInt( line.substring(sizeIndex+1) );
 				}
+				
+				// size is defined so we scale back the index to its size
+				materialIndex = sizeIndex;
+				
+			} else if (hyphonIndex >= 0) {
+				
+				// size was not defined but enchantments are so we scale to the first hyphon
+				materialIndex = hyphonIndex;
 			}
-			Material material = Material.matchMaterial(line.substring(0, itemIndex));
-			if(sizeIndex >= 0) {
-				if(hyphonIndex >= 0)
-					stackSize = Integer.parseInt(line.substring(sizeIndex+1, hyphonIndex));
-				else
-					stackSize = Integer.parseInt(line.substring(sizeIndex+1));
-			}
-			ItemStack result = new ItemStack(material, stackSize, damage);
+			
+			Material material = Material.matchMaterial( line.substring(0, materialIndex) );
+			
+			// if we could not find the material of the item, return null
+			if(material == null)
+				return null;
+			
+			ItemStack result = new ItemStack(material, stackSize);
 			String[] enchants = line.split("\\^");
-			if(enchants.length > 1) {
-				for(int cntr = 1;cntr < enchants.length;cntr++) {
+			
+			// is size > 1, we assume there are enchantments
+			if (enchants.length > 1) {
+				
+				for (int cntr = 1;cntr < enchants.length;cntr++) {
 					String enchantLine = enchants[cntr];
 					int levelIndex = enchantLine.indexOf(':');
-					if(levelIndex < 0) {
-						Enchantment enchant = Enchantment.getByName(enchantLine);
-						if(enchant == null) return null;
+					
+					// if no level given
+					if (levelIndex < 0) {
+						Enchantment enchant = Enchantment.getByKey(
+								NamespacedKey.minecraft(enchantLine));
+						
+						// return null. 
+						if(enchant == null) 
+							return null;
+						
 						result.addEnchantment(enchant, enchant.getStartLevel());
+						
+				    // level given
 					} else {
-						Enchantment enchant = Enchantment.getByName(enchantLine.substring(0, levelIndex));
-						if(enchant == null) return null;
+						Enchantment enchant = Enchantment.getByKey( 
+								NamespacedKey.minecraft( enchantLine.substring(0, levelIndex) ) );
+						
+						if(enchant == null) 
+							return null;
+						
 						int level = Integer.parseInt(enchantLine.substring(levelIndex + 1));
 						result.addEnchantment(enchant, level);
 					}
 				}
 			}
+			
 			return result;
+			
 		} catch (Exception ex) {
+			
 			ex.printStackTrace();
 		}
+		
 		return null;
 	}
 	
 	private static void listItemStacks(List<ItemStack> rewards, String line) {
-		for(String str : line.split("\\s+")) {
+		for (String str : line.split("\\s+")) {
 			try {
 				ItemStack item = loadItemStack(str);
 				if(item != null)

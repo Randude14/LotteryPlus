@@ -160,7 +160,11 @@ defaults:
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:
-    # 'Diamond_Pickaxe^DURABILITY:3' -> this creates a diamond pickaxe with a durability enchantment with a level of 3
+    # 'Diamond_Pickaxe^durablility:3' -> this creates a diamond pickaxe with a durability enchantment with a level of 3
+    # ****** When defining individual items, make sure there are no spaces!!!
+    #
+    # This -> 'blue_wool*64 white_wool*64'
+    # NOT this -> 'blue_wool *64 white_wool* 64'
     #
     item-rewards: ''
 
@@ -261,8 +265,8 @@ defaults:
     
     # items add after failed drawing
     # defined examples: 'Wool:3*64' - stack of light blue wool
-    # format -> 'material:meta_data*amount'
-    # more examples: 'Ink sack:0 Ink sack*1 Ink sack:2*1'
+    # format -> 'material*amount'
+    # more examples: 'Ink sack Ink sack*1 Ink sack*1'
     #
     # for enchantments, create your item like described above,
     # add '^', the enchantment, add ':', then the level, like so:

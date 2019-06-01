@@ -7,6 +7,9 @@ import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Time;
 
+/*
+ * Used to remind players about the lotteries
+ */
 public class ReminderMessageTask extends Task {
 	
 	public void run() {

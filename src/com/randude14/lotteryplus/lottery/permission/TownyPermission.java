@@ -9,6 +9,9 @@ import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.randude14.lotteryplus.lottery.Lottery;
 
+/*
+ * Hooks into the Towny plugin and checks the towns users are in
+ */
 public class TownyPermission extends Permission {
 	private final Lottery lottery;
 	
@@ -17,21 +20,37 @@ public class TownyPermission extends Permission {
 	}
 
 	public boolean hasAccess(CommandSender sender) {
-		if(sender instanceof Player) {
+		
+		// check if user is a player
+		if (sender instanceof Player) {
+			
 			List<String> towny = lottery.getTowny();
-			if(towny.isEmpty()) return true;
+			if(towny.isEmpty()) 
+				return true;
 			String residentTown = null;
+			
 			try {
-				residentTown = TownyUniverse.getDataSource().getResident(sender.getName()).getTown().getName();
+				residentTown = TownyUniverse.getDataSource()
+						.getResident(sender.getName()).getTown().getName();
+				
 			} catch (NotRegisteredException e) {
 			}
-			if(residentTown == null) return false;
-			for(String town : towny) {
-				if(residentTown.equalsIgnoreCase(town)) 
+			
+			// if we could not find a town associated with this user
+			// assume they are not a citizen of any town
+			if (residentTown == null) 
+				return false;
+			
+			// search if the user town matches any in the lottery
+			for (String town : towny) {
+				if (residentTown.equalsIgnoreCase(town)) 
 					return true;
 			}
+			
 			return false;
 		}
+		
+		// we assume the sender is the console it self
 		return true;
 	}
 

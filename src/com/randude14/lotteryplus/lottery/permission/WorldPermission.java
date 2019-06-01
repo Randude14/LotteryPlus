@@ -15,17 +15,27 @@ public class WorldPermission extends Permission {
 	}
 
 	public boolean hasAccess(CommandSender sender) {
+		
+		// check if user is a player
 		if(sender instanceof Player) {
 			List<String> worlds = lottery.getWorlds();
-			if(worlds.isEmpty()) return true;
+			
+			if(worlds.isEmpty()) 
+				return true;
+			
 			String worldToCheck = ((Player) sender).getWorld().getName();
+			
+			// check if player world is inside the current world
 			for(String world : worlds) {
 				if(worldToCheck.equalsIgnoreCase(world)) {
 					return true;
 				}
 			}
+			
 			return false;
 		}
+		
+		// we assume the sender is the console itself
 		return true;
 	}
 
