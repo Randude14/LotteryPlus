@@ -11,6 +11,9 @@ LotteryPlus.git
 .classpath
 .gitignore
 .project
+/target/maven-archiver
+/target/maven-status
+/target/test_classes
 =======
 /lib
 >>>>>>> upstream/master
