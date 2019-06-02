@@ -17,6 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.randude14.lotteryplus.Logger;
@@ -69,8 +70,18 @@ public class Lottery implements Runnable {
 	
 	private boolean drawSuccess;  // keep track of a successful drawing of a winner
 
+	
+	/*
+	 * Init variables that stay constant
+	 * Actual setting of variables happens at 
+	 * @see setProperties(LotteryProperties properties, boolean forceReset)
+	 */
 	public Lottery(String name) {
+		
+		// cooldowns must be synchonized so that numbers are not skewed across
+		
 		this.cooldowns = Collections.synchronizedMap(new HashMap<String, Long>());
+		
 		this.perms = new ArrayList<Permission>();
 		this.rewards = new ArrayList<Reward>();
 		this.signs = new ArrayList<Location>();
@@ -81,6 +92,164 @@ public class Lottery implements Runnable {
 		// check towny is installed before adding to avoid errors
 		if(PluginSupport.TOWNY.isInstalled()) {
 			this.perms.add(new TownyPermission(this));
+		}
+	}
+	
+	public void setProperties(CommandSender sender, LotteryProperties properties) 
+			throws InvalidLotteryException {
+		setProperties(sender, properties, false);
+	}
+
+	/*
+	 * Sets the properties of a lottery. 
+	 */
+	public void setProperties(CommandSender sender, LotteryProperties properties, boolean forceReset) 
+			throws InvalidLotteryException {
+		try {
+			
+			// Check for negative properties
+			double time = properties.getDouble(Config.DEFAULT_TIME);
+			double pot = properties.getDouble(Config.DEFAULT_POT);
+			double ticketCost = properties.getDouble(Config.DEFAULT_TICKET_COST);
+			
+			if(time < 0) {
+				throw new InvalidLotteryException( 
+						ChatUtils.getRawName("lottery.error.negative.time", "<time>", time));
+			} else if (pot < 0) {
+				throw new InvalidLotteryException( 
+						ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
+			} else if (ticketCost < 0) {
+				throw new InvalidLotteryException(
+						ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
+			}
+
+			// force reset just involves clearing the rewards
+			if (forceReset) {
+				rewards.clear();
+				
+			} else {
+				transfer(this.properties, properties);
+				
+				signs.clear();
+				int cntr = 1;
+				
+				// load signs from old properties
+				while(properties.contains("sign" + cntr)) {
+					String str = properties.remove("sign" + cntr).toString();
+					Location loc = Utils.parseToLocation(str);
+					
+					if(loc != null) {
+						Block block = loc.getBlock();
+						
+						if(LotteryPlus.isSign(block)) {
+							signs.add(loc);
+							
+						} else {
+							Logger.info("lottery.error.sign.load", "<loc>", str);
+						}
+						
+					} else {
+						Logger.info("lottery.error.loc.load", "<line>", str);
+					}
+					cntr++;
+				}
+			}
+
+			// copy over winner and set properties to the passed one
+			if(this.properties != null) {
+				properties.set("winner", this.properties.getString("winner", ""));
+			}
+			
+			this.properties = properties;
+			
+			// load old economy
+			if(properties.contains("econ")) {
+				econ = (Economy) properties.get("econ");
+			
+			// find new economy
+			} else {
+				econ = null;
+				
+				if(properties.getBoolean(Config.DEFAULT_USE_VAULT) && PluginSupport.VAULT.isInstalled()) {
+					econ = new VaultEconomy();
+					
+				} else {
+					String materialID = properties.getString(Config.DEFAULT_MATERIAL);
+					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
+					econ = new MaterialEconomy(materialID, name);
+				}
+			}
+			
+			// economy was not loaded
+			if(econ == null) {
+				throw new NullPointerException(ChatUtils.getRawName("lottery.exception.economy.load", "<lottery>", lotteryName));
+			}
+			
+
+			// Load time
+			if(properties.getBoolean(Config.DEFAULT_USE_TIMER)) {
+				this.timer = new LotteryTimer();
+			} else {
+				this.timer = new InfiniteTimer();
+			}
+			
+			timer.setRunning(true);
+			timer.load(properties);
+			
+			
+			// load items
+			List<ItemStack> items = Utils.getItemStacks(
+					properties.getString(Config.DEFAULT_ITEM_REWARDS));
+			
+			for(ItemStack item : items) {
+				rewards.add(new ItemReward(item));
+			}
+			
+			
+			// WORLDS
+			worlds = properties.getStringList(Config.DEFAULT_WORLDS);
+			
+			// TOWNY
+			towny = properties.getStringList(Config.DEFAULT_TOWNY);
+			
+			// ALIASES
+			aliases = properties.getStringList(Config.DEFAULT_ALIASES);
+			
+			cooldowns.clear(); //clear the cooldowns
+			
+			if(properties.contains("item-only")) {
+				properties.set(Config.DEFAULT_USE_POT, !properties.getBoolean("item-only"));
+				properties.remove("item-only");
+			}
+		} catch (Exception ex) {
+			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.lottery.load", "<lottery>", lotteryName), ex);
+		}
+	}
+
+	private void transfer(LotteryProperties oldproperties, LotteryProperties newproperties) {
+		
+		// check if we are transferring from an old properties
+		if (oldproperties != null && !drawSuccess) {
+				
+			if (!oldproperties.getBoolean(Config.DEFAULT_CLEAR_POT)) {
+				double pot = newproperties.getDouble(Config.DEFAULT_POT);
+				newproperties.set(Config.DEFAULT_POT, pot + oldproperties.getDouble(Config.DEFAULT_POT));
+			}
+				
+			if (oldproperties.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
+				rewards.clear();
+			}
+				
+			// copy ticket data over
+			if(oldproperties.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
+				
+				for(String player : getPlayers()) {
+					newproperties.set("players." + player, oldproperties.getInt("players." + player, 0));
+				}
+			}
+			
+		} else{
+			rewards.clear();
 		}
 	}
 
@@ -101,8 +270,11 @@ public class Lottery implements Runnable {
 	}
 	
 	public double getPot() {
+		
+		// return 0 if this lottery does not have a pot
 		if(!properties.getBoolean(Config.DEFAULT_USE_POT))
 			return 0;
+		
 		return properties.getDouble(Config.DEFAULT_POT);
 	}
 	
@@ -134,43 +306,81 @@ public class Lottery implements Runnable {
 		updateSigns();
 	}
 	
+	/*
+	 * Checks the properties and prints out when the time is at certain intervals
+	 * 
+	 *  ///////////// INSERT FROM CONFIG /////////////////
+	 *  
+	 * used to alert players about the current time of the lottery
+     * how to:
+     *  
+     * '24h 12h 6h 3h 1h'
+     * this will alert the players at 24, 12, 6, 3, and 1 hours
+     * 
+     * <amount><symbol>
+     * symbols:
+     * w: weeks
+     * d: days
+     * h: hours
+     * m: minutes
+     * s: seconds
+     *
+     * #look for 'lottery.mess.warning' to 'lang.properties' to edit the message
+	 */
 	private void printWarningTimes() {
-		String line = properties.getString(Config.DEFAULT_WARNING_TIMES);
-		if(line != null && !line.isEmpty()) {
-			for(String timeStr : line.split("\\s+")) {
-				int len = timeStr.length();
-				if(len == 0) {
+		List<String> warningTimes = properties.getStringList(Config.DEFAULT_WARNING_TIMES);
+		
+		// if list contains
+		if(!warningTimes.isEmpty()) {
+			
+			for(String timeStr : warningTimes) {
+				
+				if(timeStr.isEmpty()) // check empty string
 					continue;
-				}
+				
+				int len = timeStr.length();
+				
 				try {
-					long time = Long.parseLong(timeStr.substring(0, len-1));
+					long time = Long.parseLong( timeStr.substring(0, len-1) );
 					String timeMess = time + " ";
-					char c = Character.toLowerCase(timeStr.charAt(len-1));
+					
+					// grab character at end
+					char c = Character.toLowerCase( timeStr.charAt(len-1) );
+					
+					// find time in appropriate unit and add to message
 					switch(c) {
-					case 'w':
-						time = Time.WEEK.multi(time);
-						timeMess += ChatUtils.getRawName("lottery.time.weeks");
-					    break;
-					case 'd':
-						time = Time.DAY.multi(time);
-						timeMess += ChatUtils.getRawName("lottery.time.days");
-					    break;
-					case 'h':
-						time = Time.HOUR.multi(time);
-						timeMess += ChatUtils.getRawName("lottery.time.hours");
-					    break;
-					case 'm':
-						time = Time.MINUTE.multi(time);
-						timeMess += ChatUtils.getRawName("lottery.time.minutes");
-					    break;
-					default:
-						//no need to do anything with time, already in seconds
-						timeMess += ChatUtils.getRawName("lottery.time.seconds");
-						break;
+					
+						case 'w':
+							time = Time.WEEK.multi(time);
+							timeMess += ChatUtils.getRawName("lottery.time.weeks");
+					   		break;
+					   		
+						case 'd':
+							time = Time.DAY.multi(time);
+							timeMess += ChatUtils.getRawName("lottery.time.days");
+					    	break;
+					    	
+						case 'h':
+							time = Time.HOUR.multi(time);
+							timeMess += ChatUtils.getRawName("lottery.time.hours");
+					    	break;
+					    	
+						case 'm':
+							time = Time.MINUTE.multi(time);
+							timeMess += ChatUtils.getRawName("lottery.time.minutes");
+					    	break;
+					    	
+					    	// if no time unit specified, assume seconds
+						default:
+							//no need to do anything with time, already in seconds
+							timeMess += ChatUtils.getRawName("lottery.time.seconds");
+							break;
 					}
-					if(timer.getTime() == time) {
+					
+					if(timer.getTime() == time) { // if this is a warning time, print out
 						broadcastRaw("lottery.mess.warning", "<name>", lotteryName, "<time>", timeMess);
 					}
+					
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -182,45 +392,66 @@ public class Lottery implements Runnable {
 		updateSigns(false);
 	}
 	
+	/*
+	 * Update the signs this lottery with information from the lottery depending on its state
+	 * 
+	 * @param over - whether the lottery is over, indicates that the lottery will not be resetting
+	 */
 	private void updateSigns(boolean over) {
 		final String line1 = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 		final String line2, line3, line4;
+		
 		if(over) {
-			line2 = ChatUtils.replaceColorCodes(format(Config.getString(Config.OVER_SIGN_LINE_TWO)));
-			line3 = ChatUtils.replaceColorCodes(format(Config.getString(Config.OVER_SIGN_LINE_THREE)));
-			line4 = ChatUtils.replaceColorCodes(format(Config.getString(Config.OVER_SIGN_LINE_FOUR)));
+			line2 = ChatUtils.replaceColorCodes( format(Config.getString(Config.OVER_SIGN_LINE_TWO)) );
+			line3 = ChatUtils.replaceColorCodes( format(Config.getString(Config.OVER_SIGN_LINE_THREE)) );
+			line4 = ChatUtils.replaceColorCodes( format(Config.getString(Config.OVER_SIGN_LINE_FOUR)) );
+			
+		} else if(isDrawing()) {
+			line2 = ChatUtils.replaceColorCodes( format(Config.getString(Config.DRAWING_SIGN_LINE_TWO)) );
+			line3 = ChatUtils.replaceColorCodes( format(Config.getString(Config.DRAWING_SIGN_LINE_THREE)) );
+			line4 = ChatUtils.replaceColorCodes( format(Config.getString(Config.DRAWING_SIGN_LINE_FOUR)) );
+			
 		} else {
-			if(isDrawing()) {
-				line2 = ChatUtils.replaceColorCodes(format(Config.getString(Config.DRAWING_SIGN_LINE_TWO)));
-				line3 = ChatUtils.replaceColorCodes(format(Config.getString(Config.DRAWING_SIGN_LINE_THREE)));
-				line4 = ChatUtils.replaceColorCodes(format(Config.getString(Config.DRAWING_SIGN_LINE_FOUR)));
-			} else {
-				line2 = ChatUtils.replaceColorCodes(format(Config.getString(Config.UPDATE_SIGN_LINE_TWO)));
-				line3 = ChatUtils.replaceColorCodes(format(Config.getString(Config.UPDATE_SIGN_LINE_THREE)));
-				line4 = ChatUtils.replaceColorCodes(format(Config.getString(Config.UPDATE_SIGN_LINE_FOUR)));
-			}
+			line2 = ChatUtils.replaceColorCodes( format(Config.getString(Config.UPDATE_SIGN_LINE_TWO)) );
+			line3 = ChatUtils.replaceColorCodes( format(Config.getString(Config.UPDATE_SIGN_LINE_THREE)) );
+			line4 = ChatUtils.replaceColorCodes( format(Config.getString(Config.UPDATE_SIGN_LINE_FOUR)) );
 		}
-		LotteryPlus.scheduleSyncDelayedTask(new Runnable() {
-			public void run() {
-				for(Location loc : signs) {
-					Block block = loc.getBlock();
-					Sign sign = (Sign) block.getState();
-					sign.setLine(0, line1);
-					sign.setLine(1, line2);
-					sign.setLine(2, line3);
-					sign.setLine(3, line4);
-					sign.update(true);
-				}
+		
+		// schedule a task so sign change can be synced with server
+		LotteryPlus.scheduleSyncDelayedTask( () -> {
+			
+			for(Location loc : signs) {
+					
+				Block block = loc.getBlock();
+				Sign sign = (Sign) block.getState();
+					
+				sign.setLine(0, line1);
+				sign.setLine(1, line2);
+				sign.setLine(2, line3);
+				sign.setLine(3, line4);
+					
+				sign.update(true);
 			}
+				
 		}, 0);
 	}
 	
+	/*
+	 * Updates the player cooldowns. If there cooldown time is 0, 
+	 * remove from list so they can buy tickets again
+	 */
 	private void updateCooldowns() {
+		
 		synchronized(cooldowns) {
+			
+			// use map iterator so we can change the value
 			Iterator<Map.Entry<String, Long>> it = cooldowns.entrySet().iterator();
+			
 			while(it.hasNext()) {
 				Map.Entry<String, Long> entry = it.next();
 				long cooldown = entry.getValue();
+				
+				// cooldown time is over
 				if(cooldown-- <= 0)
 					it.remove();
 				else
@@ -229,171 +460,99 @@ public class Lottery implements Runnable {
 		}
 	}
 
+	/*
+	 * Given a string, it replaces certain keywords with information from the lottery
+	 * Primarily used by the method updateSigns(boolean over)
+	 * 
+	 * @param mess - the message to edit
+	 * @return - the edited message
+	 * 
+	 *  ///// INSERT FROM CONFIG /////////////
+	 * various sign formats used in different states of a lottery
+     *   
+     * <name> - name of the lottery
+     * <ticketcost> - cost of a ticket for the lottery
+     * <reward> - reward of the lottery
+     * <time> - time until drawing
+     * <winner> - most recent winner of the lottery
+     * <ticket_tax> - ticket tax of the lottery
+     * <pot_tax> - pot tax of the lottery
+	 */
 	public String format(String mess) {
 		String winner = properties.getString("winner", "");
+		
 		return mess
 				.replace(FORMAT_TIME, timer.format())
 				.replace(FORMAT_REWARD, formatReward())
 				.replace(FORMAT_NAME, lotteryName)
-				.replace(FORMAT_WINNER, (!winner.isEmpty()) ? winner : ChatUtils.getRawName("lottery.error.nowinner"))
+				.replace(FORMAT_WINNER, ( !winner.isEmpty() ) ? winner : ChatUtils.getRawName("lottery.error.nowinner") )
 				.replace(FORMAT_TICKET_COST, econ.format(properties.getDouble(Config.DEFAULT_TICKET_COST)))
 				.replace(FORMAT_TICKET_TAX, String.format("%,.2f", properties.getDouble(Config.DEFAULT_TICKET_TAX)))
 				.replace(FORMAT_POT_TAX, String.format("%,.2f", properties.getDouble(Config.DEFAULT_POT_TAX)));
 	}
 
+	/*
+	 * Returns a small snippet of the rewards this lottery has
+	 * @return - string containing the reward this lottery has
+	 */
 	private String formatReward() {
+		
+		// return pot in server's currency
 		if (properties.getBoolean(Config.DEFAULT_USE_POT))
 			return econ.format(properties.getDouble(Config.DEFAULT_POT));
+		
+		// return # of item rewards this lottery has
 		int num = 0;
+		
 		for (int cntr = 0; cntr < rewards.size(); cntr++) {
+			
 			if (rewards instanceof ItemReward)
 				num++;
 		}
+		
 		return ChatUtils.getRawName("lottery.reward.items", "<number>", num);
 	}
 
+	/*
+	 * Allows an admin to add more money to a lottery's pot
+	 * 
+	 * @param sender - user adding pot to lottery
+	 * @param add - amount to add
+	 * 
+	 * @return - whether the amount was added to the pot
+	 */
 	public synchronized boolean addToPot(CommandSender sender, double add) {
+		
+		// check if this lottery even has a pot to add to
 		if (!properties.getBoolean(Config.DEFAULT_USE_POT)) {
 			ChatUtils.send(sender, "lottery.error.nopot", "<lottery>", lotteryName);
 			return false;
 		}
+		
 		if(sender instanceof Player) {
+			
 			Player player = (Player) sender;
-			if(!econ.hasAccount(player)) {
+			
+			if(!econ.hasAccount(player)) { // check for account
 				ChatUtils.send(player, "lottery.error.noaccount");
 				return false;
 			}
-			if(!econ.hasEnough(player, add)) {
+			
+			if(!econ.hasEnough(player, add)) { // check if they have enough
 				ChatUtils.send(player, "lottery.error.notenough", "<money>", econ.format(add));
 				return false;
 			}
+			
 			econ.withdraw(player, add);
 		}
+		
+		// add amount to pot
 		double pot = properties.getDouble(Config.DEFAULT_POT);
 		properties.set(Config.DEFAULT_POT, pot + add);
+		
 		ChatUtils.send(sender, "plugin.command.atp.mess", "<money>", econ.format(add), "<lottery>", lotteryName);
 		LotteryManager.saveLottery(lotteryName);
 		return true;
-	}
-
-	public void setProperties(CommandSender sender, LotteryProperties properties) 
-			throws InvalidLotteryException {
-		setProperties(sender, properties, false);
-	}
-
-	public void setProperties(CommandSender sender, LotteryProperties properties, boolean clearRewards) 
-			throws InvalidLotteryException {
-		try {
-			// Check for negative properties
-			double time = properties.getDouble(Config.DEFAULT_TIME);
-			double pot = properties.getDouble(Config.DEFAULT_POT);
-			double ticketCost = properties.getDouble(Config.DEFAULT_TICKET_COST);
-			
-			if(time < 0) {
-				throw new InvalidLotteryException( 
-						ChatUtils.getRawName("lottery.error.negative.time", "<time>", time));
-			} else if (pot < 0) {
-				throw new InvalidLotteryException( 
-						ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
-			} else if (ticketCost < 0) {
-				throw new InvalidLotteryException(
-						ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
-			}
-
-			// 
-			if (clearRewards) {
-				rewards.clear();
-			} else {
-				transfer(this.properties, properties);
-				signs.clear();
-				int cntr = 1;
-				while(properties.contains("sign" + cntr)) {
-					String str = properties.remove("sign" + cntr).toString();
-					Location loc = Utils.parseToLocation(str);
-					if(loc != null) {
-						Block block = loc.getBlock();
-						if(LotteryPlus.isSign(block)) {
-							signs.add(loc);
-						} else {
-							Logger.info("lottery.error.sign.load", "<loc>", str);
-						}
-					} else {
-						Logger.info("lottery.error.loc.load", "<line>", str);
-					}
-					cntr++;
-				}
-			}
-
-			if(this.properties != null) {
-				properties.set("winner", this.properties.getString("winner", ""));
-			}
-			this.properties = properties;
-			
-			// ECONOMY
-			if(properties.contains("econ")) {
-				econ = (Economy) properties.get("econ");
-			} else {
-				econ = null;
-				if(properties.getBoolean(Config.DEFAULT_USE_VAULT) && PluginSupport.VAULT.isInstalled()) {
-					econ = new VaultEconomy();
-				} else {
-					String materialID = properties.getString(Config.DEFAULT_MATERIAL);
-					String name = properties.getString(Config.DEFAULT_MATERIAL_NAME);
-					econ = new MaterialEconomy(materialID, name);
-				}
-			}
-			
-			if(econ == null) {
-				throw new NullPointerException(ChatUtils.getRawName("lottery.exception.economy.load", "<lottery>", lotteryName));
-			}
-
-			// LOAD TIME
-			if(properties.getBoolean(Config.DEFAULT_USE_TIMER)) {
-				this.timer = new LotteryTimer();
-			} else {
-				this.timer = new InfiniteTimer();
-			}
-			timer.setRunning(true);
-			timer.load(properties);
-			
-			// WORLDS
-			worlds = properties.getStringList(Config.DEFAULT_WORLDS);
-			
-			// TOWNY
-			towny = properties.getStringList(Config.DEFAULT_TOWNY);
-			
-			// ALIASES
-			aliases = properties.getStringList(Config.DEFAULT_ALIASES);
-			
-			cooldowns.clear(); //clear the cooldowns
-			if(properties.contains("item-only")) {
-				properties.set(Config.DEFAULT_USE_POT, !properties.getBoolean("item-only"));
-				properties.remove("item-only");
-			}
-		} catch (Exception ex) {
-			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.lottery.load", "<lottery>", lotteryName), ex);
-		}
-	}
-
-	private void transfer(LotteryProperties oldproperties, LotteryProperties newproperties) {
-		if (oldproperties != null) {
-			if(!drawSuccess) {
-				if (!oldproperties.getBoolean(Config.DEFAULT_CLEAR_POT)) {
-					double pot = newproperties.getDouble(Config.DEFAULT_POT);
-					newproperties.set(Config.DEFAULT_POT, pot + oldproperties.getDouble(Config.DEFAULT_POT));
-				}
-				if (oldproperties.getBoolean(Config.DEFAULT_CLEAR_REWARDS)) {
-					rewards.clear();
-				}
-				if(oldproperties.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {
-					for(String player : getPlayers()) {
-						newproperties.set("players." + player, oldproperties.getInt("players." + player, 0));
-					}
-				}
-			}
-		} else{
-			rewards.clear();
-		}
 	}
 	
 	public void broadcast(String code, Object... args) {
@@ -908,6 +1067,16 @@ public class Lottery implements Runnable {
 		properties.set(Config.DEFAULT_MIN_PLAYERS, properties.getInt(Config.DEFAULT_MIN_PLAYERS) + properties.getInt(Config.DEFAULT_RESET_ADD_MIN_PLAYERS));
 		properties.set(Config.DEFAULT_TICKET_TAX, properties.getDouble(Config.DEFAULT_TICKET_TAX) + properties.getDouble(Config.DEFAULT_RESET_ADD_TICKET_TAX));
 		properties.set(Config.DEFAULT_POT_TAX, properties.getDouble(Config.DEFAULT_POT_TAX) + properties.getDouble(Config.DEFAULT_RESET_ADD_POT_TAX));
+		
+		
+		// load reset items
+		List<ItemStack> items = Utils.getItemStacks(
+				properties.getString(Config.DEFAULT_RESET_ADD_ITEM_REWARDS));
+		
+		for(ItemStack item : items) {
+			rewards.add(new ItemReward(item));
+		}
+		
 	}
 	
 	public boolean equals(Lottery other) {

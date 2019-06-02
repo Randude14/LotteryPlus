@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -21,6 +20,10 @@ import com.randude14.lotteryplus.configuration.Config;
 
 public class ChatUtils {
 	
+	private static File langFile;
+	private static Properties properties;
+	private static Properties defaults;
+	
 	private static void saveLangFile() {
 		
 		LotteryPlus plugin = LotteryPlus.getInstance();
@@ -32,12 +35,13 @@ public class ChatUtils {
 		    
 		    plugin.saveResource(langFile.getName(), true);
 		    
-		    PropertiesConfiguration saveTo = new PropertiesConfiguration();
-		    saveTo.read(new FileReader(langFile.getPath()));
+		    Properties saveTo = new Properties();
+		    saveTo.load(new FileReader(langFile.getPath()));
 		    
-		    Iterator<String> it = defaults.getKeys();
+		    Iterator<Object> it = defaults.keySet().iterator();
+		    
 		    while(it.hasNext()) {
-		    	String key = it.next();
+		    	String key = it.next().toString();
 		    	
 		    	if(config.containsKey(key)) {
 		    		saveTo.setProperty(key, config.getProperty(key));
@@ -46,7 +50,7 @@ public class ChatUtils {
 		    	}
 		    }
 		    
-		    saveTo.write(new FileWriter(langFile.getPath()));
+		    saveTo.store(new FileWriter(langFile.getPath()), "");
 		} catch (Exception ex) {
 			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
@@ -60,9 +64,9 @@ public class ChatUtils {
 			langFile = new File(plugin.getDataFolder(), "lang.properties");
 		
 		if(defaults == null) {
-			defaults = new PropertiesConfiguration();
+			defaults = new Properties();
 			try {
-				defaults.read(new InputStreamReader(plugin.getResource(langFile.getName())));
+				defaults.load(new InputStreamReader(plugin.getResource(langFile.getName())));
 			} catch (Exception e) {
 				Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 				e.printStackTrace();
@@ -72,8 +76,8 @@ public class ChatUtils {
 		saveLangFile();
 		
 		try {			
-			properties = new PropertiesConfiguration();
-			properties.read(new FileReader(langFile.getPath()));
+			properties = new Properties();
+			properties.load(new FileReader(langFile.getPath()));
 		} catch (Exception ex) {
 			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
@@ -182,9 +186,7 @@ public class ChatUtils {
 		return cleanColorCodes(mess);
 	}
 	
-	private static File langFile;
-	private static PropertiesConfiguration properties;
-	private static PropertiesConfiguration defaults;
+	
 	private static final String colorCodes;
 	
 	static {

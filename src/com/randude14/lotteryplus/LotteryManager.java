@@ -305,8 +305,8 @@ public class LotteryManager {
 		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, true);
 	}
 	
-	public static boolean reloadLottery(String lotteryName, boolean force) {
-		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, force);
+	public static boolean reloadLottery(String lotteryName, boolean forceReset) {
+		return reloadLottery(Bukkit.getConsoleSender(), lotteryName, forceReset);
 	}
 
 	/*
@@ -316,7 +316,7 @@ public class LotteryManager {
 	 * @param lotteryName - lottery to search for
 	 * @param clearRewards - if set to true, clears the rewards
 	 */
-	public static boolean reloadLottery(CommandSender sender, String lotteryName, boolean clearRewards) {
+	public static boolean reloadLottery(CommandSender sender, String lotteryName, boolean forceReset) {
 		Lottery lottery = LotteryManager.getLottery(lotteryName);
 		
 		if (lottery == null) {
@@ -341,7 +341,7 @@ public class LotteryManager {
 				
 				// attempt to apply the new properties to the lottery
 				try {
-					lottery.setProperties(sender, new LotteryProperties(values), clearRewards);
+					lottery.setProperties(sender, new LotteryProperties(values), forceReset);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
