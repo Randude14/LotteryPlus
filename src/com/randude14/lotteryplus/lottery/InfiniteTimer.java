@@ -2,10 +2,14 @@ package com.randude14.lotteryplus.lottery;
 
 import com.randude14.lotteryplus.util.ChatUtils;
 
-public class BlankTimer implements Timer {
-	private boolean running = false;
+/*
+ * Represents a timer that never ends. Normally used with lotteries
+ * that have limited tickets or the server admins plan to end
+ * the lottery themselves
+ */
+public class InfiniteTimer extends LotteryTimer {
 	
-	protected BlankTimer() {
+	protected InfiniteTimer() {
 	}
 
 	public void load(LotteryProperties properties) {
@@ -29,14 +33,6 @@ public class BlankTimer implements Timer {
 
 	public String format() {
 		return ChatUtils.getRawName("lottery.timer.infinite");
-	}
-
-	public void setRunning(boolean running) {
-		this.running = running;
-	}
-	
-	public boolean isRunning() {
-		return running;
 	}
 
 	public boolean isOver() {

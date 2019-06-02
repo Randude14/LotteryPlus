@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -32,7 +31,12 @@ import com.randude14.lotteryplus.util.Time;
 import com.randude14.lotteryplus.util.Utils;
 import com.randude14.register.economy.*;
 
+/*
+ * The main lottery class where the majority of this plugin's magic comes from
+ */
 public class Lottery implements Runnable {
+	
+	// used for sign formatting
 	private static final String FORMAT_REWARD = "<reward>";
 	private static final String FORMAT_TIME = "<time>";
 	private static final String FORMAT_NAME = "<name>";
@@ -40,19 +44,30 @@ public class Lottery implements Runnable {
 	private static final String FORMAT_TICKET_COST = "<ticketcost>";
 	private static final String FORMAT_TICKET_TAX = "<ticket_tax>";
 	private static final String FORMAT_POT_TAX = "<pot_tax>";
-	private final Map<String, Long> cooldowns;
-	private final List<Permission> perms;
-	private final List<Reward> rewards;
-	private final List<Location> signs;
-	private List<String> aliases;
-	private List<String> worlds;
-	private List<String> towny;
+	
 	private final String lotteryName;
+	
 	private LotteryProperties properties;
-	private BukkitTask drawTask;
-	private Timer timer;
-	private Economy econ;
-	private boolean success;
+	
+	// keeps users from spam buying tickets
+	private final Map<String, Long> cooldowns;
+	
+	private final List<Permission> perms;  // permissions this 
+	private final List<Reward> rewards;    // list of rewards
+	private final List<Location> signs;    // signs this lottery outputs to
+	
+	private List<String> aliases; // aliases this lottery can be called
+	private List<String> worlds;  // worlds this lottery is tied to
+	private List<String> towny;   // towns this lottery is tied to
+
+
+	private BukkitTask drawTask;  // task of the drawing
+	
+	private LotteryTimer timer;     // lottery timer
+	
+	private Economy econ;         // economy used to buy tickets
+	
+	private boolean drawSuccess;  // keep track of a successful drawing of a winner
 
 	public Lottery(String name) {
 		this.cooldowns = Collections.synchronizedMap(new HashMap<String, Long>());
@@ -60,8 +75,10 @@ public class Lottery implements Runnable {
 		this.rewards = new ArrayList<Reward>();
 		this.signs = new ArrayList<Location>();
 		this.lotteryName = name;
-		success = false;
+		this.drawSuccess = false;
 		this.perms.add(new WorldPermission(this));
+		
+		// check towny is installed before adding to avoid errors
 		if(PluginSupport.TOWNY.isInstalled()) {
 			this.perms.add(new TownyPermission(this));
 		}
@@ -259,19 +276,29 @@ public class Lottery implements Runnable {
 		return true;
 	}
 
-	public void setProperties(CommandSender sender, LotteryProperties properties) throws InvalidLotteryException {
+	public void setProperties(CommandSender sender, LotteryProperties properties) 
+			throws InvalidLotteryException {
 		setProperties(sender, properties, false);
 	}
 
-	public void setProperties(CommandSender sender, LotteryProperties properties, boolean clearRewards) throws InvalidLotteryException {
+	public void setProperties(CommandSender sender, LotteryProperties properties, boolean clearRewards) 
+			throws InvalidLotteryException {
 		try {
-			// CHECK FOR NEGATIVE properties
+			// Check for negative properties
 			double time = properties.getDouble(Config.DEFAULT_TIME);
 			double pot = properties.getDouble(Config.DEFAULT_POT);
 			double ticketCost = properties.getDouble(Config.DEFAULT_TICKET_COST);
-			Validate.isTrue(time >= 0, ChatUtils.getRawName("lottery.error.negative.time", "<time>", time));
-			Validate.isTrue(pot >= 0.0, ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
-			Validate.isTrue(ticketCost >= 0.0, ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
+			
+			if(time < 0) {
+				throw new InvalidLotteryException( 
+						ChatUtils.getRawName("lottery.error.negative.time", "<time>", time));
+			} else if (pot < 0) {
+				throw new InvalidLotteryException( 
+						ChatUtils.getRawName("lottery.error.negative.pot", "<pot>", pot));
+			} else if (ticketCost < 0) {
+				throw new InvalidLotteryException(
+						ChatUtils.getRawName("lottery.error.negative.ticket-cost", "<ticket_cost>", ticketCost));
+			}
 
 			// 
 			if (clearRewards) {
@@ -324,7 +351,7 @@ public class Lottery implements Runnable {
 			if(properties.getBoolean(Config.DEFAULT_USE_TIMER)) {
 				this.timer = new LotteryTimer();
 			} else {
-				this.timer = new BlankTimer();
+				this.timer = new InfiniteTimer();
 			}
 			timer.setRunning(true);
 			timer.load(properties);
@@ -350,7 +377,7 @@ public class Lottery implements Runnable {
 
 	private void transfer(LotteryProperties oldproperties, LotteryProperties newproperties) {
 		if (oldproperties != null) {
-			if(!success) {
+			if(!drawSuccess) {
 				if (!oldproperties.getBoolean(Config.DEFAULT_CLEAR_POT)) {
 					double pot = newproperties.getDouble(Config.DEFAULT_POT);
 					newproperties.set(Config.DEFAULT_POT, pot + oldproperties.getDouble(Config.DEFAULT_POT));
@@ -809,7 +836,7 @@ public class Lottery implements Runnable {
 			if (winner == null) {
 				broadcast("lottery.error.drawing.nowinner");
 				properties.set("drawing", false);
-				success = false;
+				drawSuccess = false;
 				LotteryManager.reloadLottery(lotteryName, false);
 				return;
 			}
@@ -842,7 +869,7 @@ public class Lottery implements Runnable {
 			properties.set("winner", winner);
 			properties.set("drawing", false);
 			clearPlayers();
-			success = true;
+			drawSuccess = true;
 			if (properties.getBoolean(Config.DEFAULT_REPEAT)) {
 				LotteryManager.reloadLottery(lotteryName);
 			} else {
@@ -852,7 +879,7 @@ public class Lottery implements Runnable {
 		} catch (Exception ex) {
 			Logger.info("lottery.exception.drawing", "<lottery>", lotteryName);
 			properties.set("drawing", false);
-			success = false;
+			drawSuccess = false;
 			ex.printStackTrace();
 		}
 	}

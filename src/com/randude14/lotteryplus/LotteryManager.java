@@ -13,7 +13,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.CustomYaml;
@@ -38,6 +37,14 @@ public class LotteryManager {
 	// The HashMap that contains the lotteries. Sorts by their names in lowercase
 	private static final Map<String, Lottery> lotteries = new HashMap<String, Lottery>();
 	
+	// name of the lotteries section of the lotteriesConfig
+	private static final String LOTTERIES_SECTION = "lotteries";
+	
+	// name of the saves section of the lotteriesConfig
+	private static final String SAVES_SECTION = "lotteries";
+	
+	
+	
 	/*
 	 * Creates a lottery section based on the name and values passed
 	 * 
@@ -48,7 +55,7 @@ public class LotteryManager {
 	public static void createLotterySection(CommandSender sender, String lotteryName, Map<String, Object> values) {
 		
 		// create or retrieve the lottery section
-		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection(); 
+		ConfigurationSection lotteriesSection = getOrCreateSection(LOTTERIES_SECTION); 
 		
 		// double checks if the section already exists 
 		for (String key : lotteriesSection.getKeys(false)) {
@@ -79,7 +86,7 @@ public class LotteryManager {
 			return false;
 		}
 		
-		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection(); 
+		ConfigurationSection lotteriesSection = getOrCreateSection(LOTTERIES_SECTION); 
 		
 		// check if the section exists already
 		for (String key : lotteriesSection.getKeys(false)) {
@@ -112,7 +119,7 @@ public class LotteryManager {
 			return false;
 		}
 		
-		ConfigurationSection section = getOrCreateLotteriesSection();
+		ConfigurationSection section = getOrCreateSection(LOTTERIES_SECTION);
 		
 		// find section and attempt to load
 		for (String sectionName : section.getKeys(false)) {
@@ -167,12 +174,9 @@ public class LotteryManager {
 			return false;
 		}
 		
-		ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
-		
-		// delete the saves section this lottery was writing to
-		if (savesSection != null) {
-			deleteSection(savesSection, lottery.getName());
-		}
+		// delete lottery saves
+		ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);		
+		deleteSection(savesSection, lottery.getName());
 		
 		// iterate and remove values
 		Iterator<Lottery> it = lotteries.values().iterator();
@@ -184,7 +188,7 @@ public class LotteryManager {
 		
 		// delete or simply tell the user the lottery has been unloaded
 		if (delete) {
-			ConfigurationSection section = getOrCreateLotteriesSection();
+			ConfigurationSection section = getOrCreateSection(LOTTERIES_SECTION);
 			deleteSection(section, lottery.getName());
 			ChatUtils.send(sender, "lottery.unloaded-removed", "<lottery>", lottery.getName());
 		} else {
@@ -202,7 +206,7 @@ public class LotteryManager {
 	 * @return the name of the section
 	 */
 	public static String putAll(String lotteryName, Map<Property<?>, Object> putin) {
-		ConfigurationSection lotteriesSection = LotteryManager.getOrCreateLotteriesSection();
+		ConfigurationSection lotteriesSection = getOrCreateSection(LOTTERIES_SECTION);
 		
 		// go through each section
 		for (String key : lotteriesSection.getKeys(false)) {
@@ -229,20 +233,6 @@ public class LotteryManager {
 		}
 		
 		return lotteryName;
-	}
-
-	/*
-	 * Private function that attempts to find a lottery section and delete its values
-	 * 
-	 * @param section - section to search through
-	 * @param find - lottery section to delete
-	 */
-	private static void deleteSection(ConfigurationSection section, String find) {
-		for (String key : section.getKeys(false)) {
-			if (key.equalsIgnoreCase(find)) {
-				section.set(key, null);
-			}
-		}
 	}
 
 	/*
@@ -339,7 +329,7 @@ public class LotteryManager {
 			return false;
 		}
 		
-		ConfigurationSection lotteriesSection = getOrCreateLotteriesSection();
+		ConfigurationSection lotteriesSection = getOrCreateSection(LOTTERIES_SECTION);
 		
 		for (String sectionName : lotteriesSection.getKeys(false)) {
 			
@@ -359,12 +349,9 @@ public class LotteryManager {
 					return false;
 				}
 				
-				ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
-				
-				// if saves section exists, delete
-				if (savesSection != null) {
-					deleteSection(savesSection, lottery.getName());
-				}
+				// delete lottery saves
+				ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
+				deleteSection(savesSection, lottery.getName());
 				
 				ChatUtils.send(sender, "lottery.reload", "<lottery>", lottery.getName());
 				return true;
@@ -409,8 +396,8 @@ public class LotteryManager {
 			lotteriesConfig.saveDefaultConfig();
 		}
 		
-		ConfigurationSection section = getOrCreateLotteriesSection();
-		ConfigurationSection savesSection = lotteriesConfig.getConfig().getConfigurationSection("saves");
+		ConfigurationSection section = getOrCreateSection(LOTTERIES_SECTION);
+		ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
 		int numLotteries = 0; // keep track of lotteries loaded
 		
 		for (String lotteryName : section.getKeys(false)) {
@@ -422,7 +409,7 @@ public class LotteryManager {
 			ConfigurationSection lotteriesSection;
 			
 			// grab the saved section if it is loaded, if not read from 'lotteries.yml'
-			if (savesSection != null && savesSection.contains(lotteryName)) {
+			if (savesSection.contains(lotteryName)) {
 				lotteriesSection = savesSection.getConfigurationSection(lotteryName);
 			} else {
 				lotteriesSection = section.getConfigurationSection(lotteryName);
@@ -450,7 +437,7 @@ public class LotteryManager {
 	 * Force saves all running lotteries
 	 */
 	public static void saveLotteries() {
-		ConfigurationSection savesSection = lotteriesConfig.getConfig(true).createSection("saves");
+		ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
 		
 		for (Lottery lottery : lotteries.values()) {
 			savesSection.createSection(lottery.getName(), lottery.save());
@@ -466,11 +453,7 @@ public class LotteryManager {
 		Lottery lottery = getLottery(lotteryName);
 		
 		if(lottery != null) {
-			ConfigurationSection section = lotteriesConfig.getConfig(true);
-			ConfigurationSection savesSection = section.getConfigurationSection("saves");
-			
-			if(savesSection == null) // create if it does not exist
-				savesSection = lotteriesConfig.getConfig().createSection("saves");
+			ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
 			
 			savesSection.createSection(lottery.getName(), lottery.save());
 			lotteriesConfig.saveConfig();
@@ -509,7 +492,9 @@ public class LotteryManager {
 		for (int cntr = (page * 10) - 10, stop = cntr + 10; cntr < stop && cntr < len; cntr++) {
 			Lottery lottery = list.get(cntr);
 			List<String> aliases = lottery.getAliases();
-			ChatUtils.sendRaw(sender, "lottery.list.token", "<number>", cntr + 1, "<lottery>", lottery.getName(), "<aliases>", aliases.isEmpty() ? "[none]" : aliases);
+			
+			ChatUtils.sendRaw(sender, "lottery.list.token", "<number>", cntr + 1, "<lottery>", 
+					lottery.getName(), "<aliases>", aliases.isEmpty() ? "[none]" : aliases);
 		}
 	}
 
@@ -547,15 +532,33 @@ public class LotteryManager {
 	}
 
 	/*
-	 * Returns the lotteries section of the 'lotteries.yml'
+	 * Returns or creates a section defined by sectionName
+	 * 
+	 * @param sectionName - name of section
 	 * If no section exists yet, it creates one
 	 */
-	private static ConfigurationSection getOrCreateLotteriesSection() {
-		FileConfiguration config = lotteriesConfig.getConfig(true);
+	private static ConfigurationSection getOrCreateSection(String sectionName) {
 		
-		ConfigurationSection lotteriesSection = config.getConfigurationSection("lotteries");
-		
-		return (lotteriesSection != null) ? lotteriesSection : config.createSection("lotteries");
+		if (lotteriesConfig.getConfig().contains(sectionName)) {
+			return lotteriesConfig.getConfig().getConfigurationSection(sectionName);
+			
+		} else {
+			return lotteriesConfig.getConfig().createSection(sectionName);
+		}
+	}
+	
+	/*
+	 * Private function that attempts to find a lottery section and delete its values
+	 * 
+	 * @param section - section to search through
+	 * @param find - lottery section to delete
+	 */
+	private static void deleteSection(ConfigurationSection section, String find) {
+		for (String key : section.getKeys(false)) {
+			if (key.equalsIgnoreCase(find)) {
+				section.set(key, null);
+			}
+		}
 	}
 	
 	/*

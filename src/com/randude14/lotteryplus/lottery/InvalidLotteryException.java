@@ -1,5 +1,8 @@
 package com.randude14.lotteryplus.lottery;
 
+/*
+ * When this class is thrown, a lottery was loaded with properties that were invalid
+ */
 public class InvalidLotteryException extends RuntimeException {
 	private static final long serialVersionUID = -9091643167060189764L;
 
