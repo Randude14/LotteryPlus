@@ -132,7 +132,7 @@ public class LotteryManager {
 				
 				// attempt to set the properties of the lottery
 				try {
-					lottery.setProperties(sender, new LotteryProperties(values));
+					lottery.loadFrom(values);
 				} catch (Exception ex) {
 					
 					// if failure to load, alert user and print the exception.
@@ -341,7 +341,7 @@ public class LotteryManager {
 				
 				// attempt to apply the new properties to the lottery
 				try {
-					lottery.setProperties(sender, new LotteryProperties(values), forceReset);
+					lottery.reloadFrom(values);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -379,7 +379,8 @@ public class LotteryManager {
 
 
 	/*
-	 * This is normally only called at the loading of plugin. Loads all lotteries defined in 'lotteries.yml'
+	 * This is normally only called at the loading of plugin. Loads all lotteries 
+	 * defined in 'lotteries.yml' that is already not loaded and running
 	 * 
 	 * @sender - user who called this function
 	 * 
@@ -420,7 +421,7 @@ public class LotteryManager {
 			
 			// attempt to set the properties of the lottery
 			try {
-				lottery.setProperties(sender, new LotteryProperties(values));
+				lottery.loadFrom(values);
 			} catch (InvalidLotteryException ex) {
 				Logger.info("lottery.exception.lottery.load", "<lottery>", lotteryName);
 				ex.printStackTrace();

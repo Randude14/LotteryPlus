@@ -239,12 +239,6 @@ defaults:
     # amount added to pot after failed drawing
     reset-add-pot: 0.00
 
-    # amount added to ticket-tax after failed drawing
-    reset-add-ticket-tax: 0.00
-
-    # amount added to pot-tax after failed drawing
-    reset-add-pot-tax: 0.00
-
     # amount added to max-tickets after failed drawing
     reset-add-max-tickets: 0
 
@@ -253,12 +247,6 @@ defaults:
 
     # amount added to max-players after failed drawing
     reset-add-max-players: 0
-
-    # amount added to cooldown after failed drawing
-    reset-add-cooldown: 0
-    
-    # amount added to warmup after failed drawing
-    reset-add-warmup: 0
 
     # amount added to time after failed drawing
     reset-add-time: 0

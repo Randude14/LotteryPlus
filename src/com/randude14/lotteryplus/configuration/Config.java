@@ -71,8 +71,6 @@ public class Config {
 	public static final Property<Double> DEFAULT_POT_TAX = new Property<Double>("defaults.pot-tax", 0.0).setDescription("config.description.pot-tax");
 	public static final Property<Double> DEFAULT_RESET_ADD_TICKET_COST = new Property<Double>("defaults.reset-add-ticket-cost", 0.0).setDescription("config.description.reset-add-ticket-tax");
 	public static final Property<Double> DEFAULT_RESET_ADD_POT = new Property<Double>("defaults.reset-add-pot", 0.0).setDescription("config.description.reset-add-pot");
-	public static final Property<Double> DEFAULT_RESET_ADD_TICKET_TAX = new Property<Double>("defaults.reset-add-ticket-tax", 0.0).setDescription("reset-add-ticket-tax");
-	public static final Property<Double> DEFAULT_RESET_ADD_POT_TAX = new Property<Double>("defaults.reset-add-pot-tax", 0.0).setDescription("config.description.reset-addpot-tax");
 	public static final Property<Double> DEFAULT_TIME = new Property<Double>("defaults.time", 72.0).setDescription("config.description.time");
 	public static final Property<Double> DEFAULT_RESET_ADD_TIME = new Property<Double>("defaults.reset-add-time", 0.0).setDescription("config.description.reset-add-time");
 	public static final Property<Integer> DEFAULT_MAX_TICKETS = new Property<Integer>("defaults.max-tickets", -1).setDescription("config.description.max-tickets");
@@ -84,9 +82,7 @@ public class Config {
 	public static final Property<Integer> DEFAULT_RESET_ADD_MAX_PLAYERS = new Property<Integer>("defaults.reset-add-max-players", 0).setDescription("config.description.reset-add-max-players");
 	public static final Property<Integer> DEFAULT_VOTIFIER_REWARD = new Property<Integer>("defaults.votifier-reward", 0).setDescription("config.description.votifier-reward");
 	public static final Property<Long> DEFAULT_COOLDOWN = new Property<Long>("defaults.cooldown", 0L).setDescription("config.description.cooldown");
-	public static final Property<Long> DEFAULT_RESET_ADD_COOLDOWN = new Property<Long>("defaults.reset-add-cooldown", 0L).setDescription("config.description.reset-add-cooldown");
 	public static final Property<Long> DEFAULT_WARMUP = new Property<Long>("defaults.warmup", 0L).setDescription("config.description.warmup");
-	public static final Property<Long> DEFAULT_RESET_ADD_WARMUP = new Property<Long>("defaults.reset-add-warmup", 0L).setDescription("config.description.reset-add-warmup");
 	public static final Property[] lotteryDefaults = {DEFAULT_ITEM_REWARDS, 
 		                        DEFAULT_WARNING_TIMES, 
 		                        DEFAULT_MATERIAL_NAME, 
@@ -109,8 +105,6 @@ public class Config {
 		                        DEFAULT_POT_TAX,
 		                        DEFAULT_RESET_ADD_TICKET_COST, 
 		                        DEFAULT_RESET_ADD_POT, 
-		                        DEFAULT_RESET_ADD_TICKET_TAX, 
-		                        DEFAULT_RESET_ADD_POT_TAX, 
 		                        DEFAULT_TIME,
 		                        DEFAULT_RESET_ADD_TIME,
 		                        DEFAULT_MAX_TICKETS, 
@@ -123,9 +117,7 @@ public class Config {
 		                        DEFAULT_RESET_ADD_MAX_PLAYERS, 
 		                        DEFAULT_VOTIFIER_REWARD, 
 		                        DEFAULT_COOLDOWN, 
-		                        DEFAULT_RESET_ADD_COOLDOWN, 
-		                        DEFAULT_WARMUP, 
-		                        DEFAULT_RESET_ADD_WARMUP};
+		                        DEFAULT_WARMUP};
 	
 	static {
 		Arrays.sort(Config.lotteryDefaults);
