@@ -19,7 +19,6 @@ import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.lottery.InvalidLotteryException;
 import com.randude14.lotteryplus.lottery.Lottery;
-import com.randude14.lotteryplus.lottery.LotteryProperties;
 import com.randude14.lotteryplus.util.ChatUtils;
 import com.randude14.lotteryplus.util.Utils;
 
@@ -341,7 +340,7 @@ public class LotteryManager {
 				
 				// attempt to apply the new properties to the lottery
 				try {
-					lottery.reloadFrom(values);
+					lottery.reloadFrom(values, forceReset);
 				} catch (Exception ex) {
 					ChatUtils.send(sender, "lottery.exception.lottery.reload", "<lottery>", lottery.getName());
 					ex.printStackTrace();
@@ -367,9 +366,9 @@ public class LotteryManager {
 	 * 
 	 * @param sender - user who called this function
 	 */
-	public static void reloadLotteries(CommandSender sender) {
+	public static void reloadLotteries(CommandSender sender, boolean forceReset) {
 		for (Lottery lottery : lotteries.values()) {
-			reloadLottery(sender, lottery.getName(), true);
+			reloadLottery(sender, lottery.getName(), forceReset);
 		}
 	}
 

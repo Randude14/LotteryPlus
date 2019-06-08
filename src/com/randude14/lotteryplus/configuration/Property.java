@@ -2,19 +2,24 @@ package com.randude14.lotteryplus.configuration;
 
 import com.randude14.lotteryplus.util.ChatUtils;
 
-@SuppressWarnings("rawtypes")
-public class Property<T> implements Comparable<Property> {
+/*
+ * Represents a property on the main config file. Each has a default value
+ * Also used in @see com.randude14.lotteryplus.lottery.LotteryProperties
+ */
+public class Property<T> implements Comparable<Property<?>> {
 	private final String path;
 	private final String name;
 	private String description;
-	private final T value;
+	private final T defaultValue;
 	
 	protected Property(String path, T t) {
+		
 		if(path == null || t == null) {
 			throw new IllegalArgumentException("path or t cannot be null.");
 		}
+		
 		this.path = path;
-		this.value = t;
+		this.defaultValue = t;
 		int index = path.lastIndexOf('.');
 		if(index < 0) 
 			this.name = path;
@@ -22,6 +27,12 @@ public class Property<T> implements Comparable<Property> {
 			this.name = path.substring(index+1);
 	}
 	
+	/*
+	 * Set the description of the property.
+	 * 
+	 * @param description - description to set to
+	 * @return - this class to daisy chain on declaration
+	 */
 	protected Property<T> setDescription(String description) {
 		this.description = description;
 		return this;
@@ -36,13 +47,20 @@ public class Property<T> implements Comparable<Property> {
 	}
 	
 	public T getDefaultValue() {
-		return value;
+		return defaultValue;
 	}
 	
-	public int compareTo(Property prop) {
+	/*
+	 * @param prop - property to compare to
+	 * @return - the value by comparing property names, ignoring case
+	 */
+	public int compareTo(Property<?> prop) {
 		return getName().compareToIgnoreCase(prop.getName());
 	}
 	
+	/*
+	 * @return - property as a string, add description if not null
+	 */
 	public String toString() {
 		if(description != null) {
 			return getName() + ": " + ChatUtils.getRawName(description);
@@ -50,4 +68,5 @@ public class Property<T> implements Comparable<Property> {
 			return getName();
 		}
 	}
+
 }

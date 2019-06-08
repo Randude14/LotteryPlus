@@ -8,11 +8,15 @@ import org.bukkit.Material;
 
 import com.randude14.lotteryplus.LotteryPlus;
 
-@SuppressWarnings("rawtypes")
+/*
+ * This class has multiple static methods that pull the config using the multiple defined
+ * property objects below. Each is tied to a specific data type and has default values
+ * so that the methods will never return null. @see config.yml
+ */
 public class Config {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	
-	//PROPERTIES
+	// Config properties
 	public static final Property<Long> SAVE_DELAY = new Property<Long>("properties.save-delay", 15L);
 	public static final Property<Long> UPDATE_DELAY = new Property<Long>("properties.update-delay", 60L);
 	public static final Property<Long> REMINDER_MESSAGE_TIME = new Property<Long>("properties.reminder-message-delay", 10L);
@@ -35,7 +39,7 @@ public class Config {
 	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
 	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
 	
-	//SIGN FORMATS
+	// Sign format properties
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
 	public static final Property<String> UPDATE_SIGN_LINE_THREE = new Property<String>("sign-format.Update.line-3", "<time>");
 	public static final Property<String> UPDATE_SIGN_LINE_FOUR = new Property<String>("sign-format.Update.line-4", "<reward>");
@@ -46,7 +50,7 @@ public class Config {
 	public static final Property<String> OVER_SIGN_LINE_THREE = new Property<String>("sign-format.Over.line-3", "Over");
 	public static final Property<String> OVER_SIGN_LINE_FOUR = new Property<String>("sign-format.Over.line-4", "<winner>");
 	
-	//LOTTERY PROPERTIES
+	// Lottery defaults. Also @see com.randude14.lottery.LotteryProperties for further use
 	public static final Property<String> DEFAULT_ITEM_REWARDS = new Property<String>("defaults.item-rewards", "").setDescription("config.description.item-rewards");
 	public static final Property<String> DEFAULT_WARNING_TIMES = new Property<String>("defaults.warning-times", "").setDescription("config.description.warning-times");
 	public static final Property<String> DEFAULT_MATERIAL_NAME = new Property<String>("defaults.material-name", "Gold Ingot").setDescription("config.description.material-name");
@@ -55,7 +59,7 @@ public class Config {
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "").setDescription("config.description.worlds");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "").setDescription("config.description.towny");
 	public static final Property<String> DEFAULT_ALIASES = new Property<String>("defaults.aliases", "").setDescription("config.description.aliases");
-	public static final Property<String> DEFAULT_MATERIAL = new Property<String>("defaults.material", Material.GOLD_INGOT.name() + "").setDescription("config.description.material-id");
+	public static final Property<String> DEFAULT_MATERIAL = new Property<String>("defaults.material", Material.GOLD_INGOT.name()).setDescription("config.description.material-id");
 	public static final Property<Boolean> DEFAULT_REPEAT = new Property<Boolean>("defaults.repeat", true).setDescription("config.description.repeat");
 	public static final Property<Boolean> DEFAULT_CLEAR_POT = new Property<Boolean>("defaults.clear-pot", false).setDescription("config.description.clear-pot");
 	public static final Property<Boolean> DEFAULT_CLEAR_REWARDS = new Property<Boolean>("defaults.clear-rewards", false).setDescription("config.description.clear-rewards");
@@ -83,7 +87,10 @@ public class Config {
 	public static final Property<Integer> DEFAULT_VOTIFIER_REWARD = new Property<Integer>("defaults.votifier-reward", 0).setDescription("config.description.votifier-reward");
 	public static final Property<Long> DEFAULT_COOLDOWN = new Property<Long>("defaults.cooldown", 0L).setDescription("config.description.cooldown");
 	public static final Property<Long> DEFAULT_WARMUP = new Property<Long>("defaults.warmup", 0L).setDescription("config.description.warmup");
-	public static final Property[] lotteryDefaults = {DEFAULT_ITEM_REWARDS, 
+	
+	// An array of the properties the lotteries uses
+	// @see com.randude14.lotteryplus.gui.LotteryCreator for usage
+	public static final Property<?>[] lotteryDefaults = {DEFAULT_ITEM_REWARDS, 
 		                        DEFAULT_WARNING_TIMES, 
 		                        DEFAULT_MATERIAL_NAME, 
 		                        DEFAULT_RESET_ADD_ITEM_REWARDS, 
@@ -120,9 +127,13 @@ public class Config {
 		                        DEFAULT_WARMUP};
 	
 	static {
-		Arrays.sort(Config.lotteryDefaults);
+		Arrays.sort(Config.lotteryDefaults); // sort lottery defaults
 	}
 	
+	/*
+	 * @param property - long property to grab from config
+	 * @return - the long value at property
+	 */
 	public static long getLong(Property<Long> property) {
 		return plugin.getConfig().getLong(property.getPath(), property.getDefaultValue());
 	}
@@ -143,9 +154,21 @@ public class Config {
 		return plugin.getConfig().getString(property.getPath(), property.getDefaultValue());
 	}
 	
+	/*
+	 * Takes the value at a string property and finds the list
+	 * by splitting the string by its spaces
+	 * 
+	 * @param property - string property to find list from
+	 * @return - the string list at the property
+	 */
 	public static List<String> getStringList(Property<String> property) {
 		String value = getString(property);
-		if(value.equals("")) return Collections.emptyList();
+		
+		// if value is empty, return empty list
+		if(value.equals("")) 
+			return Collections.emptyList();
+		
+		// split string and convert array to a list
 		return Arrays.asList(value.split("\\s+"));
 	}
 }

@@ -1,12 +1,15 @@
 package com.randude14.lotteryplus.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,63 +24,50 @@ import com.randude14.lotteryplus.configuration.Config;
 public class ChatUtils {
 	
 	private static File langFile;
-	private static Properties properties;
-	private static Properties defaults;
-	
-	private static void saveLangFile() {
-		
-		LotteryPlus plugin = LotteryPlus.getInstance();
-		
-		//update files
-		try {			
-		    Properties config = new Properties();
-		    config.load(new FileReader(langFile.getPath()));
-		    
-		    plugin.saveResource(langFile.getName(), true);
-		    
-		    Properties saveTo = new Properties();
-		    saveTo.load(new FileReader(langFile.getPath()));
-		    
-		    Iterator<Object> it = defaults.keySet().iterator();
-		    
-		    while(it.hasNext()) {
-		    	String key = it.next().toString();
-		    	
-		    	if(config.containsKey(key)) {
-		    		saveTo.setProperty(key, config.getProperty(key));
-		    	} else {
-		    		saveTo.setProperty(key, defaults.getProperty(key));
-		    	}
-		    }
-		    
-		    saveTo.store(new FileWriter(langFile.getPath()), "");
-		} catch (Exception ex) {
-			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
-			ex.printStackTrace();
-		}
-	}
+	private static Properties properties = new Properties();
+	private static Properties defaults = new Properties();
 	
 	public static void reload() {
 		
 		LotteryPlus plugin = LotteryPlus.getInstance();
+		
 		if(langFile == null)
 			langFile = new File(plugin.getDataFolder(), "lang.properties");
 		
-		if(defaults == null) {
-			defaults = new Properties();
-			try {
-				defaults.load(new InputStreamReader(plugin.getResource(langFile.getName())));
-			} catch (Exception e) {
-				Logger.info("logger.exception.file.load", "<file>", langFile.getName());
-				e.printStackTrace();
-			}
-		}
-		
-		saveLangFile();
-		
-		try {			
-			properties = new Properties();
-			properties.load(new FileReader(langFile.getPath()));
+		try {
+			
+			defaults.load(plugin.getResource(langFile.getName()));
+			properties.load(new FileInputStream(langFile));
+			
+			Scanner fromJar = new Scanner(plugin.getResource(langFile.getName()));
+		    PrintWriter saveTo = new PrintWriter(langFile);
+			
+		    while(fromJar.hasNextLine()) {
+		    	String line = fromJar.nextLine();
+		    	
+		    	if(line.startsWith("#")) {
+		    		saveTo.println(line);
+		    	}
+		    	
+		    	int equalIndex = line.indexOf('=');
+		    	
+		    	if(equalIndex >= 0) {
+		    		String key = line.substring(0, equalIndex);
+		    		String value = line.substring(equalIndex+1);
+		    		
+		    		if(properties.containsKey(key)) {
+		    			saveTo.println(key + "=" + properties.getProperty(key));
+		    		} else {
+		    			saveTo.println(key + "=" + value);
+		    		}
+		    			
+		    		
+		    	}
+		    }
+		   
+		    fromJar.close();
+		    saveTo.flush();
+		    saveTo.close();
 		} catch (Exception ex) {
 			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
