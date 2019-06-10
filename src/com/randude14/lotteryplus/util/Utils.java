@@ -75,9 +75,6 @@ public class Utils {
 	}
 	
 	
-	private static final Comparator<OfflinePlayer> offlineplayerComp = 
-			(OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
-	
 	public static boolean isSamePlayer(OfflinePlayer player, String name) {
 		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
 		
@@ -91,9 +88,17 @@ public class Utils {
 		 return player.getName().equalsIgnoreCase(name);
 	}
 	
+	private static final Comparator<OfflinePlayer> offlineplayerComp = 
+			(OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
+	
 	// uses binary search
 	@SuppressWarnings("deprecation")
 	public static OfflinePlayer getOfflinePlayer(String name) {
+		
+		if(name == null || name.isEmpty()) {
+			return Bukkit.getOfflinePlayer(name);
+		}
+		
 		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
 		
 		if(colonIndex >= 0) {

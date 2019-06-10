@@ -4,11 +4,10 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -336,8 +335,8 @@ public class Lottery implements Runnable {
 		if(properties.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {	
 			for(OfflinePlayer player : getPlayers()) {
 				int tickets = getTicketsBought(player);
-				String name = Utils.getUniqueName(player);
-				propertiesToLoad.set("players." + name, tickets);
+				String uniqueName = Utils.getUniqueName(player);
+				propertiesToLoad.set("players." + uniqueName, tickets);
 			}
 		}
 	}
@@ -812,18 +811,18 @@ public class Lottery implements Runnable {
 	public void onVote(String playerName) {
 		int reward = properties.getInt(Config.DEFAULT_VOTIFIER_REWARD);
 		if(reward > 0) {
-			String prevWinner = properties.getString("winner", "");
-			
-			// can't win again
-			if(prevWinner.equalsIgnoreCase(playerName) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
-				return;
-			}
-			
 			OfflinePlayer player = Utils.getOfflinePlayer(playerName);
+			OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
 			
 			// could not find player, log to server console that we could not find it
 			if(player == null) {
 				Logger.info("lottery.error.vote.noaccount", "<player>", playerName);
+				return;
+			}
+			
+			// can't win again
+			if(prevWinner.getUniqueId() == player.getUniqueId() && 
+					!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 				return;
 			}
 			
@@ -846,7 +845,8 @@ public class Lottery implements Runnable {
 			
 			// add tickets to player
 			addTickets(player, reward);
-			broadcast("lottery.vote.reward.mess", "<player>", player, "<number>", reward, "<lottery>", lotteryName);
+			broadcast("lottery.vote.reward.mess", "<player>", player, 
+					"<number>", reward, "<lottery>", lotteryName);
 			LotteryManager.saveLottery(lotteryName);
 		}
 	}
@@ -872,9 +872,10 @@ public class Lottery implements Runnable {
 		}
 		
 		// check if they were a previous winner
-		String prevWinner = properties.getString("winner", "");
+		OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
 		
-		if(prevWinner.equalsIgnoreCase(player.getName()) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+		if(prevWinner.getUniqueId() == player.getUniqueId() && 
+				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(player, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
 		}
@@ -1011,18 +1012,31 @@ public class Lottery implements Runnable {
 		return true;
 	}
 
+	/*
+	 * Called by server admins to reward players lottery tickets
+	 * @param rewarder - server admin rewarding the tickets
+	 * @param playerName - player to reward
+	 * @param tickets - total tickets to reward
+	 * @return - whether playerName was rewarded the tickets
+	 */
 	public synchronized boolean rewardPlayer(CommandSender rewarder, String playerName, int tickets) {
-		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
-		String prevWinner = properties.getString("winner", "");
-		
-		if(prevWinner.equalsIgnoreCase(playerName) && !properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
-			ChatUtils.send(rewarder, "lottery.error.already-won.reward", "<lottery>", lotteryName, "<player>", playerName);
-			return false;
-		}
 		
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
 		
+		// check if they were a previous winner
+		OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
+		
+		if(prevWinner.getUniqueId() == player.getUniqueId() && 
+				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
+			ChatUtils.send(rewarder, "lottery.error.already-won", "<lottery>", lotteryName);
+			return false;
+		}
+		
+		// check ticket limits
+		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
+		
 		int num = getTicketsBought(player);
+		
 		if (ticketLimit > 0) {
 			int total = getTotalTicketsBought();
 			if (total >= ticketLimit) {
@@ -1038,50 +1052,87 @@ public class Lottery implements Runnable {
 		if (player.isOnline()) {
 			ChatUtils.send(player.getPlayer(), "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
 		}
+		
+		// add tickets, update signs, and save lottery
+		addTickets(player, tickets);
 		updateSigns();
 		LotteryManager.saveLottery(lotteryName);
 		return true;
 	}
 
+	/*
+	 * @return - whether the lottery is over
+	 */
 	public boolean isOver() {
+		
+		// check ticket limits
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
+		
 		if(ticketLimit <= 0) {
 			return false;
 		}
+		
 		int total = getTotalTicketsBought();
+		
 		if(total < ticketLimit) {
 			return false;
 		}
+		
 		int minPlayers = properties.getInt(Config.DEFAULT_MIN_PLAYERS);
-		if(minPlayers <= 0) return false;
+		if(minPlayers <= 0) 
+			return false;
+		
 		int entered = getPlayersEntered();
 		return entered >= minPlayers && entered >= 1;
 	}
 
+	/*
+	 * Send info about this lottery to a user
+	 * @param sender - user to send info to
+	 */
 	public void sendInfo(CommandSender sender) {
+		
+		// check access to lottery if a player
 		if(sender instanceof Player) {
 			Player player = (Player) sender;
 			if(!checkAccess(player)) {
 				return;
 			}
 		}
+		
 		ChatUtils.sendRaw(sender, "lottery.info.time", "<time>", timer.format());
 		ChatUtils.sendRaw(sender, "lottery.info.drawing", "<is_drawing>", isDrawing());
+		
+		// send lottery pot info
 		if (properties.getBoolean(Config.DEFAULT_USE_POT)) {
-			ChatUtils.sendRaw(sender, "lottery.info.pot", "<pot>", econ.format(properties.getDouble(Config.DEFAULT_POT)));
+			ChatUtils.sendRaw(sender, "lottery.info.pot", "<pot>", 
+					econ.format(properties.getDouble(Config.DEFAULT_POT)));
 		}
+		
 		for (Reward reward : rewards) {
-			ChatUtils.sendRaw(sender, "lottery.info.reward", "<reward>", reward.getInfo());
+			ChatUtils.sendRaw(sender, "lottery.info.reward", "<reward>", reward.getInfo()); // send reward info
 		}
-		ChatUtils.sendRaw(sender, "lottery.info.ticket-cost", "<ticket_cost>", econ.format(properties.getDouble(Config.DEFAULT_TICKET_COST)));
-		ChatUtils.sendRaw(sender, "lottery.info.ticket-tax", "<ticket_tax>", String.format("%,.2f", properties.getDouble(Config.DEFAULT_TICKET_TAX)));
-		ChatUtils.sendRaw(sender, "lottery.info.pot-tax", "<pot_tax>", String.format("%,.2f", properties.getDouble(Config.DEFAULT_POT_TAX)));
-		ChatUtils.sendRaw(sender, "lottery.info.players", "<players>", getPlayersEntered());
-		ChatUtils.sendRaw(sender, "lottery.info.tickets.left", "<number>", formatTicketsLeft());
+		
+		ChatUtils.sendRaw(sender, "lottery.info.ticket-cost", "<ticket_cost>",   // send ticket cost
+				econ.format(properties.getDouble(Config.DEFAULT_TICKET_COST)));
+		
+		ChatUtils.sendRaw(sender, "lottery.info.ticket-tax", "<ticket_tax>", 
+				String.format("%,.2f", properties.getDouble(Config.DEFAULT_TICKET_TAX))); // send ticket tax info
+		
+		ChatUtils.sendRaw(sender, "lottery.info.pot-tax", "<pot_tax>", 
+				String.format("%,.2f", properties.getDouble(Config.DEFAULT_POT_TAX)));    // send pot tax info
+		
+		ChatUtils.sendRaw(sender, "lottery.info.players", "<players>", getPlayersEntered()); // send amount of players entered
+		ChatUtils.sendRaw(sender, "lottery.info.tickets.left", "<number>", formatTicketsLeft()); // send tickets left in lottery
+		
+		// send the amount of tickets bought by player
 		if (sender instanceof Player)
 			ChatUtils.sendRaw(sender, "lottery.info.tickets.bought", "<number>", getTicketsBought((Player) sender));
 	}
 
+	/*
+	 * @return the amount of tickets left, returns 'no limit' if there is no ticket limit
+	 */
 	private String formatTicketsLeft() {
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
 		
@@ -1092,31 +1143,46 @@ public class Lottery implements Runnable {
 		return (left > 0) ? "" + left : "none";
 	}
 
+	/*
+	 * Uses a list of UUIDs to find the amount of players entered
+	 * @return - number of players entered
+	 */
 	public int getPlayersEntered() {
-		Set<String> players = new HashSet<String>();
+		List<UUID> players = new ArrayList<UUID>();
+		
 		for (String key : properties.keySet()) {
+			
 			if (key.startsWith("players.")) {
+				
 				int index = key.indexOf('.');
 				String player = key.substring(index + 1);
 				int num = properties.getInt(key, 0);
+				
 				for (int cntr = 0; cntr < num; cntr++) {
-					players.add(player);
-				}
+					players.add(Utils.getOfflinePlayer(player).getUniqueId());
+				}	
 			}
 		}
 		return players.size();
 	}
 
+	/*
+	 * Goes through the tickets bought and tallies up the players according
+	 * to how many tickets they bought. Used to pick winner from the drawing
+	 * @return - list of tallied players
+	 */
 	public List<OfflinePlayer> getPlayers() {
 		List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
+		
 		for (String key : properties.keySet()) {
+			
 			if (key.startsWith("players.")) {
 				int index = key.indexOf('.');
-				String playerName = key.substring(index + 1);
-				
+				String playerName = key.substring(index + 1);				
 				OfflinePlayer player = Utils.getOfflinePlayer(playerName);		
-				int num = properties.getInt(key, 0);
-				for (int cntr = 0; cntr < num; cntr++) {
+				int bought = properties.getInt(key, 0);
+				
+				for (int cntr = 0; cntr < bought; cntr++) {
 					players.add(player);
 				}
 			}
@@ -1124,19 +1190,29 @@ public class Lottery implements Runnable {
 		return players;
 	}
 	
+	/*
+	 * Tallies up all the tickets bought
+	 * @return the amount of tickets bought
+	 */
 	public int getTotalTicketsBought() {
 		int total = 0;
 		for (String key : properties.keySet()) {
 			if (key.startsWith("players.")) {
-				int num = properties.getInt(key, 0);
-				total += num;
+				int bought = properties.getInt(key, 0);
+				total += bought;
 			}
 		}
 		return total;
 	}
 
+	/*
+	 * Returns the amount of tickets a player bought. Also converts the old save system
+	 * to the new save system if it exists
+	 * @param player - player to grab the tickets bought
+	 * @return - number of tickets bought
+	 */
 	public int getTicketsBought(OfflinePlayer player) {
-		String name = Utils.getUniqueName(player);
+		String uniqueName = Utils.getUniqueName(player);
 		
 		// search for old save and convert to new save if exists
 		if (properties.contains("players." + player.getName())) {
@@ -1144,36 +1220,46 @@ public class Lottery implements Runnable {
 				int tickets = Integer.parseInt( 
 						properties.remove("players." + player.getName()).toString() );
 				
-				properties.set("players." + Utils.getUniqueName(player), tickets);				
+				properties.set("players." + uniqueName, tickets);				
 				return tickets;
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		
 		// search for new save and return if it exists
-		} else if (properties.contains("players." + name)) {
-			return properties.getInt("players." + Utils.getUniqueName(player), 0);
+		} else if (properties.contains("players." + uniqueName)) {
+			return properties.getInt("players." + uniqueName, 0);
 		}
 		
 		return 0;
 	}
 	
+	/*
+	 * Adds tickets to this lottery for a player
+	 * @param player - player to add tickets for
+	 * @param add - number of tickets to add to
+	 */
 	public void addTickets(OfflinePlayer player, int add) {
-		String name = Utils.getUniqueName(player);
+		String uniqueName = Utils.getUniqueName(player);
 		
-		int tickets = getTicketsBought(player);
-		properties.set("players." + name, tickets + add);
+		int bought = getTicketsBought(player);
+		properties.set("players." + uniqueName, bought + add);
 	}
 	
+	/*
+	 * Removes tickets from a lottery tied to this player
+	 * @param player - player to remove tickets from
+	 * @param remove - number of tickets to remove
+	 */
 	public void subTickets(OfflinePlayer player, int remove) {
-		String name = Utils.getUniqueName(player);
+		String uniqueName = Utils.getUniqueName(player);
 		
 		int tickets = getTicketsBought(player);
 		
 		if ( (tickets - remove) < 0 ) {
-			properties.remove("players." + name);
+			properties.remove("players." + uniqueName);
 		} else {
-			properties.set("players." + name, tickets - remove);
+			properties.set("players." + uniqueName, tickets - remove);
 		}    
 	}
 	
@@ -1181,8 +1267,10 @@ public class Lottery implements Runnable {
 		draw(null);
 	}
 
-	// sender: sender that initiated force draw, may be null if drawing was done
-	// 'naturally'
+	/*
+	 * Calls the task to draw a winner for the lottery and alerts all players
+	 * @param sender - the user calling the drawing, normally null
+	 */
 	public synchronized void draw(CommandSender sender) {
 		
 		if (properties.getBoolean("drawing", false)) {
@@ -1198,34 +1286,51 @@ public class Lottery implements Runnable {
 			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
 		}
 		
+		// call task and delay
 		long delay = Config.getLong(Config.DRAW_DELAY);
 		drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
+		
+		// stop running the timer and update signs
 		timer.setRunning(false);
 		properties.set("drawing", true);
 		updateSigns();
 	}
 
+	/*
+	 * Cancel the drawing task, if possible
+	 */
 	public synchronized void cancelDrawing() {
-		if(drawTask == null) return;
-		drawTask.cancel();
+		if(drawTask != null) {
+			drawTask.cancel();
+		}
 	}
 
+	/*
+	 * Clears all players that have tickets
+	 */
 	private void clearPlayers() {
 		List<String> keys = new ArrayList<String>(properties.keySet());
+		
 		for (int cntr = 0; cntr < keys.size(); cntr++) {
+			
 			String key = keys.get(cntr);
+			
 			if (key.startsWith("players.")) {
 				properties.remove(key);
 			}
 		}
 	}
 
+	/*
+	 * The task called by the server to draw the lottery
+	 */
 	public void run() {
 		try {
 			// clear cooldowns
 			synchronized(cooldowns) {
 				cooldowns.clear();
 			}
+			
 			drawTask = null;
 			int entered = getPlayersEntered();
 			
@@ -1284,17 +1389,26 @@ public class Lottery implements Runnable {
 			LotteryPlus.getWinnersManager().logWinner(logWinner.toString());
 			
 			// reward winner if online
-			if(winner.isOnline())
+			if(winner.isOnline()) {
 				LotteryPlus.getRewardsManager().rewardPlayer(winner.getPlayer(), lotteryName, rewards);
+				
+			// add reward claim if offline
+			} else {
+				LotteryPlus.getRewardsManager().addRewardClaim(winner, lotteryName, rewards);
+			}
+				
 			
 			// set up for next drawing
-			properties.set("winner", winner);
+			properties.set("winner", Utils.getUniqueName(winner));
 			properties.set("drawing", false);
 			clearPlayers();
 			drawSuccess = true;
 			
+			// repeat lottery
 			if (properties.getBoolean(Config.DEFAULT_REPEAT)) {
 				LotteryManager.reloadLottery(lotteryName);
+				
+			// end the lottery and unload
 			} else {
 				LotteryManager.unloadLottery(lotteryName);
 				updateSigns(true);
@@ -1308,17 +1422,28 @@ public class Lottery implements Runnable {
 		}
 	}
 
+	/*
+	 * Given a list of the tallied players, determines the winner based on the ticketLimit
+	 * @return - the winner randomly chosen 
+	 */
 	private static OfflinePlayer pickRandomPlayer(List<OfflinePlayer> players, int ticketLimit) {
+		
+		// shuffle the players
 		SecureRandom rand = new SecureRandom();
 		Collections.shuffle(players, rand);
 		 
+		// if not ticket limit, return random player
 		if (ticketLimit <= 0) {
 			return players.get(rand.nextInt(players.size()));
 			
+		// if ticket limit, find a random number and return the player at that number
 		} else {
 			int winningNumber = rand.nextInt(ticketLimit);
+			
+			// outside of list, return null
 			if(winningNumber >= players.size()) 
 				return null;
+			
 			return players.get(winningNumber);
 		}
 	}
