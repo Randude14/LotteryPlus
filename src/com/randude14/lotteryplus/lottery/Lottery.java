@@ -971,10 +971,10 @@ public class Lottery implements Runnable {
 		// tax money to an account
 		if(taxAccount != null && econ.hasAccount(taxAccount)) {
 			double left = econ.deposit(taxAccount, taxes);
-			if(left > 0) {
+			OfflinePlayer offlineplayer = Utils.getOfflinePlayer(taxAccount);
+			if(offlineplayer != null && left > 0) {	
 				List<Reward> list = new ArrayList<Reward>();
 				list.add(new PotReward(econ, left));
-				OfflinePlayer offlineplayer = Utils.getOfflinePlayer(taxAccount);
 				LotteryPlus.getRewardsManager().addRewardClaim(offlineplayer, lotteryName, list);
 			}
 		}
@@ -1026,7 +1026,7 @@ public class Lottery implements Runnable {
 		// check if they were a previous winner
 		OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
 		
-		if(prevWinner.getUniqueId() == player.getUniqueId() && 
+		if(player != null && prevWinner.getUniqueId() == player.getUniqueId() && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(rewarder, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
@@ -1159,7 +1159,10 @@ public class Lottery implements Runnable {
 				int num = properties.getInt(key, 0);
 				
 				for (int cntr = 0; cntr < num; cntr++) {
-					players.add(Utils.getOfflinePlayer(player).getUniqueId());
+					OfflinePlayer offlineplayer = Utils.getOfflinePlayer(player);
+					if (offlineplayer != null) {
+						players.add(offlineplayer.getUniqueId());
+					}	
 				}	
 			}
 		}
@@ -1179,7 +1182,12 @@ public class Lottery implements Runnable {
 			if (key.startsWith("players.")) {
 				int index = key.indexOf('.');
 				String playerName = key.substring(index + 1);				
-				OfflinePlayer player = Utils.getOfflinePlayer(playerName);		
+				OfflinePlayer player = Utils.getOfflinePlayer(playerName);	
+				
+				if(player == null) {
+					continue;
+				}
+				
 				int bought = properties.getInt(key, 0);
 				
 				for (int cntr = 0; cntr < bought; cntr++) {
@@ -1367,10 +1375,10 @@ public class Lottery implements Runnable {
 				
 				if(taxAccount != null && econ.hasAccount(taxAccount)) {
 					double left = econ.deposit(taxAccount, taxes);
-					if(left > 0) {
+					OfflinePlayer offlineplayer = Utils.getOfflinePlayer(taxAccount);
+					if(left > 0 && offlineplayer != null) {
 						List<Reward> list = new ArrayList<Reward>();
-						list.add(new PotReward(econ, left));
-						OfflinePlayer offlineplayer = Utils.getOfflinePlayer(taxAccount);
+						list.add(new PotReward(econ, left));		
 						LotteryPlus.getRewardsManager().addRewardClaim(offlineplayer, lotteryName, list);
 					}
 				}

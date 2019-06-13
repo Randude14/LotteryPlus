@@ -41,10 +41,10 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		setLayout(new BorderLayout());
 	}
 
-	protected boolean initComponents(Map<Property<?>, Object> map) {
+	protected boolean initComponents(Map<Property<?>, Object> propoerties) {
 		defaults = new DefaultListModel<Property>();
 		for(Property prop : Config.lotteryDefaults) {
-			if(!map.containsKey(prop)) {
+			if(!propoerties.containsKey(prop)) {
 				defaults.addElement(prop);
 			}
 		}
@@ -52,9 +52,9 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		defaultsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		values = new DefaultListModel<Value>();
 		for(Property prop : Config.lotteryDefaults) {
-			if(map.containsKey(prop)) {
+			if(propoerties.containsKey(prop)) {
 				try {
-					values.addElement(new Value(prop, map.get(prop)));
+					values.addElement(new Value(prop, propoerties.get(prop)));
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(parent, ChatUtils.getRawName("plugin.gui.dialog.error.types"), "", JOptionPane.ERROR_MESSAGE);
 					return false;
@@ -152,7 +152,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 	
 	private static class Value implements Comparable<Value> {
 		private static final NumberFormat format = NumberFormat.getInstance();
-		public final Property prop;
+		public final Property<?> prop;
 		public final Object value;
 		
 		public Value(Property prop, Object value) {

@@ -22,6 +22,10 @@ import com.randude14.lotteryplus.configuration.Config;
 
 public class Utils {
 	
+	/*
+	 * Sleep for a certain amount of delay
+	 * @param delay - time to delay
+	 */
 	public static void sleep(long delay) {
 		try {
 			Thread.sleep(delay);
@@ -30,40 +34,76 @@ public class Utils {
 		}
 	}
 	
+	/*
+	 * Convert a location to a string
+	 * @param loc - location to convert
+	 * @return - string containing the location info
+	 */
 	public static String parseLocation(Location loc) {
 		return String.format("%s %d %d %d", loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 	}
 	
+	/*
+	 * Convert a string to a location
+	 * @param str - string to convert
+	 * @return - the location taken from the string
+	 */
 	public static Location parseToLocation(String str) {
 		String[] lines = str.split("\\s");
 		String worldName = "";
+		
+		// finds the world name
+		// adds spaces between the names if the length > 4
 		for(int cntr = 0;cntr < lines.length-3;cntr++) {
+			
 			if(lines[cntr].equals("")) {
 				worldName += " ";
+				
 			} else {
 				worldName += lines[cntr];
 			}
+			
 			if(cntr != lines.length-4)
 				worldName += " ";
 		}
+		
 		World world = Bukkit.getWorld(worldName);
-		if(world == null) return null;
+		
+		// return null if the world no longer exists
+		if(world == null) 
+			return null;
+		
 		int x = Integer.parseInt(lines[lines.length-3]);
 		int y = Integer.parseInt(lines[lines.length-2]);
 		int z = Integer.parseInt(lines[lines.length-1]);
 		return new Location(world, x, y, z);
 	}
 	
+	/*
+	 * Determine if two locations point to the same area
+	 * @param loc1 - location of the first point
+	 * @param loc2 - location of the second point
+	 * @return - whether the two points are in the same area
+	 */
 	public static boolean locsInBounds(Location loc1, Location loc2) {
 		return loc1.getBlockX() == loc2.getBlockX()
 				&& loc1.getBlockY() == loc2.getBlockY()
 				&& loc1.getBlockZ() == loc2.getBlockZ();
 	}
 	
+	/*
+	 * @return the unique identifier for a player
+	 * @see com.randude14.lotteryplus.lottery.Lottery for usage
+	 */
 	public static String getUniqueName(OfflinePlayer player) {
 		return player.getName() + LotteryPlus.NAME_SEPARATOR + player.getUniqueId();
 	}
 	
+	/*
+	 * Gets rid of the UUID in a unique identifier
+	 * @param player - the unique identifier
+	 * @return - the name from the unique identifier
+	 */
 	public static String stripNameOfId(String player) {
         int colonIndex = player.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
 		
@@ -74,7 +114,11 @@ public class Utils {
 		return player;
 	}
 	
-	
+	/*
+	 * Given an offline player and a name, find if they are the same
+	 * @param player - offline player to check
+	 * @param name - the name to check
+	 */
 	public static boolean isSamePlayer(OfflinePlayer player, String name) {
 		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
 		
@@ -91,16 +135,20 @@ public class Utils {
 	private static final Comparator<OfflinePlayer> offlineplayerComp = 
 			(OfflinePlayer p1, OfflinePlayer p2) -> p1.getName().compareToIgnoreCase(p2.getName());
 	
-	// uses binary search
+	/*
+	 * Given a name, return the offline player
+	 * @param name - the name to look for, can be a unique identifier
+	 */
 	@SuppressWarnings("deprecation")
 	public static OfflinePlayer getOfflinePlayer(String name) {
 		
 		if(name == null || name.isEmpty()) {
-			return Bukkit.getOfflinePlayer(name);
+			return null;
 		}
 		
 		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
 		
+		// if there is a colon, grab the UUID
 		if(colonIndex >= 0) {
 			String id = name.substring(colonIndex+1);
 			UUID uuid = UUID.fromString(id);
@@ -116,11 +164,14 @@ public class Utils {
 		
 		Arrays.sort(players, offlineplayerComp);
 		
+		// use binary search
 		int left = 0;
 		int right = players.length - 1;
+		
 		while (left <= right) {
 			int mid = (left + right) / 2;
 			int result = players[mid].getName().compareToIgnoreCase(name);
+			
 			if (result == 0)
 				return players[mid];
 			else if (result < 0)
