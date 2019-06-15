@@ -1,8 +1,12 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.Scanner;
 
 import javax.swing.UIManager;
 
@@ -45,6 +49,52 @@ import com.randude14.register.economy.VaultEconomy;
  * @version 1.0.1
  */
 public class LotteryPlus extends JavaPlugin {
+	
+	
+	public static void main(String[] args) {
+		
+		File fromFile = new File("lang.properties");
+		File toFile = new File("test/lang.properties");
+		Properties defaults = new Properties();
+		Properties properties = new Properties();
+		try {
+			
+			defaults.load(new FileInputStream(fromFile));
+			properties.load(new FileInputStream(toFile));
+			
+			Scanner fromJar = new Scanner(fromFile);
+		    PrintWriter saveTo = new PrintWriter(toFile);
+			
+		    while(fromJar.hasNextLine()) {
+		    	String line = fromJar.nextLine();
+		    	
+		    	if(line.startsWith("#")) {
+		    		saveTo.println(line);
+		    	}
+		    	
+		    	int equalIndex = line.indexOf('=');
+		    	
+		    	if(equalIndex >= 0) {
+		    		String key = line.substring(0, equalIndex);
+		    		String value = line.substring(equalIndex+1);
+		    		
+		    		if(properties.containsKey(key)) {
+		    			saveTo.println(key + "=" + properties.getProperty(key));
+		    		} else {
+		    			saveTo.println(key + "=" + value);
+		    		}
+		    			
+		    		
+		    	}
+		    }
+		   
+		    fromJar.close();
+		    saveTo.flush();
+		    saveTo.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 	
 	/*
 	 * Serves as the instance of the plugin. Can be accessed outside of class via LotteryPlus.getInstance()

@@ -65,8 +65,8 @@ public class ChatUtils {
 		    saveTo.flush();
 		    saveTo.close();
 		} catch (Exception ex) {
-			Logger.info("logger.exception.file.load", "<file>", langFile.getName());
 			ex.printStackTrace();
+			Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
 		}
 	}
 	
