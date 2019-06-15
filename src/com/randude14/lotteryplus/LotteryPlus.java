@@ -60,7 +60,9 @@ public class LotteryPlus extends JavaPlugin {
 		try {
 			
 			defaults.load(new FileInputStream(fromFile));
-			properties.load(new FileInputStream(toFile));
+			if(toFile.exists()) {
+				properties.load(new FileInputStream(toFile));
+			}
 			
 			Scanner fromJar = new Scanner(fromFile);
 		    PrintWriter saveTo = new PrintWriter(toFile);
@@ -114,6 +116,10 @@ public class LotteryPlus extends JavaPlugin {
 	 */
 	public void onEnable() {
 		instance = this;
+		
+		// create data folder
+		this.getDataFolder().mkdirs();
+		
 		registerConfigurationClasses();
 		ChatUtils.reload();
 		
