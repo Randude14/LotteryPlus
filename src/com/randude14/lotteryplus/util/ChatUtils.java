@@ -20,17 +20,18 @@ public class ChatUtils {
 	
 	private static File langFile;
 	private static Properties properties = new Properties();
-	private static Properties defaults = new Properties();
 	
 	public static void reload() {
 		
 		LotteryPlus plugin = LotteryPlus.getInstance();
+		properties.clear();
 		
 		if(langFile == null)
 			langFile = new File(plugin.getDataFolder(), "lang.properties");
 		
 		try {
 			
+			Properties defaults = new Properties();
 			defaults.load(plugin.getResource(langFile.getName()));
 			
 			if(langFile.exists()) {
@@ -60,6 +61,12 @@ public class ChatUtils {
 		    		}
 		    			
 		    		
+		    	}
+		    }
+		    
+		    for(Object key : defaults.keySet()) {
+		    	if(!properties.containsKey(key)) {
+		    		properties.setProperty(key.toString(), defaults.get(key).toString());
 		    	}
 		    }
 		   
@@ -155,9 +162,9 @@ public class ChatUtils {
 	public static String getNameFor(String code, Object... args) {
 		
 		String mess = properties.getProperty(code).toString();
+		
 		if(mess == null) {
-			mess = defaults.getProperty(code);
-			mess = (mess == null) ? code : mess;
+			mess = code;
 		}
 		
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
@@ -172,9 +179,9 @@ public class ChatUtils {
 	public static String getRawName(String code, Object... args) {
 		
 		String mess = properties.getProperty(code).toString();
+		
 		if(mess == null) {
-			mess = defaults.getProperty(code);
-			mess = (mess == null) ? code : mess;
+			mess = code;
 		}
 		
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
