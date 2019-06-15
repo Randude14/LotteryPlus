@@ -154,7 +154,10 @@ public class ChatUtils {
 	
 	public static String getNameFor(String code, Object... args) {
 		String mess = properties.getProperty(code).toString();
-		if(mess == null) mess = code;
+		if(mess == null) {
+			mess = defaults.getProperty(code);
+			mess = (mess == null) ? code : mess;
+		}
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
 			String string = args[cntr+1].toString();
 			if(string == null || string.equals("")) string = "\"\"";
