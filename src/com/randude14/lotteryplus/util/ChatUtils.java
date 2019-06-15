@@ -31,9 +31,6 @@ public class ChatUtils {
 		
 		try {
 			
-			Properties defaults = new Properties();
-			defaults.load(plugin.getResource(langFile.getName()));
-			
 			if(langFile.exists()) {
 				properties.load(new FileInputStream(langFile));
 			}
@@ -58,21 +55,16 @@ public class ChatUtils {
 		    			saveTo.println(key + "=" + properties.getProperty(key));
 		    		} else {
 		    			saveTo.println(key + "=" + value);
-		    		}
-		    			
-		    		
+		    			properties.setProperty(key, value);
+		    		}		
 		    	}
-		    }
-		    
-		    for(Object key : defaults.keySet()) {
-		    	if(!properties.containsKey(key)) {
-		    		properties.setProperty(key.toString(), defaults.get(key).toString());
-		    	}
+		    	
 		    }
 		   
 		    fromJar.close();
 		    saveTo.flush();
 		    saveTo.close();
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			//Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
