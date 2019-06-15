@@ -12,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.configuration.Config;
@@ -33,7 +32,10 @@ public class ChatUtils {
 		try {
 			
 			defaults.load(plugin.getResource(langFile.getName()));
-			properties.load(new FileInputStream(langFile));
+			
+			if(langFile.exists()) {
+				properties.load(new FileInputStream(langFile));
+			}
 			
 			Scanner fromJar = new Scanner(plugin.getResource(langFile.getName()));
 		    PrintWriter saveTo = new PrintWriter(langFile);
@@ -66,7 +68,7 @@ public class ChatUtils {
 		    saveTo.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
+			//Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
 		}
 	}
 	
