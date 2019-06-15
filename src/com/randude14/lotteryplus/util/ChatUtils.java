@@ -51,6 +51,8 @@ public class ChatUtils {
 		    		String key = line.substring(0, equalIndex);
 		    		String value = line.substring(equalIndex+1);
 		    		
+		    		System.out.println(key + " - " + value);
+		    		
 		    		if(properties.containsKey(key)) {
 		    			saveTo.println(key + "=" + properties.getProperty(key));
 		    		} else {
