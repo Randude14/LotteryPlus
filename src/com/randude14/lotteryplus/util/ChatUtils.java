@@ -2,11 +2,7 @@ package com.randude14.lotteryplus.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;

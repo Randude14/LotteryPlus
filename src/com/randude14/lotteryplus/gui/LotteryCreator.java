@@ -20,6 +20,10 @@ import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.util.ChatUtils;
 
+/*
+ * Used in the main frame in each tab and allows the user to create lotteries
+ * using add and remove buttons and entering in the values with a text field
+ */
 @SuppressWarnings({"serial", "rawtypes"})
 public class LotteryCreator extends JPanel implements ActionListener {
 	private DefaultListModel<Property> defaults;
@@ -29,8 +33,8 @@ public class LotteryCreator extends JPanel implements ActionListener {
 	private JList<Property> defaultsList;
 	private JList<Value> valuesList;
 	private JTextField valueField;
-	private JButton add; 
-	private JButton remove;
+	private JButton add;                     // used to add properties to the values list
+	private JButton remove;                  // used to remove properties from the values list
 	private JButton create;
 	private final MainFrame parent;
 	private String lotteryName;
@@ -38,11 +42,13 @@ public class LotteryCreator extends JPanel implements ActionListener {
 	protected LotteryCreator(MainFrame frame, String lotteryName) {
 		this.parent = frame;
 		this.lotteryName = lotteryName;
+		
 		setLayout(new BorderLayout());
 	}
 
 	protected boolean initComponents(Map<Property<?>, Object> propoerties) {
 		defaults = new DefaultListModel<Property>();
+		
 		for(Property prop : Config.lotteryDefaults) {
 			if(!propoerties.containsKey(prop)) {
 				defaults.addElement(prop);
@@ -51,16 +57,23 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		defaultsList = new JList<Property>(defaults);
 		defaultsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		values = new DefaultListModel<Value>();
+		
+		// add the values and their properties
 		for(Property prop : Config.lotteryDefaults) {
+			
 			if(propoerties.containsKey(prop)) {
+				
 				try {
 					values.addElement(new Value(prop, propoerties.get(prop)));
 				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(parent, ChatUtils.getRawName("plugin.gui.dialog.error.types"), "", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(parent, ChatUtils.getRawName("plugin.gui.dialog.error.types"), 
+							"", JOptionPane.ERROR_MESSAGE);
 					return false;
 				}
 			}
 		}
+		
+		// add values to the JList
 		valuesList = new JList<Value>(values);
 		valuesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -96,6 +109,10 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		return true;
 	}
 	
+	/*
+	 * Set the lottery name
+	 * @param lotteryName - lottery name to set to
+	 */
 	protected void setLotteryName(String lotteryName) {
 		this.lotteryName = lotteryName;
 	}
@@ -103,9 +120,11 @@ public class LotteryCreator extends JPanel implements ActionListener {
 	protected void reset() {
 		values.removeAllElements();
 		defaults.removeAllElements();
+		
 		for(Property prop : Config.lotteryDefaults) {
 			defaults.addElement(prop);
 		}
+
 		valueField.setText(ChatUtils.getRawName("plugin.gui.textfield.value"));
 		defaultsPane.getViewport().setViewPosition(new Point());
 		valuesPane.getViewport().setViewPosition(new Point());
@@ -113,38 +132,51 @@ public class LotteryCreator extends JPanel implements ActionListener {
 
 	public void actionPerformed(ActionEvent event) {
 		Object source = event.getSource();
+		
 		if(source == add) {
 			Property prop = defaultsList.getSelectedValue();
-			if(prop == null) return;
+			if(prop == null) 
+				return;
 			Value value = new Value(prop, valueField.getText());
 			defaults.removeElement(prop);
 			values.addElement(value);
 			sort(defaults);
 			sort(values);
+			
 		} else if(source == remove) {
 			Value value = valuesList.getSelectedValue();
-			if(value == null) return;
+			if(value == null) 
+				return;
 			values.removeElement(value);
 			defaults.addElement(value.prop);
 			sort(defaults);
 			sort(values);
+			
 		} else if(source == create) {
 			Map<String, Object> map = new HashMap<String, Object>();
+			
 			for(int cntr = 0;cntr < values.size();cntr++) {
 				Value v = values.get(cntr);
 				map.put(v.prop.getName(), v.value);
 			}
+			
 			LotteryManager.createLotterySection(Bukkit.getConsoleSender(), lotteryName, map);
 			JOptionPane.showMessageDialog(this, ChatUtils.getRawName("plugin.gui.dialog.lottery-section-created", "<lottery>", lotteryName));
 			parent.closeCreator(lotteryName);
 		}
 	}
 	
+	/*
+	 * Used to sort a default list model
+	 * @param list - default list model to sort
+	 */
 	@SuppressWarnings("unchecked")
 	private void sort(DefaultListModel list) {
+		
 		Object[] array = list.toArray();
 		list.removeAllElements();
 		Arrays.sort(array);
+		
 		for(Object obj : array) {
 			list.addElement(obj);
 		}

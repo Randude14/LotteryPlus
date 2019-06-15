@@ -11,7 +11,7 @@ import com.randude14.lotteryplus.util.ChatUtils;
 public class ReloadAllCommand implements Command {
 
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		LotteryManager.reloadLotteries(sender);
+		LotteryManager.reloadLotteries(sender, true);
 		return true;
 	}
 

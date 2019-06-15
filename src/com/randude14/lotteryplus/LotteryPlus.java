@@ -157,6 +157,7 @@ public class LotteryPlus extends JavaPlugin {
 	/*
 	 * Creates/updates files that contain information dealing with the creation of lotteries
 	 */
+	@SuppressWarnings("deprecation")
 	private void saveExtras() {
 		
 		// lists all the enchantments that can be used

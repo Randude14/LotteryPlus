@@ -113,15 +113,13 @@ public class PlayerListener implements Listener {
 	// remove buyers when the leave
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		String name = event.getPlayer().getName();
-		buyers.remove(name);
+		buyers.remove(event.getPlayer());
 	}
 
 	// remove buyers when they get kicked
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerKick(PlayerKickEvent event) {
-		String name = event.getPlayer().getName();
-		buyers.remove(name);
+		buyers.remove(event.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
