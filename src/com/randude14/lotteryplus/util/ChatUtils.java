@@ -6,13 +6,13 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.randude14.lotteryplus.Logger;
 import com.randude14.lotteryplus.LotteryPlus;
 import com.randude14.lotteryplus.Perm;
 import com.randude14.lotteryplus.configuration.Config;
@@ -52,7 +52,7 @@ public class ChatUtils {
 		    		String key = line.substring(0, equalIndex);
 		    		String value = line.substring(equalIndex+1);
 		    		
-		    		Logger.info(key + " - " + value);
+		    		plugin.getLogger().log(Level.INFO, key + " - " + value);
 		    		
 		    		if(properties.containsKey(key)) {
 		    			saveTo.println(key + "=" + properties.getProperty(key));
