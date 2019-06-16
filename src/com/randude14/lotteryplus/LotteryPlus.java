@@ -1,12 +1,8 @@
 package com.randude14.lotteryplus;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.Scanner;
 
 import javax.swing.UIManager;
 
@@ -48,63 +44,7 @@ import com.randude14.register.economy.VaultEconomy;
  * @arthur Randall Ferree
  * @version 1.0.1
  */
-public class LotteryPlus extends JavaPlugin {
-	
-	
-	public static void main(String[] args) {
-		
-		File fromFile = new File("lang.properties");
-		File toFile = new File("test/lang.properties");
-		toFile.getParentFile().mkdirs();
-		Properties properties = new Properties();
-		try {
-			
-			if(toFile.exists()) {
-				properties.load(new FileInputStream(toFile));
-			}
-			
-			Scanner fromJar = new Scanner(fromFile);
-		    PrintWriter saveTo = new PrintWriter(toFile);
-			
-		    while(fromJar.hasNextLine()) {
-		    	String line = fromJar.nextLine();
-		    	
-		    	if(line.startsWith("#")) {
-		    		saveTo.println(line);
-		    	}
-		    	
-		    	int equalIndex = line.indexOf('=');
-		    	
-		    	if(equalIndex >= 0) {
-		    		String key = line.substring(0, equalIndex);
-		    		String value = line.substring(equalIndex+1);
-		    		
-		    		System.out.println(key + "=" + value);
-		    		
-		    		if(properties.containsKey(key)) {
-		    			saveTo.println(key + "=" + properties.getProperty(key));
-		    		} else {
-		    			saveTo.println(key + "=" + value);
-		    			properties.setProperty(key, value);
-		    		}		
-		    	}
-		    	
-		    }
-		   
-		    fromJar.close();
-		    saveTo.flush();
-		    saveTo.close();
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			//Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
-		}
-		
-		for(Object key : properties.keySet()) {
-			System.out.println(key + "=" + properties.getProperty(key.toString()));
-		}
-		System.out.println(properties.get("asdf.asdf..asdfasda"));
-	}
+public class LotteryPlus extends JavaPlugin {	
 	
 	/*
 	 * Serves as the instance of the plugin. Can be accessed outside of class via LotteryPlus.getInstance()

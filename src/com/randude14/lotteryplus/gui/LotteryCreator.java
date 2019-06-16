@@ -19,6 +19,7 @@ import com.randude14.lotteryplus.LotteryManager;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Property;
 import com.randude14.lotteryplus.util.ChatUtils;
+import com.randude14.lotteryplus.util.Utils;
 
 /*
  * Used in the main frame in each tab and allows the user to create lotteries
@@ -137,6 +138,12 @@ public class LotteryCreator extends JPanel implements ActionListener {
 			Property prop = defaultsList.getSelectedValue();
 			if(prop == null) 
 				return;
+			
+			if(!checkEnteredValue(prop, valueField.getText())) {
+				JOptionPane.showMessageDialog(this, ChatUtils.getRawName("plugin.gui.dialog.error.incorrect-value"));
+				return;
+			}
+			
 			Value value = new Value(prop, valueField.getText());
 			defaults.removeElement(prop);
 			values.addElement(value);
@@ -164,6 +171,26 @@ public class LotteryCreator extends JPanel implements ActionListener {
 			JOptionPane.showMessageDialog(this, ChatUtils.getRawName("plugin.gui.dialog.lottery-section-created", "<lottery>", lotteryName));
 			parent.closeCreator(lotteryName);
 		}
+	}
+	
+	/*
+	 * Check the value entered in the text field.
+	 * @param property - property to compare
+	 * @param entered - value entered by user
+	 * @return - whether the value entered is of correct data type
+	 */
+	private boolean checkEnteredValue(Property property, String entered) {
+		Object defaultValue = property.getDefaultValue();
+		
+		if(defaultValue instanceof Boolean || defaultValue instanceof String) {
+			return true;
+		}
+		
+		if(defaultValue instanceof Number) {
+			return Utils.isNumber(entered);
+		}
+		
+		return true;
 	}
 	
 	/*

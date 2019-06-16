@@ -35,6 +35,53 @@ public class Utils {
 	}
 	
 	/*
+	 * Check if an object is a number
+	 * @param value - value to check
+	 * @return - whether the value is a number
+	 */
+	public static boolean isNumber(Object value) {
+		
+		if(value == null) {
+			return false;
+		}
+		
+		String string = value.toString();
+		
+		try {
+			Integer.parseInt(string);
+			return true;
+		} catch (Exception ex) {
+		}
+		
+		try {
+			Long.parseLong(string);
+			return true;
+		} catch (Exception ex) {
+		}
+		
+		try {
+			Double.parseDouble(string);
+			return true;
+		} catch (Exception ex) {
+		}
+		
+		try {
+			Float.parseFloat(string);
+			return true;
+		} catch (Exception ex) {
+		}
+		
+		try {
+			Short.parseShort(string);
+			return true;
+		} catch (Exception ex) {
+		}
+		
+		// return false if all number parsing fails
+		return false;
+	}
+	
+	/*
 	 * Convert a location to a string
 	 * @param loc - location to convert
 	 * @return - string containing the location info
