@@ -52,7 +52,7 @@ public class ChatUtils {
 		    		String key = line.substring(0, equalIndex);
 		    		String value = line.substring(equalIndex+1);
 		    		
-		    		plugin.getLogger().log(Level.INFO, key + " - " + value);
+		    		plugin.getLogger().log(Level.INFO, key + "=" + value);
 		    		
 		    		if(properties.containsKey(key)) {
 		    			saveTo.println(key + "=" + properties.getProperty(key));
@@ -156,10 +156,10 @@ public class ChatUtils {
 	
 	public static String getNameFor(String code, Object... args) {
 		
-		String mess = properties.getProperty(code).toString();
+		String mess = code;
 		
-		if(mess == null) {
-			mess = code;
+		if(properties.containsKey(code)) {
+			mess = properties.getProperty(code);
 		}
 		
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {
@@ -173,10 +173,10 @@ public class ChatUtils {
 	
 	public static String getRawName(String code, Object... args) {
 		
-		String mess = properties.getProperty(code).toString();
+		String mess = code;
 		
-		if(mess == null) {
-			mess = code;
+		if(properties.containsKey(code)) {
+			mess = properties.getProperty(code);
 		}
 		
 		for(int cntr = 0;cntr < args.length-1;cntr+=2) {

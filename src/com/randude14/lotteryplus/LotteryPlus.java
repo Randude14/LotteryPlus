@@ -55,11 +55,10 @@ public class LotteryPlus extends JavaPlugin {
 		
 		File fromFile = new File("lang.properties");
 		File toFile = new File("test/lang.properties");
-		Properties defaults = new Properties();
+		toFile.getParentFile().mkdirs();
 		Properties properties = new Properties();
 		try {
 			
-			defaults.load(new FileInputStream(fromFile));
 			if(toFile.exists()) {
 				properties.load(new FileInputStream(toFile));
 			}
@@ -80,22 +79,31 @@ public class LotteryPlus extends JavaPlugin {
 		    		String key = line.substring(0, equalIndex);
 		    		String value = line.substring(equalIndex+1);
 		    		
+		    		System.out.println(key + "=" + value);
+		    		
 		    		if(properties.containsKey(key)) {
 		    			saveTo.println(key + "=" + properties.getProperty(key));
 		    		} else {
 		    			saveTo.println(key + "=" + value);
-		    		}
-		    			
-		    		
+		    			properties.setProperty(key, value);
+		    		}		
 		    	}
+		    	
 		    }
 		   
 		    fromJar.close();
 		    saveTo.flush();
 		    saveTo.close();
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			//Logger.info("logger.exception.file.load", "<file>", langFile.getName());	
 		}
+		
+		for(Object key : properties.keySet()) {
+			System.out.println(key + "=" + properties.getProperty(key.toString()));
+		}
+		System.out.println(properties.get("asdf.asdf..asdfasda"));
 	}
 	
 	/*
