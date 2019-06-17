@@ -812,7 +812,7 @@ public class Lottery implements Runnable {
 		int reward = properties.getInt(Config.DEFAULT_VOTIFIER_REWARD);
 		if(reward > 0) {
 			OfflinePlayer player = Utils.getOfflinePlayer(playerName);
-			OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
+			OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 			
 			// could not find player, log to server console that we could not find it
 			if(player == null) {
@@ -872,7 +872,7 @@ public class Lottery implements Runnable {
 		}
 		
 		// check if they were a previous winner
-		OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
+		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
 		if(prevWinner.getUniqueId() == player.getUniqueId() && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
@@ -1024,7 +1024,7 @@ public class Lottery implements Runnable {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
 		
 		// check if they were a previous winner
-		OfflinePlayer prevWinner = Utils.getBukkitPlayer(properties.getString("winner", ""));
+		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
 		if(player != null && prevWinner.getUniqueId() == player.getUniqueId() && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {

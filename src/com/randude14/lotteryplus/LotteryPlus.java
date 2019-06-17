@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.UIManager;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -64,6 +65,8 @@ public class LotteryPlus extends JavaPlugin {
 	 */
 	public void onEnable() {
 		instance = this;
+		
+		Bukkit.getConsoleSender().setOp(true);
 		
 		// create data folder
 		this.getDataFolder().mkdirs();
