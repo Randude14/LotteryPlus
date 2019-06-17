@@ -115,12 +115,12 @@ public class Lottery implements Runnable {
 				econ = (Economy) propertiesToLoad.get("econ");
 			} 
 			
+			loadData(propertiesToLoad);
+			
 			// economy was not loaded
 			if(econ == null) {
 				throw new NullPointerException("Economy failed to load.");
-			}
-			
-			loadData(propertiesToLoad);
+			}			
 			
 			// load signs
 			for(int cntr = 1; propertiesToLoad.contains("sign" + cntr); cntr++) {

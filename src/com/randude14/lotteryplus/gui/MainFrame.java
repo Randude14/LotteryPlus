@@ -202,10 +202,10 @@ public class MainFrame extends JFrame {
 			Object source = event.getSource();
 			
 			if(source == tutorialItem) {
-				browse("http://dev.bukkit.org/server-mods/lotteryplus/pages/gui-tutorial/");
+				browse("dev.bukkit.org/projects/lotteryplus/pages/gui-tutorial");
 				
 			} else if(source == websiteItem) {
-				browse("http://dev.bukkit.org/server-mods/lotteryplus/");
+				browse("dev.bukkit.org/projects/lotteryplus");
 				
 			} else if(source == openItem) {
 				String lotteryName = JOptionPane.showInputDialog(parent, ChatUtils.getRawName("plugin.gui.dialog.lottery-name"));
@@ -215,7 +215,7 @@ public class MainFrame extends JFrame {
 				}
 				
 			} else if(source == ticketItem) {
-				browse("http://github.com/Randude14/LotteryPlus/issues/new");
+				browse("github.com/Randude14/LotteryPlus/issues/new");
 				
 			} else if(source == removeItem) {
 				int index = tabs.getSelectedIndex();
