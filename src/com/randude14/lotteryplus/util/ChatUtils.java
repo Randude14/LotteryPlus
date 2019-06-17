@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -51,8 +50,6 @@ public class ChatUtils {
 		    	if(equalIndex >= 0) {
 		    		String key = line.substring(0, equalIndex);
 		    		String value = line.substring(equalIndex+1);
-		    		
-		    		plugin.getLogger().log(Level.INFO, key + "=" + value);
 		    		
 		    		if(properties.containsKey(key)) {
 		    			saveTo.println(key + "=" + properties.getProperty(key));

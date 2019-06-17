@@ -2,6 +2,7 @@ package com.randude14.lotteryplus;
  
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
@@ -68,6 +69,12 @@ public enum Perm {
      * @param sender - user to check
      */
     public boolean hasPermission(CommandSender sender) {
+    	
+    	// if sender is the console, return true
+    	if(sender instanceof ConsoleCommandSender) {
+    		return true;
+    	}
+    	
     	return sender.hasPermission(permission);
     }
    
