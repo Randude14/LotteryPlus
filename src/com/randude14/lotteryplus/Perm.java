@@ -13,6 +13,7 @@ import com.randude14.lotteryplus.util.ChatUtils;
  */
 public enum Perm {
    
+	// TODO: set option in config to allow admins to control admin level commands
     SUPER_PERM(new Permission("lottery.*", PermissionDefault.OP)),
     PARENT_BASIC(new Permission("lottery.basic.*", PermissionDefault.OP), SUPER_PERM),
     PARENT_ADMIN(new Permission("lottery.admin.*", PermissionDefault.OP), SUPER_PERM),

@@ -125,7 +125,7 @@ public class RewardManager {
 		// check for old storage of claims that saved only by player name
 		List<LotteryClaim> oldClaims = claims.get(player.getName());
 		
-		if(!oldClaims.isEmpty())
+		if(oldClaims!= null && !oldClaims.isEmpty())
 			playerClaims.addAll(oldClaims);
 		
 		
@@ -166,9 +166,11 @@ public class RewardManager {
 	 * @param player - player to check
 	 */
 	public void notifyOfRewardClaims(Player player) {
-		List<LotteryClaim> playerClaims = claims.get(player.getName());
+		List<LotteryClaim> playerClaims = claims.get(Utils.getUniqueName(player));
+		List<LotteryClaim> oldClaims = claims.get(player.getName());
 		
-		if(playerClaims != null && !playerClaims.isEmpty()) {
+		if( (oldClaims != null && !oldClaims.isEmpty()) || 
+				(playerClaims != null) && !playerClaims.isEmpty()) {
 			ChatUtils.send(player, "lottery.claim.notify");
 		}
 	}

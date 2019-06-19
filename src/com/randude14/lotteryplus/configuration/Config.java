@@ -55,7 +55,7 @@ public class Config {
 	public static final Property<String> DEFAULT_WARNING_TIMES = new Property<String>("defaults.warning-times", "").setDescription("config.description.warning-times");
 	public static final Property<String> DEFAULT_MATERIAL_NAME = new Property<String>("defaults.material-name", "Gold Ingot").setDescription("config.description.material-name");
 	public static final Property<String> DEFAULT_RESET_ADD_ITEM_REWARDS = new Property<String>("defaults.reset-add-item-rewards", "").setDescription("config.description.reset-add-item-rewards");
-	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "").setDescription("config.description.tax-taccount");
+	public static final Property<String> DEFAULT_TAX_ACCOUNT = new Property<String>("defaults.tax-account", "").setDescription("config.description.tax-account");
 	public static final Property<String> DEFAULT_WORLDS = new Property<String>("defaults.worlds", "").setDescription("config.description.worlds");
 	public static final Property<String> DEFAULT_TOWNY = new Property<String>("defaults.towny", "").setDescription("config.description.towny");
 	public static final Property<String> DEFAULT_ALIASES = new Property<String>("defaults.aliases", "").setDescription("config.description.aliases");

@@ -40,7 +40,7 @@ public class LotteryManager {
 	private static final String LOTTERIES_SECTION = "lotteries";
 	
 	// name of the saves section of the lotteriesConfig
-	private static final String SAVES_SECTION = "lotteries";
+	private static final String SAVES_SECTION = "saves";
 	
 	
 	
@@ -348,11 +348,9 @@ public class LotteryManager {
 					return false;
 				}
 				
-				// delete lottery saves
-				ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
-				deleteSection(savesSection, lottery.getName());
-				
 				ChatUtils.send(sender, "lottery.reload", "<lottery>", lottery.getName());
+				
+				LotteryManager.saveLottery(lotteryName);
 				return true;
 			}
 		}

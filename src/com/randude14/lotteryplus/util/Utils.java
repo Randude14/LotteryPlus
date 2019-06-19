@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -152,7 +153,7 @@ public class Utils {
 	 * @return - the name from the unique identifier
 	 */
 	public static String stripNameOfId(String player) {
-        int colonIndex = player.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+        int colonIndex = player.indexOf(LotteryPlus.NAME_SEPARATOR);
 		
 		if(colonIndex >= 0) {
 			return player.substring(0, colonIndex);
@@ -167,7 +168,7 @@ public class Utils {
 	 * @param name - the name to check
 	 */
 	public static boolean isSamePlayer(OfflinePlayer player, String name) {
-		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+		int colonIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
 		
 		if(colonIndex >= 0) {
 			String id = name.substring(colonIndex+1);
@@ -193,7 +194,7 @@ public class Utils {
 			return null;
 		}
 		
-		int colonIndex = name.lastIndexOf(LotteryPlus.NAME_SEPARATOR);
+		int colonIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
 		
 		// if there is a colon, grab the UUID
 		if(colonIndex >= 0) {
@@ -245,6 +246,7 @@ public class Utils {
 	}
 	
 	public static List<ItemStack> getItemStacks(String line) {
+		LotteryPlus.getInstance().getLogger().log(Level.INFO, line);
 		List<ItemStack> rewards = new ArrayList<ItemStack>();
 		listItemStacks(rewards, line);
 		return rewards;

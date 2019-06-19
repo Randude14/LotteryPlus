@@ -874,7 +874,7 @@ public class Lottery implements Runnable {
 		// check if they were a previous winner
 		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
-		if(prevWinner.getUniqueId() == player.getUniqueId() && 
+		if(prevWinner != null && prevWinner.getUniqueId() == player.getUniqueId() && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(player, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
@@ -1026,7 +1026,7 @@ public class Lottery implements Runnable {
 		// check if they were a previous winner
 		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
-		if(player != null && prevWinner.getUniqueId() == player.getUniqueId() && 
+		if(player != null && prevWinner != null && prevWinner.getUniqueId() == player.getUniqueId() && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(rewarder, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
