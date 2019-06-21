@@ -2,6 +2,8 @@ Version 1.0.2
   - Better code commenting being added
   - Starting conversion to using player IDs with names
   - Added 'plugin.gui.dialog.error.incorrect-value' to check for incorrect inputs on the GUI creator
+  - Lotteries will log if they load a player that they were not able to find if they were converting from a save predating this version
+  - Commands will now have auto tabs to help make filling out the command arguments easier
   - Other general updates to 1.14
   - 
   - 

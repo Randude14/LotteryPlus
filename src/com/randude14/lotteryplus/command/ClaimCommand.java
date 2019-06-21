@@ -1,5 +1,6 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -15,6 +16,10 @@ public class ClaimCommand implements Command {
 		Player player = (Player) sender;
 		LotteryPlus.getRewardsManager().checkForPlayerClaims(player);
 		return true;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		return null;
 	}
 
 	public CommandAccess getAccess() {

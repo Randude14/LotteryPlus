@@ -1,5 +1,7 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -15,6 +17,20 @@ public class UnloadCommand implements Command {
 		if(args.length >= 2) delete = new Boolean(args[1]).booleanValue();
 		LotteryManager.unloadLottery(sender, args[0], delete);
 		return true;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		
+		if (args.length == 0) {
+			return LotteryManager.getLotteryNames();
+		} else if (args.length == 1) {
+			return LotteryManager.getLotteryNames(args[0]);
+		} else if (args.length == 2) {
+			List<String> options = Arrays.asList(new String[] {"true", "false"});
+			return options;
+		}
+		
+		return null;
 	}
 
 	public CommandAccess getAccess() {

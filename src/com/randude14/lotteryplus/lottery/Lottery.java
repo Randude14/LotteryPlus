@@ -117,6 +117,40 @@ public class Lottery implements Runnable {
 			
 			loadData(propertiesToLoad);
 			
+			
+			// search for old player saves add their unique IDs
+			propertiesToLoad.remove("players"); // NOTE: removes configuration section
+			List<String> keys = new ArrayList<String>(propertiesToLoad.keySet());
+			
+			for (int cntr = 0; cntr < keys.size(); cntr++) {
+				String key = keys.get(cntr);
+				
+				// new saves should have UUID attached to reduce dependence on username
+				// EX: BobbyHill-12345-12345-12345-12345-12345
+				if (key.startsWith("players.") && !key.contains("-")) {
+					String name = key.substring(8);
+					List<OfflinePlayer> players = Utils.matchForPlayers(name);
+					int tickets = propertiesToLoad.getInt(key);
+					
+					// if we couldn't find player, remove and log the error
+					if(players.isEmpty()) {
+						Logger.info("plugin.error.unknown-player", "<lottery>", lotteryName, 
+								"<player>", name, "<tickets>", tickets);
+						
+					// if there are more than one players that were on this server with this username
+					} else if (players.size() > 1) {
+						Logger.info("plugin.error.ambig-name", "<lottery>", lotteryName, 
+								"<player>", name, "<tickets>", tickets);
+						
+					} else {
+						String uniqueName = Utils.getUniqueName(players.get(0));			
+						propertiesToLoad.set("players." + uniqueName, tickets);
+					}
+					
+					propertiesToLoad.set(key, null);
+				}
+			}
+			
 			// economy was not loaded
 			if(econ == null) {
 				throw new NullPointerException("Economy failed to load.");
@@ -147,8 +181,8 @@ public class Lottery implements Runnable {
 			return true;
 			
 		} catch (Exception ex) {
-			throw new NullPointerException(ChatUtils.getRawName("lottery.exception.economy.load", 
-					"<lottery>", lotteryName));
+			throw new InvalidLotteryException(ChatUtils.getRawName("lottery.exception.economy.load", 
+					"<lottery>", lotteryName), ex);
 		}
 
 	}
@@ -810,6 +844,7 @@ public class Lottery implements Runnable {
 	 */
 	public void onVote(String playerName) {
 		int reward = properties.getInt(Config.DEFAULT_VOTIFIER_REWARD);
+		
 		if(reward > 0) {
 			OfflinePlayer player = Utils.getOfflinePlayer(playerName);
 			OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
@@ -821,7 +856,7 @@ public class Lottery implements Runnable {
 			}
 			
 			// can't win again
-			if(prevWinner.getUniqueId() == player.getUniqueId() && 
+			if(prevWinner != null && prevWinner.getUniqueId().equals(player.getUniqueId()) && 
 					!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 				return;
 			}
@@ -847,6 +882,11 @@ public class Lottery implements Runnable {
 			addTickets(player, reward);
 			broadcast("lottery.vote.reward.mess", "<player>", player, 
 					"<number>", reward, "<lottery>", lotteryName);
+			
+			if(isOver()) {
+				draw(null);
+			}
+			
 			LotteryManager.saveLottery(lotteryName);
 		}
 	}
@@ -874,7 +914,7 @@ public class Lottery implements Runnable {
 		// check if they were a previous winner
 		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
-		if(prevWinner != null && prevWinner.getUniqueId() == player.getUniqueId() && 
+		if(prevWinner != null && prevWinner.getUniqueId().equals(player.getUniqueId()) && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(player, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
@@ -893,18 +933,17 @@ public class Lottery implements Runnable {
 		
 		// check ticket limit
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
-		int bought = getTicketsBought(player);
+		int ticketsTotal = getTotalTicketsBought();
 		
-		if (ticketLimit > 0 && bought >= ticketLimit) {
-			ChatUtils.sendRaw(player, "lottery.error.tickets.soldout");
+		if (ticketLimit > 0 && ticketsTotal + tickets > ticketLimit) {
+			ChatUtils.sendRaw(player, "lottery.error.tickets.limit", "<lottery>", lotteryName, "<tickets>", ticketLimit - ticketsTotal);
 			return false;
 		}
 		
 		
-		String name = player.getName();
+		int bought = getTicketsBought(player);
 		int maxTickets = properties.getInt(Config.DEFAULT_MAX_TICKETS);
 		int maxPlayers = properties.getInt(Config.DEFAULT_MAX_PLAYERS);
-		int playersEntered = getPlayersEntered();
 		
 		// check that they haven't gotten over the max
 		if (maxTickets > 0) {
@@ -917,14 +956,27 @@ public class Lottery implements Runnable {
 			}
 		}
 		
+		List<OfflinePlayer> players = getPlayers();
+		
 		// check if there can be more players
 		if(maxPlayers > 0) {
-			if (playersEntered >= maxPlayers) {
+			boolean boughtYet = false;
+			
+			for(OfflinePlayer check : players) {
+				if(check.getName().equalsIgnoreCase(player.getName())) {
+					boughtYet = true;
+				}
+			}
+			
+			int playersEntered = players.size();
+			
+			if (!boughtYet && playersEntered >= maxPlayers) {
 				ChatUtils.sendRaw(player, "lottery.error.players.nomore");
 				return false;
 			}
 		}
 		
+		String name = player.getName();
 		// check if their cooldown from buying tickets earlier is over
 		synchronized(cooldowns) {
 			if(cooldowns.containsKey(name)) {
@@ -1007,6 +1059,10 @@ public class Lottery implements Runnable {
 			}
 		}
 		
+		if(isOver()) {
+			draw(null);
+		}
+		
 		updateSigns();
 		LotteryManager.saveLottery(lotteryName);
 		return true;
@@ -1026,7 +1082,7 @@ public class Lottery implements Runnable {
 		// check if they were a previous winner
 		OfflinePlayer prevWinner = Utils.getOfflinePlayer(properties.getString("winner", ""));
 		
-		if(player != null && prevWinner != null && prevWinner.getUniqueId() == player.getUniqueId() && 
+		if(player != null && prevWinner != null && prevWinner.getUniqueId().equals(player.getUniqueId()) && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
 			ChatUtils.send(rewarder, "lottery.error.already-won", "<lottery>", lotteryName);
 			return false;
@@ -1056,6 +1112,11 @@ public class Lottery implements Runnable {
 		// add tickets, update signs, and save lottery
 		addTickets(player, tickets);
 		updateSigns();
+		
+		if(isOver()) {
+			draw(null);
+		}
+		
 		LotteryManager.saveLottery(lotteryName);
 		return true;
 	}
@@ -1156,13 +1217,10 @@ public class Lottery implements Runnable {
 				
 				int index = key.indexOf('.');
 				String player = key.substring(index + 1);
-				int num = properties.getInt(key, 0);
 				
-				for (int cntr = 0; cntr < num; cntr++) {
-					OfflinePlayer offlineplayer = Utils.getOfflinePlayer(player);
-					if (offlineplayer != null) {
-						players.add(offlineplayer.getUniqueId());
-					}	
+				OfflinePlayer offlineplayer = Utils.getOfflinePlayer(player);
+				if (offlineplayer != null) {
+					players.add(offlineplayer.getUniqueId());
 				}	
 			}
 		}
@@ -1222,24 +1280,7 @@ public class Lottery implements Runnable {
 	public int getTicketsBought(OfflinePlayer player) {
 		String uniqueName = Utils.getUniqueName(player);
 		
-		// search for old save and convert to new save if exists
-		if (properties.contains("players." + player.getName())) {
-			try {
-				int tickets = Integer.parseInt( 
-						properties.remove("players." + player.getName()).toString() );
-				
-				properties.set("players." + uniqueName, tickets);				
-				return tickets;
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		
-		// search for new save and return if it exists
-		} else if (properties.contains("players." + uniqueName)) {
-			return properties.getInt("players." + uniqueName, 0);
-		}
-		
-		return 0;
+		return properties.getInt("players." + uniqueName, 0);
 	}
 	
 	/*
@@ -1281,12 +1322,17 @@ public class Lottery implements Runnable {
 	 */
 	public synchronized void draw(CommandSender sender) {
 		
-		if (properties.getBoolean("drawing", false)) {
+		if (properties.getBoolean("drawing", false) || drawTask != null) {
 			if (sender != null) {
 				ChatUtils.send(sender, "lottery.error.drawing", "<lottery>", lotteryName);
 			}
 			return;
 		}
+		
+		// stop running the timer and update signs
+		timer.setRunning(false);
+		properties.set("drawing", true);
+		updateSigns();
 		
 		if (sender == null) {
 			broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
@@ -1297,11 +1343,6 @@ public class Lottery implements Runnable {
 		// call task and delay
 		long delay = Config.getLong(Config.DRAW_DELAY);
 		drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
-		
-		// stop running the timer and update signs
-		timer.setRunning(false);
-		properties.set("drawing", true);
-		updateSigns();
 	}
 
 	/*

@@ -1,5 +1,6 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -13,6 +14,10 @@ public class WinnersCommand implements Command {
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
 		LotteryPlus.getWinnersManager().listWinners(sender);
 		return true;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		return null;
 	}
 
 	public CommandAccess getAccess() {

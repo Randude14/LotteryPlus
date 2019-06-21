@@ -56,9 +56,6 @@ properties:
     
     # prefix used in chat, can have color codes
     chat-prefix: '&e[LotteryPlus] - '
-    
-    # the lottery that will be used when a user doesn't specify one in the buy command
-    main-lottery: 'MAIN'
 
     # the lotteries that the user will be notified about when a player joins the server
     # ex: 'MAIN1 MAIN2 MAIN3', ect...

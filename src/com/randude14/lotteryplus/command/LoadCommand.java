@@ -1,5 +1,6 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -20,6 +21,17 @@ public class LoadCommand implements Command {
 				LotteryManager.loadLottery(sender, lottery);
 			}
 		return true;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		
+		if (args.length == 0) {
+			return LotteryManager.getUnloadedLotteries(null);
+		} else if (args.length == 1) {
+			return LotteryManager.getUnloadedLotteries(args[0]);
+		}
+		
+		return null;
 	}
 
 	public CommandAccess getAccess() {

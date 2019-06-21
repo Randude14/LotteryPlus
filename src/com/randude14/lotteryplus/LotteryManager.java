@@ -1,12 +1,14 @@
 package com.randude14.lotteryplus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -240,6 +242,61 @@ public class LotteryManager {
 	public static List<Lottery> getLotteries() {
 		return new ArrayList<Lottery>(lotteries.values());
 	}
+	
+	public static List<String> getUnloadedLotteries(String match) {
+		List<String> unloaded = new ArrayList<String>();
+		
+		for(String key : getOrCreateSection(LOTTERIES_SECTION).getValues(false).keySet()) {
+			key = key.toLowerCase();
+			
+			if (!lotteries.containsKey(key.toLowerCase())) {
+				if (match == null || key.startsWith(match.toLowerCase())) {
+					unloaded.add(key);
+				}
+			}
+		}
+		
+		return unloaded;
+	}
+	
+	/*
+	 * Return a list of the names of the lotteries in a list. If sender and/or match is not null,
+	 * it will filter out the lotteries the sender has access to and lotteries that start with match
+	 * @param sender - user to check access for
+	 * @param match - string to match to
+	 * @return - list of the lottery names
+	 */
+	public static List<String> getLotteryNames(CommandSender sender, String match) {
+		
+		// use stream to filter out lotteries and convert
+		List<String> lotteryNames = lotteries.values().stream()
+				.filter( (Lottery lottery) -> {
+					
+					if (sender == null && match == null) {
+						return true;
+					} else if (sender != null && lottery.hasAccess(sender)) {
+						return match == null || lottery.getName().startsWith(match);
+					} else {
+						return lottery.getName().startsWith(match);
+					}
+					
+				})
+				.map( (Lottery lottery) -> lottery.getName() ).collect(Collectors.toList());
+		
+		return lotteryNames;
+	}
+	
+	public static List<String> getLotteryNames() {
+		return getLotteryNames(null, null);
+	}
+	
+	public static List<String> getLotteryNames(String match) {
+		return getLotteryNames(null, match);
+	}
+	
+	public static List<String> getLotteryNames(CommandSender sender) {
+		return getLotteryNames(sender, null);
+	}
 
 	/*
 	 * Returns a list of loaded lotteries but eliminates those this user does not have access to
@@ -316,7 +373,7 @@ public class LotteryManager {
 	 * @param clearRewards - if set to true, clears the rewards
 	 */
 	public static boolean reloadLottery(CommandSender sender, String lotteryName, boolean forceReset) {
-		Lottery lottery = LotteryManager.getLottery(lotteryName);
+		Lottery lottery = getLottery(lotteryName);
 		
 		if (lottery == null) {
 			ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", lotteryName);
@@ -428,6 +485,8 @@ public class LotteryManager {
 			numLotteries++;
 			lotteries.put(lotteryName.toLowerCase(), lottery); // add lottery
 		}
+		
+		saveLotteries();
 		return numLotteries;
 	}
 
@@ -438,6 +497,7 @@ public class LotteryManager {
 		ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
 		
 		for (Lottery lottery : lotteries.values()) {
+			savesSection.set(lottery.getName(), null);
 			savesSection.createSection(lottery.getName(), lottery.save());
 		}
 		lotteriesConfig.saveConfig();
@@ -445,7 +505,6 @@ public class LotteryManager {
 	
 	/*
 	 * Force saves a lottery, if it exists
-	 *  
 	 */
 	public static void saveLottery(String lotteryName) {
 		Lottery lottery = getLottery(lotteryName);
@@ -453,6 +512,7 @@ public class LotteryManager {
 		if(lottery != null) {
 			ConfigurationSection savesSection = getOrCreateSection(SAVES_SECTION);
 			
+			savesSection.set(lottery.getName(), null);
 			savesSection.createSection(lottery.getName(), lottery.save());
 			lotteriesConfig.saveConfig();
 		}
@@ -494,6 +554,17 @@ public class LotteryManager {
 			ChatUtils.sendRaw(sender, "lottery.list.token", "<number>", cntr + 1, "<lottery>", 
 					lottery.getName(), "<aliases>", aliases.isEmpty() ? "[none]" : aliases);
 		}
+	}
+	
+	public static List<String> getLotteryFilters(String match) {
+		List<String> filters = Arrays.asList(new String[] {"config", "name", "pot", "time"});
+		
+		if (match == null || match.isEmpty()) {
+			return filters;
+		}
+		
+		return filters.stream().filter( (String filter) -> 
+		filter.startsWith(match) ).collect(Collectors.toList());
 	}
 
 	/*

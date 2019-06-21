@@ -1,5 +1,7 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -18,6 +20,16 @@ public class ConfigCommand implements Command {
 		LotteryPlus.reload();
 		ChatUtils.send(sender, "plugin.command.config.version", "<version>", LotteryPlus.getVersion());
 		return true;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		
+		if(args.length > 0) {
+			return null;
+		}
+		
+		String[] reload = {"reload"};
+		return Arrays.asList(reload);
 	}
 
 	public CommandAccess getAccess() {

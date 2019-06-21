@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableMap;
 import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.configuration.Property;
 
@@ -175,7 +174,7 @@ public class LotteryProperties {
 		return options.keySet();
 	}
 	
-	public Map<String, Object> getValues() {
-		return ImmutableMap.copyOf(options);
+	protected Map<String, Object> getValues() {
+		return options;
 	}
 }

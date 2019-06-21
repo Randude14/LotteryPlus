@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -48,38 +47,8 @@ public class Utils {
 		
 		String string = value.toString();
 		
-		try {
-			Integer.parseInt(string);
-			return true;
-		} catch (Exception ex) {
-		}
-		
-		try {
-			Long.parseLong(string);
-			return true;
-		} catch (Exception ex) {
-		}
-		
-		try {
-			Double.parseDouble(string);
-			return true;
-		} catch (Exception ex) {
-		}
-		
-		try {
-			Float.parseFloat(string);
-			return true;
-		} catch (Exception ex) {
-		}
-		
-		try {
-			Short.parseShort(string);
-			return true;
-		} catch (Exception ex) {
-		}
-		
-		// return false if all number parsing fails
-		return false;
+		// check all chars are between 0 and 9
+		return string.chars().allMatch( (int num) -> (num >= '0' && num <= '9') );
 	}
 	
 	/*
@@ -187,24 +156,23 @@ public class Utils {
 	 * Given a name, return the offline player
 	 * @param name - the name to look for, can be a unique identifier
 	 */
-	@SuppressWarnings("deprecation")
 	public static OfflinePlayer getOfflinePlayer(String name) {
 		
 		if(name == null || name.isEmpty()) {
 			return null;
 		}
 		
-		int colonIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
+		int separatorIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
 		
 		// if there is a colon, grab the UUID
-		if(colonIndex >= 0) {
-			String id = name.substring(colonIndex+1);
+		if(separatorIndex >= 0) {
+			String id = name.substring(separatorIndex+1);
 			UUID uuid = UUID.fromString(id);
 			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 			if(player != null) {
 				return player;
 			} else {
-				name = name.substring(0, colonIndex);
+				name = name.substring(0, separatorIndex);
 			}
 		}
 		
@@ -218,7 +186,7 @@ public class Utils {
 		
 		while (left <= right) {
 			int mid = (left + right) / 2;
-			int result = players[mid].getName().compareToIgnoreCase(name);
+			int result = players[mid].getName().compareTo(name);
 			
 			if (result == 0)
 				return players[mid];
@@ -228,11 +196,14 @@ public class Utils {
 				right = mid - 1;
 		}
 
-		// if it doesn't exist, then have the server
-		// create the object instead of returning null
-		return Bukkit.getOfflinePlayer(name);
+		return null;
 	}
 	
+	/*
+	 * Return the player with a name
+	 * @param playerName - player to search for
+	 * @return - the player, if they are online
+	 */
 	public static Player getBukkitPlayer(String playerName) {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
 		if(player.isOnline())
@@ -241,12 +212,37 @@ public class Utils {
 			return null;
 	}
 	
+	/*
+	 * Searches for and returns a list of players associated with match. If it is
+	 * a UUID, searches by id, otherwise searches by player names
+	 * @param match - search criteria to use
+	 * @return - list of players associated with match
+	 */
+	public static List<OfflinePlayer> matchForPlayers(String match) {
+		List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
+		
+		for(OfflinePlayer player : Bukkit.getOfflinePlayers())
+			players.add(player);
+		
+		// search using UUID
+		if (match.split("-").length == 5) {
+			UUID id = UUID.fromString(match);
+			players.removeIf( (player) -> !player.getUniqueId().equals(id) );
+			
+		// search finding players that start with match
+		} else {
+			players.removeIf( (player) -> (!player.getName().equals(match)));
+		}
+		
+		
+		return players;
+	}
+	
 	public static String format(double amount) {
 		return Config.getString(Config.MONEY_FORMAT).replace("<money>", String.format("%,.2f", amount));
 	}
 	
 	public static List<ItemStack> getItemStacks(String line) {
-		LotteryPlus.getInstance().getLogger().log(Level.INFO, line);
 		List<ItemStack> rewards = new ArrayList<ItemStack>();
 		listItemStacks(rewards, line);
 		return rewards;

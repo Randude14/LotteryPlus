@@ -2,7 +2,6 @@ package com.randude14.lotteryplus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -183,15 +182,15 @@ public class RewardManager {
 	 * @param rewards - the rewards to give
 	 */
 	private void givePlayerRewards(Player player, String lottery, List<Reward> rewards) {
-		Iterator<Reward> it = rewards.iterator();
 		
-		while(it.hasNext()) {
-			Reward reward = it.next();
+		for(int cntr = 0;cntr < rewards.size(); cntr++) {
+			Reward reward = rewards.get(cntr);
 			String info = reward.getInfo();
 			ChatUtils.send(player, "lottery.reward.giving", "<reward>", info);
 			
 			if(reward.rewardPlayer(player, lottery)) {
-				it.remove();
+				rewards.remove(cntr);
+				cntr--;
 				ChatUtils.send(player, "lottery.reward.rewarded", "<reward>", info);
 			} else {
 				ChatUtils.send(player, "lottery.reward.leftover", "<reward>", info, "<updatedreward>", reward.getInfo());

@@ -36,7 +36,6 @@ public class Config {
 	public static final Property<String> LINE_SEPARATOR = new Property<String>("properties.line-separator", "<newline>");
 	public static final Property<String> CHAT_PREFIX = new Property<String>("properties.chat-prefix", "&e[LotteryPlus] - ");
 	public static final Property<String> SIGN_TAG = new Property<String>("properties.sign-tag", "&a[Lottery+]");
-	public static final Property<String> MAIN_LOTTERY = new Property<String>("properties.main-lottery", "MAIN");
 	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
 	
 	// Sign format properties

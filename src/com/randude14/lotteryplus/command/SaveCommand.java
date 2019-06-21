@@ -1,5 +1,6 @@
 package com.randude14.lotteryplus.command;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,10 @@ public class SaveCommand implements Command {
 		LotteryManager.saveLotteries();
 		ChatUtils.send(sender, "plugin.command.save.mess");
 		return true;
+	}
+
+	public List<String> onTabComplete(CommandSender sender, String[] args) {
+		return null;
 	}
 
 	public CommandAccess getAccess() {
