@@ -4,12 +4,10 @@ Version 1.0.2
   - Added 'plugin.gui.dialog.error.incorrect-value' to check for incorrect inputs on the GUI creator
   - Lotteries will log if they load a player that they were not able to find if they were converting from a save predating this version
   - Commands will now have auto tabs to help make filling out the command arguments easier
+  - Lotteries will auto update saved usernames to include IDs. If they could not find the user or if there are multiple users with the same name, it will remove them and log out the error with the number of tickets and the lottery attached to the username.
+  - Reward command will also check for mulitple users and will report an ambiguity error if multiple users exist with that name.
+  - Also added the option for the reward command to check for an inputed UUID in place for the username. Can be easily found by googling and entering the player you are trying to find.
   - Other general updates to 1.14
-  - 
-  - 
-  - 
-  - 
-  - 
   - 
   - 
   - 

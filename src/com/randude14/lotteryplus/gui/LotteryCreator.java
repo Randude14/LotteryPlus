@@ -47,6 +47,9 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		setLayout(new BorderLayout());
 	}
 
+	/*
+	 * Checks if the map of properties is valid and creates the components for the creator
+	 */
 	protected boolean initComponents(Map<Property<?>, Object> propoerties) {
 		defaults = new DefaultListModel<Property>();
 		
@@ -66,6 +69,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 				
 				try {
 					values.addElement(new Value(prop, propoerties.get(prop)));
+					
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(parent, ChatUtils.getRawName("plugin.gui.dialog.error.types"), 
 							"", JOptionPane.ERROR_MESSAGE);
@@ -78,6 +82,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		valuesList = new JList<Value>(values);
 		valuesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+		// create buttons
 		add = new JButton(ChatUtils.getRawName("plugin.gui.button.add"));
 		add.addActionListener(this);
 		remove = new JButton(ChatUtils.getRawName("plugin.gui.button.remove"));
@@ -85,6 +90,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		create = new JButton(ChatUtils.getRawName("plugin.gui.button.create"));
 		create.addActionListener(this);
 		
+		// create text field and lists
 		valueField = new JTextField();
 		valueField.setText(ChatUtils.getRawName("plugin.gui.textfield.value"));
 		defaultsList.addListSelectionListener(new ButtonEnabler(defaultsList, add));
@@ -134,11 +140,13 @@ public class LotteryCreator extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		Object source = event.getSource();
 		
+		// adding a property to the lottery
 		if(source == add) {
 			Property prop = defaultsList.getSelectedValue();
 			if(prop == null) 
 				return;
 			
+			// check that inputed value is consistent with the property
 			if(!checkEnteredValue(prop, valueField.getText())) {
 				JOptionPane.showMessageDialog(this, ChatUtils.getRawName("plugin.gui.dialog.error.incorrect-value"));
 				return;
@@ -150,6 +158,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 			sort(defaults);
 			sort(values);
 			
+		// remove a property from the lottery
 		} else if(source == remove) {
 			Value value = valuesList.getSelectedValue();
 			if(value == null) 
@@ -159,6 +168,7 @@ public class LotteryCreator extends JPanel implements ActionListener {
 			sort(defaults);
 			sort(values);
 			
+		// create the lottery section in the lotteries file and remove the tab from the main frames
 		} else if(source == create) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			
@@ -209,6 +219,9 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		}
 	}
 	
+	/*
+	 * Used in the JScrollPanes for listing
+	 */
 	private static class Value implements Comparable<Value> {
 		private static final NumberFormat format = NumberFormat.getInstance();
 		public final Property<?> prop;
@@ -253,11 +266,13 @@ public class LotteryCreator extends JPanel implements ActionListener {
 		
 		public String toString() {
 			String valueToString = value.toString();
-			if(valueToString.equals("")) valueToString = "''";
+			if(valueToString.equals("")) 
+				valueToString = "''";
 			return prop.getName() + ": " + valueToString;
 		}
 	}
 
+	// enables the button if a value was selected
 	private class ButtonEnabler implements ListSelectionListener {
 		private final JList list;
 		private final JButton button;

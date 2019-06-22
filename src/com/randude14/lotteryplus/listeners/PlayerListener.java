@@ -26,24 +26,33 @@ import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.lottery.Lottery;
 import com.randude14.lotteryplus.util.ChatUtils;
 
+/*
+ * Listens for specific player events.
+ */
 public class PlayerListener implements Listener {
 	private final Map<Player, String> buyers = new HashMap<Player, String>();
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
+		
 		Player player = event.getPlayer();
+		
+		// check for unclaimed rewards
 		LotteryPlus.getRewardsManager().notifyOfRewardClaims(player);
+		
+		// send information about the defined main lotteries
 		String[] mainLotteries = Config.getString(Config.MAIN_LOTTERIES).split("\\s+");
 		for (String lotteryName : mainLotteries) {
 			Lottery lottery = LotteryManager.getLottery(player, lotteryName);
 			if (lottery == null)
-				return;
+				continue;
 			String mess = ChatUtils.getNameFor("lottery.mess.main");
 			mess = lottery.format(mess);
 			player.sendMessage(mess.split(Config.getString(Config.LINE_SEPARATOR)));
 		}
 	}
 
+	// register a sign
 	@EventHandler(ignoreCancelled = true)
 	public void onSignChange(SignChangeEvent event) {
 		Player player = event.getPlayer();
@@ -58,42 +67,58 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
+		
 		Block block = event.getClickedBlock();
 		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
 			return;
 		}
+		
 		if (!LotteryPlus.isSign(block)) {
 			return;
 		}
+		
 		Player player = event.getPlayer();
 		Sign sign = (Sign) block.getState();
 		String[] lines = sign.getLines();
+		
 		if (isLotterySign(lines)) {
 			lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 			event.setCancelled(true);
+			
+			// remove a sign if they are croching and have permission
 			if (player.isSneaking()) {
+				
 				if (Perm.SIGN_REMOVE.checkPermission(player)) {
 					Lottery lottery = LotteryManager.getLottery(player, lines[1]);
+					
 					if (lottery != null && lottery.unregisterSign(event.getClickedBlock().getLocation())) {
 						ChatUtils.send(player, "lottery.sign.removed", "<lottery>", lottery.getName());
 						block.breakNaturally();
 					}
 				}
+				
+			// check for registered sign and allow user to buy from the lottery
 			} else {
+				
 				for (Lottery lottery : LotteryManager.getLotteries()) {
+					
 					if (lottery.hasRegisteredSign(block)) {
+						
 						if (!Perm.SIGN_USE.checkPermission(player)) {
 							return;
 						}
 						lines[1] = lottery.getName();
+						
 						if (buyers.containsKey(player)) {
 							String lotteryName = buyers.remove(player);
+							
 							if (lotteryName.equalsIgnoreCase(lottery.getName())) {
 								ChatUtils.sendRaw(player,
 										"lottery.error.trans-cancelled");
 								ChatUtils.sendRaw(player, "plugin.headliner");
 								return;
 							}
+							
 						}
 						ChatUtils.sendRaw(player, "plugin.headliner");
 						String[] messages = getSignMessage(lottery);
@@ -103,6 +128,7 @@ public class PlayerListener implements Listener {
 						return;
 					}
 				}
+				
 				if (Perm.SIGN_CREATE.checkPermission(player)) {
 					createSign(player, sign, event);
 				}
@@ -122,6 +148,7 @@ public class PlayerListener implements Listener {
 		buyers.remove(event.getPlayer());
 	}
 
+	// players buying tickets
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		Player player = event.getPlayer();
@@ -174,21 +201,26 @@ public class PlayerListener implements Listener {
 		if (!Perm.SIGN_CREATE.checkPermission(player)) {
 			return;
 		}
+		
 		String[] lines = sign.getLines();
 		if (lines[1] == null || lines[1].equals("")) {
 			ChatUtils.send(player, "lottery.error.sign.specify");
 			cancel.setCancelled(true);
 			return;
 		}
+		
 		Lottery lottery = LotteryManager.getLottery(lines[1]);
 		if (lottery == null) {
 			ChatUtils.send(player, "lottery.error.notfound", "<lottery>", lines[1]);
 			cancel.setCancelled(true);
 			return;
 		}
+		
 		lines[0] = ChatUtils.replaceColorCodes(Config.getString(Config.SIGN_TAG));
 		lines[1] = lottery.getName();
+		
 		boolean success = lottery.registerSign(player, sign.getLocation());
+		
 		if(success) {
 			ChatUtils.send(player, "lottery.sign.created", "<lottery>", lottery.getName());
 		} else {

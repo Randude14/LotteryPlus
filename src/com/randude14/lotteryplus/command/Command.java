@@ -31,12 +31,23 @@ public interface Command {
 	Perm getPermission();
 	
 	/*
-	 * 
+	 * Sends the user information about this command and how to use it
+	 * @param sender - user to send to
+	 * @param cmd - bukkit command that contains the label
 	 */
 	void getCommands(CommandSender sender, org.bukkit.command.Command cmd);
 	
+	/*
+	 * Adds the code that points to this commands information help.
+	 * Used when user invokes the help command and lists the commands by page.
+	 * @param sender - user to send to
+	 * @param list - list to add the command codes to
+	 */
 	void listCommands(CommandSender sender, Set<String> list);
 	
+	/*
+	 * @return - the minimum number of arguments needed to use this command
+	 */
 	int minValues();
 
 }
