@@ -109,6 +109,7 @@ public class LotteryPlus extends JavaPlugin {
 		saveExtras();
 		registerListeners();
 		Perm.loadPermissions();
+		Perm.loadDefaults();
 		
 		// controls the commands of the plugin
 		// @see com.randude14.lotteryplus.command.CommandManager()
@@ -218,6 +219,7 @@ public class LotteryPlus extends JavaPlugin {
 	public static void reload() {
 		instance.reloadConfig();
 		ChatUtils.reload();
+		Perm.loadDefaults();
 		callTasks();
 	}
 

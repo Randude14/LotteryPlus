@@ -1084,29 +1084,38 @@ public class Lottery implements Runnable {
 		
 		if(player != null && prevWinner != null && prevWinner.getUniqueId().equals(player.getUniqueId()) && 
 				!properties.getBoolean(Config.DEFAULT_WIN_AGAIN)) {
-			ChatUtils.send(rewarder, "lottery.error.already-won", "<lottery>", lotteryName);
+			ChatUtils.send(rewarder, "plugin.command.reward.error.win-again", 
+					"<player>", playerName);
 			return false;
 		}
 		
 		// check ticket limits
 		int ticketLimit = properties.getInt(Config.DEFAULT_TICKET_LIMIT);
 		
-		int num = getTicketsBought(player);
-		
 		if (ticketLimit > 0) {
-			int total = getTotalTicketsBought();
-			if (total >= ticketLimit) {
+			int totalBought = getTotalTicketsBought();
+			if (totalBought >= ticketLimit) {
 				ChatUtils.send(rewarder, "lottery.error.tickets.soldout", "<lottery>", lotteryName);
 				return false;
 			}
-			if (tickets + num > ticketLimit) {
-				ChatUtils.send(rewarder, "plugin.command.reward.error.toomany");
+			if (totalBought + tickets > ticketLimit) {
+				ChatUtils.send(rewarder, "plugin.command.reward.error.not-enough", "<lottery>", lotteryName, "<tickets>", ticketLimit - totalBought);
 				return false;
 			}
 		}
 		
+		int bought = getTicketsBought(player);	
+		int maxTickets = properties.getInt(Config.DEFAULT_MAX_TICKETS);
+		
+		if (bought + tickets > maxTickets) {
+			ChatUtils.send(rewarder, "plugin.command.reward.error.max-tickets", 
+					"<lottery>", lotteryName, "<ticket_limit>", maxTickets, "<tickets>", bought + tickets, "<player>", playerName);
+			return false;
+		}
+		
 		if (player.isOnline()) {
-			ChatUtils.send(player.getPlayer(), "plugin.command.reward.player.mess", "<tickets>", tickets, "<lottery>", lotteryName);
+			ChatUtils.send(player.getPlayer(), "plugin.command.reward.player.mess", 
+					"<tickets>", tickets, "<lottery>", lotteryName);
 		}
 		
 		// add tickets, update signs, and save lottery
@@ -1332,17 +1341,22 @@ public class Lottery implements Runnable {
 		// stop running the timer and update signs
 		timer.setRunning(false);
 		properties.set("drawing", true);
-		updateSigns();
 		
-		if (sender == null) {
-			broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
-		} else {
-			broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
-		}
-		
-		// call task and delay
-		long delay = Config.getLong(Config.DRAW_DELAY);
-		drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
+		// delay drawing by a server second to allow other messages to go through
+		LotteryPlus.scheduleAsyncDelayedTask( () -> {
+			
+			if (sender == null) {
+				broadcast("lottery.drawing.mess", "<lottery>", lotteryName);
+			} else {
+				broadcast("lottery.drawing.force.mess", "<lottery>", lotteryName, "<player>", sender.getName());
+			}
+			
+			// call draw task
+			updateSigns();
+			long delay = Config.getLong(Config.DRAW_DELAY);
+			drawTask = LotteryPlus.scheduleAsyncDelayedTask(this, Time.SERVER_SECOND.multi(delay));
+			
+		}, Time.SERVER_SECOND.getBukkitTime());
 	}
 
 	/*

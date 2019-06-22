@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
+import com.randude14.lotteryplus.configuration.Config;
 import com.randude14.lotteryplus.util.ChatUtils;
  
 /*
@@ -99,6 +100,31 @@ public enum Perm {
             Bukkit.getPluginManager().addPermission(perm.getPermission());
         }
     }
+    
+    /*
+     * Called to load the defaults for the admin permissions
+     */
+	public static void loadDefaults() {
+		PermissionDefault permissionDefault = Config.getBoolean(Config.DEFAULT_OP) 
+				? PermissionDefault.OP : PermissionDefault.FALSE;
+		
+		SUPER_PERM.getPermission().setDefault(permissionDefault);
+		PARENT_ADMIN.getPermission().setDefault(permissionDefault);
+		PARENT_SIGN.getPermission().setDefault(permissionDefault);
+		REWARD.getPermission().setDefault(permissionDefault);
+		VERSION.getPermission().setDefault(permissionDefault);
+		DRAW.getPermission().setDefault(permissionDefault);
+		RELOAD.getPermission().setDefault(permissionDefault);
+		RELOAD_ALL.getPermission().setDefault(permissionDefault);
+		CONFIG_RELOAD.getPermission().setDefault(permissionDefault);
+		LOAD.getPermission().setDefault(permissionDefault);
+		UNLOAD.getPermission().setDefault(permissionDefault);
+		FORCE_SAVE.getPermission().setDefault(permissionDefault);
+		UPDATE.getPermission().setDefault(permissionDefault);
+		CREATE.getPermission().setDefault(permissionDefault);
+		SIGN_CREATE.getPermission().setDefault(permissionDefault);
+		SIGN_REMOVE.getPermission().setDefault(permissionDefault);
+	}
     
     
    

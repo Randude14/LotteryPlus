@@ -68,6 +68,10 @@ properties:
     # pot: sorts by how large the pots are
     default-filter: ''
     
+    # true - all players that are OP'd will have permissions for admin commands
+    # false - permissions for admin command must be added to that player
+    default-op: true
+    
 
 # various sign formats used in different states of a lottery
 #

@@ -171,7 +171,7 @@ public class LotteryManager {
 		// find lottery
 		Lottery lottery = LotteryManager.getLottery(find);
 		if (lottery == null) {
-			ChatUtils.send(sender, "lottery.notfound", "<lottery>", find);
+			ChatUtils.send(sender, "lottery.error.notfound", "<lottery>", find);
 			return false;
 		}
 		

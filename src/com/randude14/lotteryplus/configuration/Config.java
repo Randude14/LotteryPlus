@@ -37,6 +37,7 @@ public class Config {
 	public static final Property<String> CHAT_PREFIX = new Property<String>("properties.chat-prefix", "&e[LotteryPlus] - ");
 	public static final Property<String> SIGN_TAG = new Property<String>("properties.sign-tag", "&a[Lottery+]");
 	public static final Property<String> DEFAULT_FILTER = new Property<String>("properties.default-filter", "");
+	public static final Property<Boolean> DEFAULT_OP = new Property<Boolean>("properties.default-op", true);
 	
 	// Sign format properties
 	public static final Property<String> UPDATE_SIGN_LINE_TWO = new Property<String>("sign-format.Update.line-2", "<name>");
