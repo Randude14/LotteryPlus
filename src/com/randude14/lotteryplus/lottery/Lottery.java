@@ -127,24 +127,29 @@ public class Lottery implements Runnable {
 				
 				// new saves should have UUID attached to reduce dependence on username
 				// EX: BobbyHill-12345-12345-12345-12345-12345
-				if (key.startsWith("players.") && !key.contains("-")) {
-					String name = key.substring(8);
-					List<OfflinePlayer> players = Utils.matchForPlayers(name);
+				if (key.startsWith("players.")) {
+					String tag = key.substring(8);
+					
+					if (Utils.isUUID(tag)) {
+						continue;
+					}
+					
+					List<OfflinePlayer> players = Utils.matchForPlayers(tag);
 					int tickets = propertiesToLoad.getInt(key);
 					
 					// if we couldn't find player, remove and log the error
 					if(players.isEmpty()) {
 						Logger.info("plugin.error.unknown-player", "<lottery>", lotteryName, 
-								"<player>", name, "<tickets>", tickets);
+								"<player>", tag, "<tickets>", tickets);
 						
 					// if there are more than one players that were on this server with this username
 					} else if (players.size() > 1) {
 						Logger.info("plugin.error.ambig-name", "<lottery>", lotteryName, 
-								"<player>", name, "<tickets>", tickets);
+								"<player>", tag, "<tickets>", tickets);
 						
 					} else {
-						String uniqueName = Utils.getUniqueName(players.get(0));			
-						propertiesToLoad.set("players." + uniqueName, tickets);
+						String idString = players.get(0).getUniqueId().toString();			
+						propertiesToLoad.set("players." + idString, tickets);
 					}
 					
 					propertiesToLoad.set(key, null);
@@ -369,8 +374,7 @@ public class Lottery implements Runnable {
 		if(properties.getBoolean(Config.DEFAULT_KEEP_TICKETS)) {	
 			for(OfflinePlayer player : getPlayers()) {
 				int tickets = getTicketsBought(player);
-				String uniqueName = Utils.getUniqueName(player);
-				propertiesToLoad.set("players." + uniqueName, tickets);
+				propertiesToLoad.set("players." + player.getUniqueId().toString(), tickets);
 			}
 		}
 	}
@@ -1287,9 +1291,9 @@ public class Lottery implements Runnable {
 	 * @return - number of tickets bought
 	 */
 	public int getTicketsBought(OfflinePlayer player) {
-		String uniqueName = Utils.getUniqueName(player);
+		String idString = player.getUniqueId().toString();
 		
-		return properties.getInt("players." + uniqueName, 0);
+		return properties.getInt("players." + idString, 0);
 	}
 	
 	/*
@@ -1298,10 +1302,10 @@ public class Lottery implements Runnable {
 	 * @param add - number of tickets to add to
 	 */
 	public void addTickets(OfflinePlayer player, int add) {
-		String uniqueName = Utils.getUniqueName(player);
+		String idString = player.getUniqueId().toString();
 		
 		int bought = getTicketsBought(player);
-		properties.set("players." + uniqueName, bought + add);
+		properties.set("players." + idString, bought + add);
 	}
 	
 	/*
@@ -1310,14 +1314,14 @@ public class Lottery implements Runnable {
 	 * @param remove - number of tickets to remove
 	 */
 	public void subTickets(OfflinePlayer player, int remove) {
-		String uniqueName = Utils.getUniqueName(player);
+		String idString = player.getUniqueId().toString();
 		
 		int tickets = getTicketsBought(player);
 		
 		if ( (tickets - remove) < 0 ) {
-			properties.remove("players." + uniqueName);
+			properties.remove("players." + idString);
 		} else {
-			properties.set("players." + uniqueName, tickets - remove);
+			properties.set("players." + idString, tickets - remove);
 		}    
 	}
 	
@@ -1462,7 +1466,7 @@ public class Lottery implements Runnable {
 				
 			
 			// set up for next drawing
-			properties.set("winner", Utils.getUniqueName(winner));
+			properties.set("winner", winner.getUniqueId().toString());
 			properties.set("drawing", false);
 			clearPlayers();
 			drawSuccess = true;

@@ -108,12 +108,8 @@ public class Utils {
 				&& loc1.getBlockZ() == loc2.getBlockZ();
 	}
 	
-	/*
-	 * @return the unique identifier for a player
-	 * @see com.randude14.lotteryplus.lottery.Lottery for usage
-	 */
-	public static String getUniqueName(OfflinePlayer player) {
-		return player.getName() + LotteryPlus.NAME_SEPARATOR + player.getUniqueId();
+	public static boolean isUUID(String tag) {
+		return tag.split("-").length == 5;
 	}
 	
 	/*
@@ -121,14 +117,19 @@ public class Utils {
 	 * @param player - the unique identifier
 	 * @return - the name from the unique identifier
 	 */
-	public static String stripNameOfId(String player) {
-        int colonIndex = player.indexOf(LotteryPlus.NAME_SEPARATOR);
+	public static String getPlayerName(String tag) {
 		
-		if(colonIndex >= 0) {
-			return player.substring(0, colonIndex);
+		if(Utils.isUUID(tag)) {
+			try {
+				UUID id = UUID.fromString(tag);
+				OfflinePlayer player = Bukkit.getOfflinePlayer(id);
+				return player.getName();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 		
-		return player;
+		return tag;
 	}
 	
 	/*
@@ -137,14 +138,7 @@ public class Utils {
 	 * @param name - the name to check
 	 */
 	public static boolean isSamePlayer(OfflinePlayer player, String name) {
-		int colonIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
-		
-		if(colonIndex >= 0) {
-			String id = name.substring(colonIndex+1);
-			UUID uuid = UUID.fromString(id);
-			OfflinePlayer check = Bukkit.getOfflinePlayer(uuid);
-			return player.getUniqueId() == check.getUniqueId();
-		}
+		name = Utils.getPlayerName(name);
 		
 		 return player.getName().equalsIgnoreCase(name);
 	}
@@ -156,24 +150,17 @@ public class Utils {
 	 * Given a name, return the offline player
 	 * @param name - the name to look for, can be a unique identifier
 	 */
-	public static OfflinePlayer getOfflinePlayer(String name) {
+	public static OfflinePlayer getOfflinePlayer(String tag) {
 		
-		if(name == null || name.isEmpty()) {
+		if(tag == null || tag.isEmpty()) {
 			return null;
 		}
 		
-		int separatorIndex = name.indexOf(LotteryPlus.NAME_SEPARATOR);
-		
 		// if there is a colon, grab the UUID
-		if(separatorIndex >= 0) {
-			String id = name.substring(separatorIndex+1);
-			UUID uuid = UUID.fromString(id);
-			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-			if(player != null) {
-				return player;
-			} else {
-				name = name.substring(0, separatorIndex);
-			}
+		if(Utils.isUUID(tag)) {
+			UUID id = UUID.fromString(tag);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(id);
+			return player;
 		}
 		
 		OfflinePlayer[] players = LotteryPlus.getBukkitServer().getOfflinePlayers();
@@ -186,7 +173,7 @@ public class Utils {
 		
 		while (left <= right) {
 			int mid = (left + right) / 2;
-			int result = players[mid].getName().compareTo(name);
+			int result = players[mid].getName().compareTo(tag);
 			
 			if (result == 0)
 				return players[mid];
@@ -225,13 +212,14 @@ public class Utils {
 			players.add(player);
 		
 		// search using UUID
-		if (match.split("-").length == 5) {
+		if (Utils.isUUID(match)) {
 			UUID id = UUID.fromString(match);
 			players.removeIf( (player) -> !player.getUniqueId().equals(id) );
 			
 		// search finding players that start with match
 		} else {
-			players.removeIf( (player) -> (!player.getName().equals(match)));
+			String name = match.toLowerCase(); // create another variable to avoid compiler errors with final
+			players.removeIf( (player) -> (!player.getName().toLowerCase().startsWith(name)));
 		}
 		
 		

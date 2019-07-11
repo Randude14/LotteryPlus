@@ -14,7 +14,6 @@ import com.randude14.lotteryplus.configuration.CustomYaml;
 import com.randude14.lotteryplus.lottery.LotteryClaim;
 import com.randude14.lotteryplus.lottery.reward.Reward;
 import com.randude14.lotteryplus.util.ChatUtils;
-import com.randude14.lotteryplus.util.Utils;
 
 /*
  * This class keeps track of the rewards given to the winners of the lotteries
@@ -82,14 +81,14 @@ public class RewardManager {
 	 * Called when a player is offline during the drawing
 	 */
 	public void addRewardClaim(OfflinePlayer player, String lottery, List<Reward> rewards) {
-		String name = Utils.getUniqueName(player);
+		String idString = player.getUniqueId().toString();
 		
-		if (!claims.containsKey(name))
-			claims.put(name, new ArrayList<LotteryClaim>());
+		if (!claims.containsKey(idString))
+			claims.put(idString, new ArrayList<LotteryClaim>());
 		
 		// create the reward and then save
 		LotteryClaim claim = new LotteryClaim(lottery, rewards);
-		claims.get(name).add(claim);
+		claims.get(idString).add(claim);
 		this.saveRewardClaims();
 	}
 	
@@ -119,7 +118,7 @@ public class RewardManager {
 	public void checkForPlayerClaims(Player player) {
 		
 		// new system also stores the player's unique id
-		List<LotteryClaim> playerClaims = claims.get(Utils.getUniqueName(player));
+		List<LotteryClaim> playerClaims = claims.get(player.getUniqueId().toString());
 		
 		// check for old storage of claims that saved only by player name
 		List<LotteryClaim> oldClaims = claims.get(player.getName());
@@ -165,7 +164,7 @@ public class RewardManager {
 	 * @param player - player to check
 	 */
 	public void notifyOfRewardClaims(Player player) {
-		List<LotteryClaim> playerClaims = claims.get(Utils.getUniqueName(player));
+		List<LotteryClaim> playerClaims = claims.get(player.getUniqueId().toString());
 		List<LotteryClaim> oldClaims = claims.get(player.getName());
 		
 		if( (oldClaims != null && !oldClaims.isEmpty()) || 
