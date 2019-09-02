@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -163,7 +164,11 @@ public class Utils {
 			return player;
 		}
 		
-		OfflinePlayer[] players = LotteryPlus.getBukkitServer().getOfflinePlayers();
+		Stream<OfflinePlayer> stream = Arrays.stream( LotteryPlus.getBukkitServer().getOfflinePlayers() );
+		// remove players that do not have names
+		// can't identify players if they do have a name
+		OfflinePlayer[] players = stream.filter( (player) -> player.getName() != null)
+				                        .toArray(OfflinePlayer[]::new);
 		
 		Arrays.sort(players, offlineplayerComp);
 		
