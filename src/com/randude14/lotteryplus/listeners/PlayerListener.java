@@ -149,7 +149,7 @@ public class PlayerListener implements Listener {
 	}
 
 	// players buying tickets
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		Player player = event.getPlayer();
 		String chat = event.getMessage();

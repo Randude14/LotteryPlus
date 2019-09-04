@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
@@ -211,24 +212,21 @@ public class Utils {
 	 * @return - list of players associated with match
 	 */
 	public static List<OfflinePlayer> matchForPlayers(String match) {
-		List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
-		
-		for(OfflinePlayer player : Bukkit.getOfflinePlayers())
-			players.add(player);
+		Stream<OfflinePlayer> players = Arrays.stream(Bukkit.getOfflinePlayers());
 		
 		// search using UUID
 		if (Utils.isUUID(match)) {
 			UUID id = UUID.fromString(match);
-			players.removeIf( (player) -> !player.getUniqueId().equals(id) );
+			players.filter( player -> player.getName() != null && player.getUniqueId().equals(id) );
 			
 		// search finding players that start with match
 		} else {
 			String name = match.toLowerCase(); // create another variable to avoid compiler errors with final
-			players.removeIf( (player) -> (!player.getName().toLowerCase().startsWith(name)));
+			players.filter( (player) -> (player.getName().toLowerCase().startsWith(name)));
 		}
 		
 		
-		return players;
+		return players.collect(Collectors.toList());
 	}
 	
 	public static String format(double amount) {
@@ -355,5 +353,12 @@ public class Utils {
 				Logger.info("logger.exception.itemstack", "<line>", line);
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		String[] strings = {"qwer", "asdf", "reqw", "ytui", "asdf"};
+		Stream<String> stream = Arrays.stream(strings);
+		strings = stream.filter( string -> string.equals("asdf")).toArray(String[]::new);
+		System.out.println(Arrays.toString(strings));
 	}
 }

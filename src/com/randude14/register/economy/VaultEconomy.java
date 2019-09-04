@@ -31,18 +31,28 @@ public class VaultEconomy extends Economy {
 
 	public boolean hasEnough(String playerName, double amount) {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
-		return econ.has(player, amount);
+		// only check players we could find
+		if(player != null) {
+			return econ.has(player, amount);
+		}
+		return false;
 	}
 
 	public double deposit(String playerName, double amount) {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
-		econ.depositPlayer(player, amount);
+		// only deposit from players we could find
+		if(player != null) {
+			econ.depositPlayer(player, amount);
+		}
 		return 0;
 	}
 
 	public void withdraw(String playerName, double amount) {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
-		econ.withdrawPlayer(player, amount);
+		// only withdraw from players we could find
+		if(player != null) {
+			econ.withdrawPlayer(player, amount);
+		}
 	}
 	
 	public String format(double amount) {
@@ -51,7 +61,11 @@ public class VaultEconomy extends Economy {
 	
 	public boolean hasAccount(String playerName) {
 		OfflinePlayer player = Utils.getOfflinePlayer(playerName);
-		return econ.hasAccount(player);
+		// couldn't find player in server files
+		if(player != null) {
+			return econ.hasAccount(player);
+		}
+		return false;
 	}
 	
 	public Map<String, Object> serialize() {
@@ -63,18 +77,35 @@ public class VaultEconomy extends Economy {
 	}
 
 	public boolean hasEnough(Player player, double amount) {
-		return this.hasEnough(player.getName(), amount);
+		// couldn't find player in server files
+		if(player == null)
+			return false;
+		
+		return econ.has(player, amount);
 	}
 
 	public double deposit(Player player, double amount) {
-		return this.deposit(player.getName(), amount);
+		// couldn't find player in server files
+		if(player == null)
+			return 0;
+		
+		econ.depositPlayer(player, amount);
+		return 0;
 	}
 
 	public void withdraw(Player player, double amount) {
-		this.withdraw(player.getName(), amount);
+		// couldn't find player in server files
+		if(player == null)
+			return;
+		
+		econ.withdrawPlayer(player, amount);
 	}
 
 	public boolean hasAccount(Player player) {
-		return this.hasAccount(player.getName());
+		// couldn't find player in server files
+		if(player == null)
+			return false;
+				
+		return econ.hasAccount(player);
 	}
 }

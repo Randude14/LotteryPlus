@@ -549,6 +549,8 @@ public class Lottery implements Runnable {
 			for(Location loc : signs) {
 					
 				Block block = loc.getBlock();
+				if(! (block.getState() instanceof Sign) )
+					continue;
 				Sign sign = (Sign) block.getState();
 					
 				sign.setLine(0, line1);

@@ -266,14 +266,6 @@ public class LotteryPlus extends JavaPlugin {
 	}
 	
 	/*
-	 * Used to dispatch a command and uses the console as the CommandSender
-	 * @return - whether the command was successful
-	 */
-	public static boolean dispatchCommand(String command) {
-		return instance.getServer().dispatchCommand(instance.getServer().getConsoleSender(), command);
-	}
-	
-	/*
 	 * Open the lottery creator gui. If LotteryName is not null, it can open a section
 	 * from the lotteries file if it exists
 	 * @see com.randude14.lotteryplus.gui.MainFrame
