@@ -962,19 +962,28 @@ public class Lottery implements Runnable {
 			}
 		}
 		
-		List<OfflinePlayer> players = getPlayers();
-		
 		// check if there can be more players
 		if(maxPlayers > 0) {
 			boolean boughtYet = false;
 			
-			for(OfflinePlayer check : players) {
-				if(check.getName().equalsIgnoreCase(player.getName())) {
-					boughtYet = true;
+			// determine if player has bought tickets yet
+			for(String key : properties.keySet()) {
+				
+				if(key.startsWith("players.")) {
+					int index = key.indexOf('.');
+					String uuidstring = key.substring(index+1);
+					
+					if(Utils.isUUID(uuidstring)) {
+						UUID uuid = UUID.fromString(uuidstring);
+						if(uuid.equals(player.getUniqueId())) {
+							boughtYet = true;
+							break;
+						}
+					}
 				}
 			}
 			
-			int playersEntered = players.size();
+			int playersEntered = getPlayersEntered();
 			
 			if (!boughtYet && playersEntered >= maxPlayers) {
 				ChatUtils.sendRaw(player, "lottery.error.players.nomore");
