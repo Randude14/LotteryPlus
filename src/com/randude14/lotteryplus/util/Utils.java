@@ -354,11 +354,4 @@ public class Utils {
 			}
 		}
 	}
-	
-	public static void main(String[] args) {
-		String[] strings = {"qwer", "asdf", "reqw", "ytui", "asdf"};
-		Stream<String> stream = Arrays.stream(strings);
-		strings = stream.filter( string -> string.equals("asdf")).toArray(String[]::new);
-		System.out.println(Arrays.toString(strings));
-	}
 }

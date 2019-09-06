@@ -33,7 +33,7 @@ import com.randude14.lotteryplus.util.Utils;
 public class LotteryManager {
 	
 	// points to 'lotteries.yml', see @CustomYaml for more about this class
-	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml");
+	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml", true);
 	
 	// The HashMap that contains the lotteries. Sorts by their names in lowercase
 	private static final Map<String, Lottery> lotteries = new HashMap<String, Lottery>();
