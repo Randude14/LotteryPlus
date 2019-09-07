@@ -1,3 +1,14 @@
+Version 1.2.2
+- lotteries.yml now loads before saving to ensure changes to the file are not lost by the GUI. 
+- Fixed max players bug not letting players enter the lottery
+- Fixed sign breaking bug where players can destroy the attached block
+- Fixed chat bug that reported that players were not entering numbers
+
+
+Version 1.2.1
+- Removed dependency jars to reduce file size.
+
+
 Version 1.0.2
   - Better code commenting being added
   - Conversion to using player IDs with names to differentiate players better
