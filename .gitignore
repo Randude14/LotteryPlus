@@ -1,19 +1,17 @@
 .classpath
 
-.project
+*.project
 Change Log.gdoc
 /.settings
 /bin
 <<<<<<< HEAD
 /lib
-.settings
+*.settings
 LotteryPlus.git
-.classpath
-.gitignore
-.project
-target/maven-archiver/
-target/maven-status/
-target/test_classes/
+*.classpath
+*.gitignore
+*.project
+**/target/test_classes/
 =======
 /lib
 >>>>>>> upstream/master
