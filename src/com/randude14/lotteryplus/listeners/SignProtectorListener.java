@@ -2,9 +2,6 @@ package com.randude14.lotteryplus.listeners;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.Sign;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -53,19 +50,11 @@ public class SignProtectorListener implements Listener {
 	private boolean canBreakBlock(Block check, Block broken) {
 		if (!LotteryManager.isSignRegistered(check))
 			return true;
-		if(check.getBlockData() instanceof WallSign) {
-			Directional dir = (Directional) check.getBlockData();
-			BlockFace face = dir.getFacing().getOppositeFace();
-			Block attached = check.getRelative(face);
-			return !Utils.locsInBounds(attached.getLocation(),
-					broken.getLocation());
-		}
-		else if(check.getBlockData() instanceof Sign) {
-			Block attached = check.getRelative(BlockFace.DOWN);
-			return !Utils.locsInBounds(attached.getLocation(),
-					broken.getLocation());
-		}
-		return true;
+		BlockFace attached = ((org.bukkit.material.Sign) check.getState()
+				.getData()).getAttachedFace();
+		Block blockAttached = check.getRelative(attached);
+		return !Utils.locsInBounds(blockAttached.getLocation(),
+				broken.getLocation());
 	}
 
 	@EventHandler(ignoreCancelled = true)

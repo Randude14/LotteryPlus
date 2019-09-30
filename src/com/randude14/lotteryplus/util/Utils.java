@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
@@ -308,8 +307,7 @@ public class Utils {
 					
 					// if no level given
 					if (levelIndex < 0) {
-						Enchantment enchant = Enchantment.getByKey(
-								NamespacedKey.minecraft(enchantLine));
+						Enchantment enchant = Enchantment.getByName(enchantLine);
 						
 						// return null. 
 						if(enchant == null) 
@@ -319,8 +317,7 @@ public class Utils {
 						
 				    // level given
 					} else {
-						Enchantment enchant = Enchantment.getByKey( 
-								NamespacedKey.minecraft( enchantLine.substring(0, levelIndex) ) );
+						Enchantment enchant = Enchantment.getByName(  enchantLine.substring(0, levelIndex) );
 						
 						if(enchant == null) 
 							return null;
