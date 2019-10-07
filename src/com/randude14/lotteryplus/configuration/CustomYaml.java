@@ -16,15 +16,9 @@ public class CustomYaml {
 	private static final LotteryPlus plugin = LotteryPlus.getInstance();
 	private FileConfiguration config;
 	private final File configFile;
-	private final boolean loadBeforeSaving;
 	
 	public CustomYaml(String file) {
-		this(file, false);
-	}
-	
-	public CustomYaml(String file, boolean loadBeforeSaving) {
 		configFile = new File(plugin.getDataFolder(), file);
-		this.loadBeforeSaving = loadBeforeSaving;
 	}
 	
 	/*
@@ -45,9 +39,6 @@ public class CustomYaml {
 		
 		// attempt to save
 		try {
-			if(loadBeforeSaving) { // reload file before saving so we don't overwrite changes
-				reloadConfig();
-			}
 			config.save(configFile);
 			
 		// ignore if file was not found

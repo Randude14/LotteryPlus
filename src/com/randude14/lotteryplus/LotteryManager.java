@@ -33,7 +33,7 @@ import com.randude14.lotteryplus.util.Utils;
 public class LotteryManager {
 	
 	// points to 'lotteries.yml', see @CustomYaml for more about this class
-	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml", true);
+	private static final CustomYaml lotteriesConfig = new CustomYaml("lotteries.yml");
 	
 	// The HashMap that contains the lotteries. Sorts by their names in lowercase
 	private static final Map<String, Lottery> lotteries = new HashMap<String, Lottery>();
@@ -87,6 +87,7 @@ public class LotteryManager {
 			return false;
 		}
 		
+		lotteriesConfig.reloadConfig();
 		ConfigurationSection lotteriesSection = getOrCreateSection(LOTTERIES_SECTION); 
 		
 		// check if the section exists already
@@ -147,7 +148,7 @@ public class LotteryManager {
 				return true;
 			}
 		}
-		ChatUtils.send(sender, "lottery.notfound", "<lottery>", find);
+		ChatUtils.send(sender, "lottery.error.section.notfound", "<lottery>", find);
 		return false;
 	}
 
@@ -608,11 +609,11 @@ public class LotteryManager {
 	 */
 	private static ConfigurationSection getOrCreateSection(String sectionName) {
 		
-		if (lotteriesConfig.getConfig().contains(sectionName)) {
+		if (lotteriesConfig.getConfig(true).contains(sectionName)) {
 			return lotteriesConfig.getConfig().getConfigurationSection(sectionName);
 			
 		} else {
-			return lotteriesConfig.getConfig().createSection(sectionName);
+			return lotteriesConfig.getConfig(true).createSection(sectionName);
 		}
 	}
 	
